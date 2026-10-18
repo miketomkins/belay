@@ -19,18 +19,18 @@
 
 ## File Map
 
-- Create: `Conduit/Views/Components/ComposerDraftStore.swift` — profile/session key and bounded in-memory draft storage.
-- Modify: `Conduit/Views/Components/ComposerBar.swift` — store ownership, session handoff, editor generation, and draft restoration.
-- Modify: `Conduit/Views/Components/ComposerPasteTextView.swift` — programmatic-update guard and UIKit teardown.
-- Create: `ConduitTests/ComposerDraftStoreTests.swift` — storage isolation and replacement tests.
-- Modify: `ConduitTests/ComposerPasteTextViewTests.swift` — editor callback/teardown regression coverage.
-- Modify: `ConduitTests/AppStateChatResumeTests.swift` only if a focused composer/session test demonstrates an AppState defect.
+- Create: `Belay/Views/Components/ComposerDraftStore.swift` — profile/session key and bounded in-memory draft storage.
+- Modify: `Belay/Views/Components/ComposerBar.swift` — store ownership, session handoff, editor generation, and draft restoration.
+- Modify: `Belay/Views/Components/ComposerPasteTextView.swift` — programmatic-update guard and UIKit teardown.
+- Create: `BelayTests/ComposerDraftStoreTests.swift` — storage isolation and replacement tests.
+- Modify: `BelayTests/ComposerPasteTextViewTests.swift` — editor callback/teardown regression coverage.
+- Modify: `BelayTests/AppStateChatResumeTests.swift` only if a focused composer/session test demonstrates an AppState defect.
 
 ### Task 1: Create the profile/session draft store with explicit isolation
 
 **Files:**
-- Create: `ConduitTests/ComposerDraftStoreTests.swift`
-- Create: `Conduit/Views/Components/ComposerDraftStore.swift`
+- Create: `BelayTests/ComposerDraftStoreTests.swift`
+- Create: `Belay/Views/Components/ComposerDraftStore.swift`
 
 **Interfaces:**
 - `ComposerDraft` is `Equatable` and contains `text: String` and `attachments: [Attachment]`.
@@ -85,9 +85,9 @@ Run:
 
 ```bash
 /Users/agrias/bin/bin/xcodegen generate
-xcodebuild test -project Conduit.xcodeproj -scheme Conduit \
+xcodebuild test -project Belay.xcodeproj -scheme Belay \
   -destination 'platform=iOS Simulator,id=6930ECCE-D36C-4E11-8AB5-EDEC4DEA8355' \
-  -only-testing:ConduitTests/ComposerDraftStoreTests CODE_SIGNING_ALLOWED=NO
+  -only-testing:BelayTests/ComposerDraftStoreTests CODE_SIGNING_ALLOWED=NO
 ```
 
 Expected: compilation failure for the missing store types.
@@ -101,15 +101,15 @@ Use a dictionary plus an insertion/access-order array. `save(.empty, for:)` remo
 Expected: isolation, empty-removal, replacement, and capacity tests pass.
 
 ```bash
-git add Conduit/Views/Components/ComposerDraftStore.swift ConduitTests/ComposerDraftStoreTests.swift
+git add Belay/Views/Components/ComposerDraftStore.swift BelayTests/ComposerDraftStoreTests.swift
 git commit -m "feat: isolate composer drafts by session"
 ```
 
 ### Task 2: Make the UIKit bridge safe during programmatic handoff
 
 **Files:**
-- Modify: `Conduit/Views/Components/ComposerPasteTextView.swift`
-- Modify: `ConduitTests/ComposerPasteTextViewTests.swift`
+- Modify: `Belay/Views/Components/ComposerPasteTextView.swift`
+- Modify: `BelayTests/ComposerPasteTextViewTests.swift`
 
 **Interfaces:**
 - `ComposerPasteTextView` gains an `editorIdentity: UUID` input used to identify a mounted editor generation.
@@ -155,16 +155,16 @@ In `updateUIView`, call `coordinator.apply(text:to:)` instead of assigning `uiVi
 - [ ] **Step 4: Run the full composer bridge tests and commit**
 
 ```bash
-git add Conduit/Views/Components/ComposerPasteTextView.swift ConduitTests/ComposerPasteTextViewTests.swift
+git add Belay/Views/Components/ComposerPasteTextView.swift BelayTests/ComposerPasteTextViewTests.swift
 git commit -m "fix: isolate composer UIKit callbacks during handoff"
 ```
 
 ### Task 3: Save, tear down, and restore drafts at the session boundary
 
 **Files:**
-- Modify: `Conduit/Views/Components/ComposerBar.swift`
-- Modify: `Conduit/Views/Components/ComposerPasteTextView.swift`
-- Modify: `ConduitTests/ComposerDraftStoreTests.swift`
+- Modify: `Belay/Views/Components/ComposerBar.swift`
+- Modify: `Belay/Views/Components/ComposerPasteTextView.swift`
+- Modify: `BelayTests/ComposerDraftStoreTests.swift`
 
 **Interfaces:**
 - `ComposerBar` owns `@State private var draftStore = ComposerDraftStore()`, `@State private var editorIdentity = UUID()`, and `@State private var loadedDraftKey: ComposerDraftKey?`.
@@ -192,25 +192,25 @@ Keep `.task(id: appState.activeSessionId)` for context refresh, but add a captur
 - [ ] **Step 5: Run focused tests and commit the ComposerBar integration**
 
 ```bash
-git add Conduit/Views/Components/ComposerBar.swift Conduit/Views/Components/ComposerPasteTextView.swift ConduitTests/ComposerDraftStoreTests.swift
+git add Belay/Views/Components/ComposerBar.swift Belay/Views/Components/ComposerPasteTextView.swift BelayTests/ComposerDraftStoreTests.swift
 git commit -m "fix: restore composer drafts per active session"
 ```
 
 ### Task 4: Verify the crash and synchronization regression against real session switches
 
 **Files:**
-- Modify: `ConduitTests/AppStateChatResumeTests.swift` only if a new test proves an AppState ownership defect.
+- Modify: `BelayTests/AppStateChatResumeTests.swift` only if a new test proves an AppState ownership defect.
 - No other source changes without a failing test identifying the exact stale callback or transition.
 
 - [ ] **Step 1: Run all focused session and composer tests**
 
 ```bash
 /Users/agrias/bin/bin/xcodegen generate
-xcodebuild test -project Conduit.xcodeproj -scheme Conduit \
+xcodebuild test -project Belay.xcodeproj -scheme Belay \
   -destination 'platform=iOS Simulator,id=6930ECCE-D36C-4E11-8AB5-EDEC4DEA8355' \
-  -only-testing:ConduitTests/ComposerDraftStoreTests \
-  -only-testing:ConduitTests/ComposerPasteTextViewTests \
-  -only-testing:ConduitTests/AppStateChatResumeTests \
+  -only-testing:BelayTests/ComposerDraftStoreTests \
+  -only-testing:BelayTests/ComposerPasteTextViewTests \
+  -only-testing:BelayTests/AppStateChatResumeTests \
   CODE_SIGNING_ALLOWED=NO
 ```
 

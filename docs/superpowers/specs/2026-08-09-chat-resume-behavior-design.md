@@ -2,7 +2,7 @@
 
 ## Context
 
-Conduit currently performs an authoritative session reconciliation whenever it launches or returns to the foreground. If the locally remembered session uses a runtime ID that no longer matches the stored ID in the refreshed catalog, session selection falls back to the first and newest chat. A user who left Conduit while reading conversation A can therefore return to conversation B.
+Belay currently performs an authoritative session reconciliation whenever it launches or returns to the foreground. If the locally remembered session uses a runtime ID that no longer matches the stored ID in the refreshed catalog, session selection falls back to the first and newest chat. A user who left Belay while reading conversation A can therefore return to conversation B.
 
 PR #19 added semantic scroll anchors, session-ID aliases, and several restoration callbacks, but it does not model the complete launch/foreground decision. Session selection and viewport restoration are currently split between `AppState`, `RootView`, and `ChatView`, and both `RootView` and `ChatView` independently observe scene changes. This makes callback ordering part of correctness and leaves the reported A-to-B regression without an end-to-end policy test.
 
@@ -15,11 +15,11 @@ PR #19 added semantic scroll anchors, session-ID aliases, and several restoratio
 - In latest mode, deliberately open the newest available chat and follow its bottom.
 - Preserve notification routing and explicit user navigation as higher-priority actions.
 - Make session choice, snapshot persistence, and restoration sequencing independently testable.
-- Reuse the resulting components if Conduit later adopts a broader navigation coordinator.
+- Reuse the resulting components if Belay later adopts a broader navigation coordinator.
 
 ## Non-goals
 
-- Rewriting Conduit's complete navigation stack.
+- Rewriting Belay's complete navigation stack.
 - Changing Hermes server configuration or synchronizing this preference across devices.
 - Restoring a deleted message or conversation.
 - Changing how sessions are ordered in the sidebar.
@@ -27,14 +27,14 @@ PR #19 added semantic scroll anchors, session-ID aliases, and several restoratio
 
 ## User-facing behavior
 
-Chat settings gain a device-local segmented choice titled **When returning to Conduit**:
+Chat settings gain a device-local segmented choice titled **When returning to Belay**:
 
 - **Continue where I left off**: reopen the last visible conversation and restore its last stable viewport anchor. New activity in another conversation does not steal focus. New messages in the restored conversation do not move the reader; the existing jump-to-latest control remains available.
 - **Jump to latest activity**: refresh the session catalog, select its newest ordinary chat, and scroll that conversation to the bottom.
 
 Continue mode is the default when no preference has been saved. The setting governs automatic restoration on launch and foregrounding. A notification tap, an explicit session tap, profile selection, or new-conversation action always wins over an automatic resume already in progress.
 
-If a saved conversation no longer exists or is no longer eligible, continue mode falls back to the newest available chat at its bottom. If the conversation still exists but only its saved message anchor is unavailable, Conduit keeps that conversation selected and falls back to its bottom.
+If a saved conversation no longer exists or is no longer eligible, continue mode falls back to the newest available chat at its bottom. If the conversation still exists but only its saved message anchor is unavailable, Belay keeps that conversation selected and falls back to its bottom.
 
 ## Architecture
 
@@ -151,13 +151,13 @@ Resume metadata is a convenience layer and must never prevent login, connection,
 
 ### Acceptance testing
 
-Run the focused unit tests and the complete Conduit test suite, then verify on Simulator:
+Run the focused unit tests and the complete Belay test suite, then verify on Simulator:
 
-1. Open A, scroll to an older message, background Conduit, create or receive newer activity in B, and return in continue mode. Conduit must show A at the saved message.
-2. Repeat after terminating and relaunching Conduit.
-3. Repeat both flows in latest mode. Conduit must show B at its bottom.
+1. Open A, scroll to an older message, background Belay, create or receive newer activity in B, and return in continue mode. Belay must show A at the saved message.
+2. Repeat after terminating and relaunching Belay.
+3. Repeat both flows in latest mode. Belay must show B at its bottom.
 4. Add new messages to A while backgrounded. Continue mode must preserve the reading position and expose jump-to-latest.
-5. Delete the saved conversation and relaunch. Conduit must open the newest eligible chat without an error.
+5. Delete the saved conversation and relaunch. Belay must open the newest eligible chat without an error.
 6. Trigger a notification while automatic restoration is pending. The notification destination must win.
 
 ## Implementation boundary for PR #19

@@ -25,7 +25,7 @@
 
 **Files:**
 - Modify: Git history on `codex/pr46-session-cache-invalidation`.
-- Preserve: `Conduit/Services/AppState.swift` cache invalidation from commit `313a26d`.
+- Preserve: `Belay/Services/AppState.swift` cache invalidation from commit `313a26d`.
 
 **Interfaces:**
 - Consumes: `origin/main` at the current PR #45 merge commit.
@@ -78,7 +78,7 @@ Run:
 
 ```bash
 git diff --name-status origin/main...HEAD
-git diff origin/main...HEAD -- Conduit/Services/AppState.swift
+git diff origin/main...HEAD -- Belay/Services/AppState.swift
 ```
 
 Expected: no stale PR #46 replacements of the current deduplication, bridge,
@@ -104,8 +104,8 @@ needed.
 ### Task 2: Verify the cache behavior without adding test-only hooks
 
 **Files:**
-- Inspect: `Conduit/Services/AppState.swift` around `disconnect()` and `removeSessionFromLiveCatalog()`.
-- Inspect: `ConduitTests/` existing AppState and session-catalog tests.
+- Inspect: `Belay/Services/AppState.swift` around `disconnect()` and `removeSessionFromLiveCatalog()`.
+- Inspect: `BelayTests/` existing AppState and session-catalog tests.
 
 **Interfaces:**
 - Consumes: The reduced effective diff from Task 1.
@@ -120,7 +120,7 @@ needed.
 Run:
 
 ```bash
-rg -n -C 8 "sessionCatalogCache|SessionCatalogCache|removeSessionFromLiveCatalog|disconnect\(" ConduitTests Conduit/Services/AppState.swift
+rg -n -C 8 "sessionCatalogCache|SessionCatalogCache|removeSessionFromLiveCatalog|disconnect\(" BelayTests Belay/Services/AppState.swift
 ```
 
 Expected: do not change `AppState` production visibility merely to inspect
@@ -144,8 +144,8 @@ focused-test, and salvage-document scope.
 ### Task 3: Run full verification
 
 **Files:**
-- Generate: ignored `Conduit.xcodeproj` from `project.yml`.
-- Test: all targets in the `Conduit` scheme.
+- Generate: ignored `Belay.xcodeproj` from `project.yml`.
+- Test: all targets in the `Belay` scheme.
 
 **Interfaces:**
 - Consumes: The merged, reduced PR branch.
@@ -159,11 +159,11 @@ Run:
 DESTINATION="${DESTINATION:-platform=iOS Simulator,name=iPhone 17 Pro,OS=26.5}"
 xcodegen generate
 xcodebuild test \
-  -project Conduit.xcodeproj \
-  -scheme Conduit \
+  -project Belay.xcodeproj \
+  -scheme Belay \
   -destination "$DESTINATION" \
   -configuration Debug \
-  -resultBundlePath /tmp/conduit-pr46-salvage.xcresult \
+  -resultBundlePath /tmp/belay-pr46-salvage.xcresult \
   CODE_SIGN_IDENTITY="" \
   CODE_SIGNING_REQUIRED=NO \
   CODE_SIGNING_ALLOWED=NO \
@@ -178,7 +178,7 @@ Set `DESTINATION` to another available simulator name and runtime when needed.
 Run:
 
 ```bash
-xcrun xcresulttool get test-results summary --path /tmp/conduit-pr46-salvage.xcresult
+xcrun xcresulttool get test-results summary --path /tmp/belay-pr46-salvage.xcresult
 ```
 
 Expected: `result` is `Passed`, `failedTests` is `0`, and `skippedTests` is

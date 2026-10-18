@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""CI v2 test planner for Hermes Conduit.
+"""CI v2 test planner for Hermes Belay.
 
 Replaces the static unit-a..unit-d shard system:
 
-  * discovers every XCTestCase class under ConduitTests/ and ConduitUITests/
+  * discovers every XCTestCase class under BelayTests/ and BelayUITests/
     directly from the Swift sources (no Xcode runtime discovery needed);
   * validates complete, duplicate-free inventory (a new test class cannot
     silently miss CI);
@@ -125,8 +125,8 @@ UNIT_BATCH_RECOVERY_OVERHEAD_S = 600
 # twice per class, so the ceiling reserves a bound for it as well.
 UI_EXTRACT_BOUND_S = 300
 JOB_TIMEOUT_MARGIN_S = 1200        # reset/erase overhead + setup/download slack
-UNIT_TARGET = "ConduitTests"
-UI_TARGET = "ConduitUITests"
+UNIT_TARGET = "BelayTests"
+UI_TARGET = "BelayUITests"
 
 # A class declaration line: attributes, optional access level, optional final,
 # then "class Name: InheritanceClause". Single-line inheritance is the repo
@@ -173,7 +173,7 @@ def _parse_decl(line: str):
 
 def discover_test_classes(repo_root: str) -> dict:
     """Discover XCTest classes per target directory. Directory membership (not
-    class-name suffix) decides ConduitTests vs ConduitUITests."""
+    class-name suffix) decides BelayTests vs BelayUITests."""
     result = {
         "unit": [], "ui": [],            # [{"name","file","line"}]
         "helpers": [],                   # [{"name","file","line"}]
@@ -1050,7 +1050,7 @@ def cmd_smoke(args) -> int:
 
     problems = []
     # Validated per TARGET, never against the union of both: a class moved
-    # between ConduitTests/ and ConduitUITests/ would otherwise still validate
+    # between BelayTests/ and BelayUITests/ would otherwise still validate
     # while the smoke job filters it against the wrong bundle - which runs zero
     # tests for it and silently shrinks hosted coverage.
     for target, names, inventory in (("unit", unit, unit_inventory),

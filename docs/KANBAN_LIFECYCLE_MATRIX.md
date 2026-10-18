@@ -3,7 +3,7 @@
 Audited upstream: NousResearch/hermes-agent @ fd760435c (2026-08-22). Evidence: kanban_db.py VALID_STATUSES:102,
 ui.tsx LOCKED_COLUMNS:51, board.tsx:317, plugin_api.py PATCH /tasks/:869-972, POST /tasks:623.
 
-| Status | User create target? | Manual move target? | Backend/system transition? | Desktop behavior | Conduit V3A behavior |
+| Status | User create target? | Manual move target? | Backend/system transition? | Desktop behavior | Belay V3A behavior |
 |---|---|---|---|---|---|
 | triage | YES (via triage flag) | YES (PATCH _set_status_direct) | specifier/decomposer flip triage→todo | creatable; specifier target | create OK; move OK; Specify/Decompose eligible |
 | todo | YES (landing when parents open) | YES | recompute_ready promotes todo→ready | creatable | create/move OK |
@@ -16,5 +16,5 @@ ui.tsx LOCKED_COLUMNS:51, board.tsx:317, plugin_api.py PATCH /tasks/:869-972, PO
 | archived | NO create | YES (PATCH archive_task) | archive releases parents (recompute_ready) | archive action | archive action/move OK |
 | unknown | NO | NO | treated system/backend-controlled | fallback render | render-only fallback |
 
-Differences from Conduit V2 policy: NONE. LOCKED_COLUMNS unchanged; no creation/move contract change; scheduled's REST path no longer
+Differences from Belay V2 policy: NONE. LOCKED_COLUMNS unchanged; no creation/move contract change; scheduled's REST path no longer
 requires a wake time but Desktop still refuses it as a target, so the user-facing policy is unchanged (documented, no regression needed).

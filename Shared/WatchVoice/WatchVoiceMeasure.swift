@@ -1,6 +1,6 @@
 //
 //  WatchVoiceMeasure.swift
-//  Conduit and the Conduit Watch app
+//  Belay and the Belay Watch app
 //
 //  What a Watch call measures and logs: when the user last spoke (a
 //  simple level detector), percentiles of timings, and the call log's

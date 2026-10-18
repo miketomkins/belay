@@ -2,7 +2,7 @@
 
 ## Goal
 
-Fix Conduit issue #37 so a Cloudflare Access redirect during dashboard auth-provider discovery does not appear as a fatal provider-probe error. Conduit should fall through to its existing dashboard WebView sign-in path, which already carries configured Cloudflare service-token headers.
+Fix Belay issue #37 so a Cloudflare Access redirect during dashboard auth-provider discovery does not appear as a fatal provider-probe error. Belay should fall through to its existing dashboard WebView sign-in path, which already carries configured Cloudflare service-token headers.
 
 ## Scope
 
@@ -28,4 +28,4 @@ The redirect handling will be covered by focused tests for provider discovery, a
 
 ## Verification
 
-Run the focused provider-discovery tests, the full Conduit test suite, and the repository’s generated Xcode project build/test command where the local Xcode toolchain permits.
+Run the focused provider-discovery tests, the full Belay test suite, and the repository’s generated Xcode project build/test command where the local Xcode toolchain permits.

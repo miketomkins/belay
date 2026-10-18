@@ -5,7 +5,7 @@ Branch: `unified-chat-viewport` (from `origin/main` @ 9a06e33). Written 2026-08-
 ## 1. Current control-path inventory
 
 Every path that can move (or decide not to move) the chat viewport today.
-Line numbers refer to `Conduit/Views/ChatView.swift` at 9a06e33 (offset by
+Line numbers refer to `Belay/Views/ChatView.swift` at 9a06e33 (offset by
 the Phase-0 trace additions, ~+30 lines past line 417).
 
 | # | Path | Guard conditions | Scrolls? |

@@ -1,6 +1,6 @@
 //
 //  LocalLiveSession.swift
-//  Conduit and the Conduit Watch app
+//  Belay and the Belay Watch app
 //
 //  One Local Live call through the Hermes host's relay to the user's speech
 //  server. The first frame is the session.update. Once the server confirms
@@ -9,7 +9,7 @@
 //  it shows connecting until the whole path works (the server warmed up, its
 //  model address pointed at this profile). The server listens, decides when
 //  the user finished, and speaks the answer; the answer itself comes from
-//  Hermes, as the `conduit.turn` frames the plugin sends on this socket
+//  Hermes, as the `belay.turn` frames the plugin sends on this socket
 //  (`onTurn`), which the call answers with `sendTurnDelta` and
 //  `sendTurnDone`.
 //
@@ -22,7 +22,7 @@
 import Foundation
 import OSLog
 
-private let localLiveLogger = Logger(subsystem: "com.milim.relay", category: "LocalLive")
+private let localLiveLogger = Logger(subsystem: "live.tomkins.belay", category: "LocalLive")
 
 @MainActor
 protocol LocalLiveConnecting: AnyObject {

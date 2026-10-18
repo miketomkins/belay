@@ -104,7 +104,7 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         if self.path.rstrip("/").endswith("/models"):
             self.send_json(200, {"object": "list", "data": [
-                {"id": MODEL, "object": "model", "owned_by": "conduit-demo", "context_length": 131072}
+                {"id": MODEL, "object": "model", "owned_by": "belay-demo", "context_length": 131072}
             ]})
         else:
             self.send_json(404, {"error": "not found"})

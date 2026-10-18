@@ -33,7 +33,7 @@ class RetrySelectionTests(unittest.TestCase):
         # Real xcresulttool assertion failures carry diagnostic children on
         # the Test Case, rather than another test attempt or an orphan failure.
         return {"testNodes": [{"nodeType": "Test Plan", "children": [
-            {"nodeType": "Test Bundle", "name": "ConduitUITests", "children": [
+            {"nodeType": "Test Bundle", "name": "BelayUITests", "children": [
                 {"nodeType": "Test Suite", "name": cls, "children": [
                     {"nodeType": "Test Case", "name": "testFixture()",
                      "result": result if cls == "ProfilePickerUITests" else "Passed",

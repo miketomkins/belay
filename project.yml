@@ -1,8 +1,8 @@
-# xcodegen project spec — Conduit (native SwiftUI)
+# xcodegen project spec — Belay (native SwiftUI)
 # Generate with: xcodegen generate
-# Then open Conduit.xcodeproj in Xcode
+# Then open Belay.xcodeproj in Xcode
 
-name: Conduit
+name: Belay
 options:
   bundleIdPrefix: com.milim
   deploymentTarget:
@@ -14,7 +14,7 @@ settings:
     SWIFT_VERSION: "5.9"
     IPHONEOS_DEPLOYMENT_TARGET: "17.0"
     ENABLE_BITCODE: NO
-    DEVELOPMENT_TEAM: U2TH557QA8
+    DEVELOPMENT_TEAM: EYF346PHUG
     CODE_SIGN_STYLE: Manual
     MARKETING_VERSION: "0.1.15"
     CURRENT_PROJECT_VERSION: "162"
@@ -26,17 +26,17 @@ packages:
     exactVersion: 153.0.0
 # Each shipped target that calls a required-reason API keeps its
 # PrivacyInfo.xcprivacy at its folder's root; xcodegen bundles it with that
-# folder's sources (ConduitTests/PrivacyManifestTests.swift checks them).
+# folder's sources (BelayTests/PrivacyManifestTests.swift checks them).
 targets:
-  Conduit:
+  Belay:
     type: application
     platform: iOS
     deploymentTarget: "17.0"
     sources:
-      - path: Conduit
+      - path: Belay
         excludes:
           - "Resources/AlternateIcons/**"
-      - path: Conduit/Resources/AlternateIcons
+      - path: Belay/Resources/AlternateIcons
         buildPhase: resources
       # End-to-end encrypted notifications (#431), shared with the
       # Notification Service Extension. Also the Apple Watch app's link
@@ -47,31 +47,31 @@ targets:
       - path: Shared
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.milim.relay
-        PRODUCT_NAME: Conduit
+        PRODUCT_BUNDLE_IDENTIFIER: live.tomkins.belay
+        PRODUCT_NAME: Belay
         GENERATE_INFOPLIST_FILE: NO
-        INFOPLIST_FILE: Conduit/Info.plist
+        INFOPLIST_FILE: Belay/Info.plist
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         CODE_SIGN_IDENTITY: "Apple Distribution"
-        CODE_SIGN_ENTITLEMENTS: Conduit/Conduit.entitlements
+        CODE_SIGN_ENTITLEMENTS: Belay/Belay.entitlements
         # Regenerated with HealthKit and the Location Push Service Extension
         # capability (com.apple.developer.location.push).
-        PROVISIONING_PROFILE_SPECIFIER: "Hermes Conduit App Store"
+        PROVISIONING_PROFILE_SPECIFIER: "Hermes Belay App Store"
         # The draft-stripping phase below deletes lprojs it can't declare
         # up front, which the user-script sandbox would refuse.
         ENABLE_USER_SCRIPT_SANDBOXING: NO
     dependencies:
       - package: WebRTC
-      - target: ConduitWatch
-      # Embedded as Conduit.app/PlugIns/ConduitNotificationService.appex.
-      - target: ConduitNotificationService
+      - target: BelayWatch
+      # Embedded as Belay.app/PlugIns/BelayNotificationService.appex.
+      - target: BelayNotificationService
       # The configured launcher widgets are embedded with the app.
-      - target: ConduitWidgets
-      # Answers the agent's on-demand locate while Conduit isn't running
+      - target: BelayWidgets
+      # Answers the agent's on-demand locate while Belay isn't running
       # (designs/location-awareness.md section 12).
-      - target: ConduitLocationPush
+      - target: BelayLocationPush
     postBuildScripts:
-      # A draft language (Info.plist ConduitDraftLanguages) is compiled from
+      # A draft language (Info.plist BelayDraftLanguages) is compiled from
       # the String Catalogs like any other; drop its lproj so it never ships.
       - name: Strip draft localizations
         basedOnDependencyAnalysis: false
@@ -85,13 +85,13 @@ targets:
   # (designs/apple-watch-voice-direct.md, apple-watch-gpt-live.md).
   # Embedded in the iPhone app; signed automatically so Xcode registers
   # its App ID on the first archive.
-  ConduitWatch:
+  BelayWatch:
     type: application
     platform: watchOS
     deploymentTarget: "10.0"
     sources:
-      - path: ConduitWatch
-        # The widget extension's own code (ConduitWatchWidgets).
+      - path: BelayWatch
+        # The widget extension's own code (BelayWatchWidgets).
         excludes:
           - "Widgets/**"
       - path: Shared/WatchVoice
@@ -106,13 +106,13 @@ targets:
       - path: Shared/LocalLive
       # GPT-Live's events, which the Watch reads and answers through the
       # host's audio bridge (designs/apple-watch-gpt-live.md).
-      - path: Conduit/Voice/GPTLive/GPTLiveProtocol.swift
+      - path: Belay/Voice/GPTLive/GPTLiveProtocol.swift
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.milim.relay.watchkitapp
-        PRODUCT_NAME: ConduitWatch
+        PRODUCT_BUNDLE_IDENTIFIER: live.tomkins.belay.watchkitapp
+        PRODUCT_NAME: BelayWatch
         GENERATE_INFOPLIST_FILE: NO
-        INFOPLIST_FILE: ConduitWatch/Info.plist
+        INFOPLIST_FILE: BelayWatch/Info.plist
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         TARGETED_DEVICE_FAMILY: "4"
         SKIP_INSTALL: YES
@@ -123,47 +123,47 @@ targets:
         # on (designs/hermes-calls-watch.md). Automatic signing adds the
         # capability to the App ID. Production, as the iPhone's: the relay
         # sends only to production APNs.
-        CODE_SIGN_ENTITLEMENTS: ConduitWatch/ConduitWatch.entitlements
+        CODE_SIGN_ENTITLEMENTS: BelayWatch/BelayWatch.entitlements
     dependencies:
-      # Embedded as ConduitWatch.app/PlugIns/ConduitWatchWidgets.appex.
-      - target: ConduitWatchWidgets
+      # Embedded as BelayWatch.app/PlugIns/BelayWatchWidgets.appex.
+      - target: BelayWatchWidgets
   # The Watch's complication and its control for the Action button,
   # Control Center and the Smart Stack: both start a call
-  # (ConduitWatch/TalkToHermesIntent.swift). watchOS 26, where Watch apps
+  # (BelayWatch/TalkToHermesIntent.swift). watchOS 26, where Watch apps
   # first get controls. Signed automatically, as the Watch app.
-  ConduitWatchWidgets:
+  BelayWatchWidgets:
     type: app-extension
     platform: watchOS
     deploymentTarget: "26.0"
     sources:
-      - path: ConduitWatch/Widgets
+      - path: BelayWatch/Widgets
         excludes:
           - "Info.plist"
       # The control's intent runs in the app, so both build it.
-      - path: ConduitWatch/TalkToHermesIntent.swift
-      - path: ConduitWatch/Localizable.xcstrings
+      - path: BelayWatch/TalkToHermesIntent.swift
+      - path: BelayWatch/Localizable.xcstrings
         buildPhase: resources
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.milim.relay.watchkitapp.widgets
-        PRODUCT_NAME: ConduitWatchWidgets
+        PRODUCT_BUNDLE_IDENTIFIER: live.tomkins.belay.watchkitapp.widgets
+        PRODUCT_NAME: BelayWatchWidgets
         GENERATE_INFOPLIST_FILE: NO
-        INFOPLIST_FILE: ConduitWatch/Widgets/Info.plist
+        INFOPLIST_FILE: BelayWatch/Widgets/Info.plist
         TARGETED_DEVICE_FAMILY: "4"
         APPLICATION_EXTENSION_API_ONLY: YES
         SKIP_INSTALL: YES
         CODE_SIGN_STYLE: Automatic
         CODE_SIGN_IDENTITY: "Apple Development"
         PROVISIONING_PROFILE_SPECIFIER: ""
-  ConduitNotificationService:
+  BelayNotificationService:
     # Decrypts end-to-end encrypted notifications before iOS shows them
-    # (#431). APNs still targets com.milim.relay; this App ID has no Push
+    # (#431). APNs still targets live.tomkins.belay; this App ID has no Push
     # capability of its own.
     type: app-extension
     platform: iOS
     deploymentTarget: "17.0"
     sources:
-      - path: ConduitNotificationService
+      - path: BelayNotificationService
       - path: Shared
         # The Watch app's code, Gemini Live, Grok Live, Local Live and
         # location sharing, which the extension never uses.
@@ -176,16 +176,16 @@ targets:
           - "Location/**"
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.milim.relay.NotificationService
-        PRODUCT_NAME: ConduitNotificationService
+        PRODUCT_BUNDLE_IDENTIFIER: live.tomkins.belay.NotificationService
+        PRODUCT_NAME: BelayNotificationService
         GENERATE_INFOPLIST_FILE: NO
-        INFOPLIST_FILE: ConduitNotificationService/Info.plist
+        INFOPLIST_FILE: BelayNotificationService/Info.plist
         CODE_SIGN_IDENTITY: "Apple Distribution"
-        CODE_SIGN_ENTITLEMENTS: ConduitNotificationService/ConduitNotificationService.entitlements
-        PROVISIONING_PROFILE_SPECIFIER: "Conduit Notification Service App Store"
+        CODE_SIGN_ENTITLEMENTS: BelayNotificationService/BelayNotificationService.entitlements
+        PROVISIONING_PROFILE_SPECIFIER: "Belay Notification Service App Store"
         APPLICATION_EXTENSION_API_ONLY: YES
         SKIP_INSTALL: YES
-  ConduitLocationPush:
+  BelayLocationPush:
     # The Location Push Service Extension: iOS launches it for a `location`
     # push (the agent's on-demand locate) and it posts one sealed fix
     # straight to the Hermes host. Reads the sharing binding, the device key
@@ -194,7 +194,7 @@ targets:
     platform: iOS
     deploymentTarget: "17.0"
     sources:
-      - path: ConduitLocationPush
+      - path: BelayLocationPush
       - path: Shared
         excludes:
           - "WatchVoice/**"
@@ -208,39 +208,39 @@ targets:
       - sdk: MapKit.framework
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.milim.relay.LocationPush
-        PRODUCT_NAME: ConduitLocationPush
+        PRODUCT_BUNDLE_IDENTIFIER: live.tomkins.belay.LocationPush
+        PRODUCT_NAME: BelayLocationPush
         GENERATE_INFOPLIST_FILE: NO
-        INFOPLIST_FILE: ConduitLocationPush/Info.plist
+        INFOPLIST_FILE: BelayLocationPush/Info.plist
         CODE_SIGN_IDENTITY: "Apple Distribution"
-        CODE_SIGN_ENTITLEMENTS: ConduitLocationPush/ConduitLocationPush.entitlements
-        PROVISIONING_PROFILE_SPECIFIER: "Conduit Location Push App Store"
+        CODE_SIGN_ENTITLEMENTS: BelayLocationPush/BelayLocationPush.entitlements
+        PROVISIONING_PROFILE_SPECIFIER: "Belay Location Push App Store"
         APPLICATION_EXTENSION_API_ONLY: YES
         SKIP_INSTALL: YES
-  ConduitWidgets:
+  BelayWidgets:
     type: app-extension
     platform: iOS
     deploymentTarget: "17.0"
     sources:
-      - path: ConduitWidgets
+      - path: BelayWidgets
         excludes:
           - "Info.plist"
-          - "ConduitWidgets.entitlements"
+          - "BelayWidgets.entitlements"
           - "Resources/**"
-      - path: ConduitWidgets/Resources/Assets.xcassets
+      - path: BelayWidgets/Resources/Assets.xcassets
         buildPhase: resources
       - path: Shared/Widgets
-      - path: Conduit/Localizable.xcstrings
+      - path: Belay/Localizable.xcstrings
         buildPhase: resources
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.milim.relay.widgets
-        PRODUCT_NAME: ConduitWidgets
+        PRODUCT_BUNDLE_IDENTIFIER: live.tomkins.belay.widgets
+        PRODUCT_NAME: BelayWidgets
         GENERATE_INFOPLIST_FILE: NO
-        INFOPLIST_FILE: ConduitWidgets/Info.plist
+        INFOPLIST_FILE: BelayWidgets/Info.plist
         CODE_SIGN_IDENTITY: "Apple Distribution"
-        CODE_SIGN_ENTITLEMENTS: ConduitWidgets/ConduitWidgets.entitlements
-        PROVISIONING_PROFILE_SPECIFIER: "Conduit Widgets App Store"
+        CODE_SIGN_ENTITLEMENTS: BelayWidgets/BelayWidgets.entitlements
+        PROVISIONING_PROFILE_SPECIFIER: "Belay Widgets App Store"
         APPLICATION_EXTENSION_API_ONLY: YES
         SKIP_INSTALL: YES
         TARGETED_DEVICE_FAMILY: "1,2"
@@ -253,35 +253,35 @@ targets:
             --info-plist "$SRCROOT/$INFOPLIST_FILE" \
             --bundle "$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH" \
             --development-language "$DEVELOPMENT_LANGUAGE"
-  ConduitTests:
+  BelayTests:
     type: bundle.unit-test
     platform: iOS
     sources:
-      - path: ConduitTests
+      - path: BelayTests
     settings:
       base:
         GENERATE_INFOPLIST_FILE: YES
     dependencies:
-      - target: Conduit
-  ConduitUITests:
+      - target: Belay
+  BelayUITests:
     type: bundle.ui-testing
     platform: iOS
     sources:
-      - path: ConduitUITests
+      - path: BelayUITests
     settings:
       base:
         GENERATE_INFOPLIST_FILE: YES
     dependencies:
-      - target: Conduit
+      - target: Belay
   # App Store screenshots against the demo dashboard; run only by
-  # .github/workflows/app-store-screenshots.yml (skips without CONDUIT_DEMO_URL).
-  ConduitScreenshots:
+  # .github/workflows/app-store-screenshots.yml (skips without BELAY_DEMO_URL).
+  BelayScreenshots:
     type: bundle.ui-testing
     platform: iOS
     sources:
-      - path: ConduitScreenshots
+      - path: BelayScreenshots
     settings:
       base:
         GENERATE_INFOPLIST_FILE: YES
     dependencies:
-      - target: Conduit
+      - target: Belay

@@ -52,7 +52,7 @@ The capture code has a second fragility: it requests 16 kHz as the hardware pref
 
 Update `Haptics` so its custom engine is created with `AVAudioSession.sharedInstance()` and is explicitly configured as haptics-only. The existing stopped/reset handlers remain responsible for clearing the active pattern and will discard an engine stopped by an audio-session interruption so the next response creates a clean engine. The UIKit fallback continues to handle unsupported hardware or engine-start failures.
 
-This keeps Conduit’s haptic and voice features on one audio-session boundary instead of allowing Core Haptics to create an independent session. It does not make the haptic engine responsible for configuring the voice category; `AVAudioCaptureService` remains the owner of microphone activation.
+This keeps Belay’s haptic and voice features on one audio-session boundary instead of allowing Core Haptics to create an independent session. It does not make the haptic engine responsible for configuring the voice category; `AVAudioCaptureService` remains the owner of microphone activation.
 
 ### Route-native microphone capture
 

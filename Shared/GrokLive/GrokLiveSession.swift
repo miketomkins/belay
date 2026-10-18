@@ -1,6 +1,6 @@
 //
 //  GrokLiveSession.swift
-//  Conduit and the Conduit Watch app
+//  Belay and the Belay Watch app
 //
 //  One Grok Live conversation through the Hermes host: the phone's relay
 //  socket on the dashboard, or the Watch's audio bridge through the push
@@ -19,7 +19,7 @@
 import Foundation
 import OSLog
 
-private let grokLiveLogger = Logger(subsystem: "com.milim.relay", category: "GrokLive")
+private let grokLiveLogger = Logger(subsystem: "live.tomkins.belay", category: "GrokLive")
 
 @MainActor
 final class GrokLiveSession: GeminiLiveSessionControlling {

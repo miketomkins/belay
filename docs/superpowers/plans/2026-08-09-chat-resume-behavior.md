@@ -19,10 +19,10 @@
 - Runtime, stored, and alternate session IDs must resolve to one canonical stored identity.
 - Do not add dependencies or raise the iOS 17.0 deployment target.
 - Preserve unrelated user changes; implementation stays in `/private/tmp/hermes-conduit-chat-scroll-restoration-fix`.
-- Never hardcode a Simulator model. Before test commands, resolve `CONDUIT_SIMULATOR_ID` with the same available-device JSON selection used by `.github/workflows/ci.yml`:
+- Never hardcode a Simulator model. Before test commands, resolve `BELAY_SIMULATOR_ID` with the same available-device JSON selection used by `.github/workflows/ci.yml`:
 
 ```bash
-CONDUIT_SIMULATOR_ID=$(xcrun simctl list devices available -j | python3 -c '
+BELAY_SIMULATOR_ID=$(xcrun simctl list devices available -j | python3 -c '
 import json, sys
 data = json.load(sys.stdin)
 for runtime, devices in data["devices"].items():
@@ -38,18 +38,18 @@ raise SystemExit(1)
 
 ## File map
 
-- Create `Conduit/Services/ChatResumePolicy.swift`: behavior enum, sync purpose, pure automatic-session resolver, and viewport fallback resolver.
-- Create `Conduit/Services/ChatResumeStore.swift`: versioned device-local payload, one-time legacy active-session import, snapshot conversion, pruning, and explicit flush.
-- Create `Conduit/Services/ChatResumeCoordinator.swift`: lifecycle freeze/thaw, 300 ms write scheduling, restoration generations, and restoration request production.
-- Create `ConduitTests/ChatResumePolicyTests.swift`: session-selection and viewport-resolution policy tests.
-- Create `ConduitTests/ChatResumeStoreTests.swift`: persistence, migration, corruption, versioning, and pruning tests.
-- Create `ConduitTests/ChatResumeCoordinatorTests.swift`: lifecycle ordering, freeze, cancellation, and cold-launch restoration tests.
-- Modify `Conduit/Services/ChatScrollState.swift`: make persisted anchor conversion reusable and remove in-memory ownership superseded by the coordinator.
-- Modify `Conduit/Services/AppState.swift`: own the coordinator, distinguish automatic return from recovery sync, migrate active-session persistence, and publish restoration requests.
-- Modify `Conduit/Views/ChatView.swift`: report stable snapshots, consume restoration requests, and remove its independent scene observer/store.
-- Modify `Conduit/Views/AuxiliaryViews.swift`: expose the device-local return behavior in Chat settings.
-- Modify `Conduit/Views/RootView.swift`: pass the settings save action and remain the sole scene-phase source.
-- Modify `ConduitTests/ChatScrollStateTests.swift`: retain semantic-anchor coverage while removing tests tied to superseded local-store ownership.
+- Create `Belay/Services/ChatResumePolicy.swift`: behavior enum, sync purpose, pure automatic-session resolver, and viewport fallback resolver.
+- Create `Belay/Services/ChatResumeStore.swift`: versioned device-local payload, one-time legacy active-session import, snapshot conversion, pruning, and explicit flush.
+- Create `Belay/Services/ChatResumeCoordinator.swift`: lifecycle freeze/thaw, 300 ms write scheduling, restoration generations, and restoration request production.
+- Create `BelayTests/ChatResumePolicyTests.swift`: session-selection and viewport-resolution policy tests.
+- Create `BelayTests/ChatResumeStoreTests.swift`: persistence, migration, corruption, versioning, and pruning tests.
+- Create `BelayTests/ChatResumeCoordinatorTests.swift`: lifecycle ordering, freeze, cancellation, and cold-launch restoration tests.
+- Modify `Belay/Services/ChatScrollState.swift`: make persisted anchor conversion reusable and remove in-memory ownership superseded by the coordinator.
+- Modify `Belay/Services/AppState.swift`: own the coordinator, distinguish automatic return from recovery sync, migrate active-session persistence, and publish restoration requests.
+- Modify `Belay/Views/ChatView.swift`: report stable snapshots, consume restoration requests, and remove its independent scene observer/store.
+- Modify `Belay/Views/AuxiliaryViews.swift`: expose the device-local return behavior in Chat settings.
+- Modify `Belay/Views/RootView.swift`: pass the settings save action and remain the sole scene-phase source.
+- Modify `BelayTests/ChatScrollStateTests.swift`: retain semantic-anchor coverage while removing tests tied to superseded local-store ownership.
 
 ---
 
@@ -75,11 +75,11 @@ Expected: the current directory is `/private/tmp/hermes-conduit-chat-scroll-rest
 
 - [ ] **Step 2: Regenerate the project and run the existing full suite**
 
-Resolve `CONDUIT_SIMULATOR_ID` using the Global Constraints command, then run:
+Resolve `BELAY_SIMULATOR_ID` using the Global Constraints command, then run:
 
 ```bash
 xcodegen generate
-xcodebuild test -project Conduit.xcodeproj -scheme Conduit -destination "platform=iOS Simulator,id=$CONDUIT_SIMULATOR_ID" -configuration Debug CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO DEVELOPMENT_TEAM="" PROVISIONING_PROFILE_SPECIFIER=""
+xcodebuild test -project Belay.xcodeproj -scheme Belay -destination "platform=iOS Simulator,id=$BELAY_SIMULATOR_ID" -configuration Debug CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO DEVELOPMENT_TEAM="" PROVISIONING_PROFILE_SPECIFIER=""
 ```
 
 Expected: all existing tests pass. If any existing test fails, stop implementation and report the baseline failure separately rather than attributing it to the first TDD change.
@@ -100,8 +100,8 @@ Expected: only intentional XcodeGen output, if any, is present. Do not create a 
 ### Task 1: Pure return behavior and session-selection policy
 
 **Files:**
-- Create: `Conduit/Services/ChatResumePolicy.swift`
-- Create: `ConduitTests/ChatResumePolicyTests.swift`
+- Create: `Belay/Services/ChatResumePolicy.swift`
+- Create: `BelayTests/ChatResumePolicyTests.swift`
 
 **Interfaces:**
 - Produces: `ChatResumeBehavior`, `ChatResumeSyncPurpose`, `ChatResumeSessionResolver.target(in:behavior:purpose:savedSessionID:currentSessionID:)`.
@@ -109,11 +109,11 @@ Expected: only intentional XcodeGen output, if any, is present. Do not create a 
 
 - [ ] **Step 1: Write failing selection-policy tests**
 
-Create `ConduitTests/ChatResumePolicyTests.swift` with a local session factory and the exact A/B regression:
+Create `BelayTests/ChatResumePolicyTests.swift` with a local session factory and the exact A/B regression:
 
 ```swift
 import XCTest
-@testable import Conduit
+@testable import Belay
 
 final class ChatResumePolicyTests: XCTestCase {
     private func session(
@@ -194,14 +194,14 @@ Run:
 
 ```bash
 xcodegen generate
-xcodebuild test -project Conduit.xcodeproj -scheme Conduit -destination "platform=iOS Simulator,id=$CONDUIT_SIMULATOR_ID" -only-testing:ConduitTests/ChatResumePolicyTests CODE_SIGNING_ALLOWED=NO
+xcodebuild test -project Belay.xcodeproj -scheme Belay -destination "platform=iOS Simulator,id=$BELAY_SIMULATOR_ID" -only-testing:BelayTests/ChatResumePolicyTests CODE_SIGNING_ALLOWED=NO
 ```
 
 Expected: compilation fails because `ChatResumeBehavior`, `ChatResumeSyncPurpose`, and `ChatResumeSessionResolver` do not exist.
 
 - [ ] **Step 3: Implement the minimal pure policy**
 
-Create `Conduit/Services/ChatResumePolicy.swift`:
+Create `Belay/Services/ChatResumePolicy.swift`:
 
 ```swift
 import Foundation
@@ -280,7 +280,7 @@ Rerun the Step 2 command. Expected: all `ChatResumePolicyTests` pass.
 - [ ] **Step 5: Commit the policy**
 
 ```bash
-git add Conduit/Services/ChatResumePolicy.swift ConduitTests/ChatResumePolicyTests.swift Conduit.xcodeproj/project.pbxproj
+git add Belay/Services/ChatResumePolicy.swift BelayTests/ChatResumePolicyTests.swift Belay.xcodeproj/project.pbxproj
 git commit -m "feat: define chat resume selection policy"
 ```
 
@@ -289,9 +289,9 @@ git commit -m "feat: define chat resume selection policy"
 ### Task 2: Versioned device-local resume store
 
 **Files:**
-- Create: `Conduit/Services/ChatResumeStore.swift`
-- Create: `ConduitTests/ChatResumeStoreTests.swift`
-- Modify: `Conduit/Services/ChatScrollState.swift`
+- Create: `Belay/Services/ChatResumeStore.swift`
+- Create: `BelayTests/ChatResumeStoreTests.swift`
+- Modify: `Belay/Services/ChatScrollState.swift`
 
 **Interfaces:**
 - Consumes: `ChatResumeBehavior`, `ChatScrollSessionKey`, `ChatScrollSnapshot`, and `ChatScrollAnchorMetadata`.
@@ -299,11 +299,11 @@ git commit -m "feat: define chat resume selection policy"
 
 - [ ] **Step 1: Write failing store tests with isolated defaults**
 
-Create `ConduitTests/ChatResumeStoreTests.swift`:
+Create `BelayTests/ChatResumeStoreTests.swift`:
 
 ```swift
 import XCTest
-@testable import Conduit
+@testable import Belay
 
 final class ChatResumeStoreTests: XCTestCase {
     private func defaults() -> (UserDefaults, String) {
@@ -360,7 +360,7 @@ Run:
 
 ```bash
 xcodegen generate
-xcodebuild test -project Conduit.xcodeproj -scheme Conduit -destination "platform=iOS Simulator,id=$CONDUIT_SIMULATOR_ID" -only-testing:ConduitTests/ChatResumeStoreTests CODE_SIGNING_ALLOWED=NO
+xcodebuild test -project Belay.xcodeproj -scheme Belay -destination "platform=iOS Simulator,id=$BELAY_SIMULATOR_ID" -only-testing:BelayTests/ChatResumeStoreTests CODE_SIGNING_ALLOWED=NO
 ```
 
 Expected: compilation fails because `ChatResumeStore` does not exist.
@@ -383,7 +383,7 @@ Create a `final class ChatResumeStore` with a private payload matching these exa
 
 ```swift
 final class ChatResumeStore {
-    static let defaultStorageKey = "conduit.chatResume.v1"
+    static let defaultStorageKey = "belay.chatResume.v1"
     static let schemaVersion = 1
     static let maximumSnapshots = 100
 
@@ -403,7 +403,7 @@ final class ChatResumeStore {
     init(
         defaults: UserDefaults = .standard,
         storageKey: String = ChatResumeStore.defaultStorageKey,
-        legacyActiveSessionsKey: String = "conduit.activeSessionIdsByProfile.v1"
+        legacyActiveSessionsKey: String = "belay.activeSessionIdsByProfile.v1"
     )
 }
 ```
@@ -500,7 +500,7 @@ func testSnapshotMigratesFromRuntimeToCanonicalKey() {
 Run:
 
 ```bash
-xcodebuild test -project Conduit.xcodeproj -scheme Conduit -destination "platform=iOS Simulator,id=$CONDUIT_SIMULATOR_ID" -only-testing:ConduitTests/ChatResumeStoreTests -only-testing:ConduitTests/ChatScrollStateTests CODE_SIGNING_ALLOWED=NO
+xcodebuild test -project Belay.xcodeproj -scheme Belay -destination "platform=iOS Simulator,id=$BELAY_SIMULATOR_ID" -only-testing:BelayTests/ChatResumeStoreTests -only-testing:BelayTests/ChatScrollStateTests CODE_SIGNING_ALLOWED=NO
 ```
 
 Expected: all store and scroll-state tests pass.
@@ -508,7 +508,7 @@ Expected: all store and scroll-state tests pass.
 - [ ] **Step 7: Commit the store**
 
 ```bash
-git add Conduit/Services/ChatResumeStore.swift Conduit/Services/ChatScrollState.swift ConduitTests/ChatResumeStoreTests.swift Conduit.xcodeproj/project.pbxproj
+git add Belay/Services/ChatResumeStore.swift Belay/Services/ChatScrollState.swift BelayTests/ChatResumeStoreTests.swift Belay.xcodeproj/project.pbxproj
 git commit -m "feat: persist chat resume state"
 ```
 
@@ -517,8 +517,8 @@ git commit -m "feat: persist chat resume state"
 ### Task 3: Focused lifecycle coordinator
 
 **Files:**
-- Create: `Conduit/Services/ChatResumeCoordinator.swift`
-- Create: `ConduitTests/ChatResumeCoordinatorTests.swift`
+- Create: `Belay/Services/ChatResumeCoordinator.swift`
+- Create: `BelayTests/ChatResumeCoordinatorTests.swift`
 
 **Interfaces:**
 - Consumes: `ChatResumeStore`, `ChatResumeSessionResolver`, `ChatScrollSessionIdentity`, and `ChatScrollSnapshot`.
@@ -589,7 +589,7 @@ Run:
 
 ```bash
 xcodegen generate
-xcodebuild test -project Conduit.xcodeproj -scheme Conduit -destination "platform=iOS Simulator,id=$CONDUIT_SIMULATOR_ID" -only-testing:ConduitTests/ChatResumeCoordinatorTests CODE_SIGNING_ALLOWED=NO
+xcodebuild test -project Belay.xcodeproj -scheme Belay -destination "platform=iOS Simulator,id=$BELAY_SIMULATOR_ID" -only-testing:BelayTests/ChatResumeCoordinatorTests CODE_SIGNING_ALLOWED=NO
 ```
 
 Expected: compilation fails because the coordinator and request types do not exist.
@@ -732,7 +732,7 @@ func testMissingContinueTargetSelectsNewestChat() {
 Run:
 
 ```bash
-xcodebuild test -project Conduit.xcodeproj -scheme Conduit -destination "platform=iOS Simulator,id=$CONDUIT_SIMULATOR_ID" -only-testing:ConduitTests/ChatResumePolicyTests -only-testing:ConduitTests/ChatResumeStoreTests -only-testing:ConduitTests/ChatResumeCoordinatorTests CODE_SIGNING_ALLOWED=NO
+xcodebuild test -project Belay.xcodeproj -scheme Belay -destination "platform=iOS Simulator,id=$BELAY_SIMULATOR_ID" -only-testing:BelayTests/ChatResumePolicyTests -only-testing:BelayTests/ChatResumeStoreTests -only-testing:BelayTests/ChatResumeCoordinatorTests CODE_SIGNING_ALLOWED=NO
 ```
 
 Expected: all pass without fixed-delay test waits.
@@ -740,7 +740,7 @@ Expected: all pass without fixed-delay test waits.
 - [ ] **Step 7: Commit the coordinator**
 
 ```bash
-git add Conduit/Services/ChatResumeCoordinator.swift ConduitTests/ChatResumeCoordinatorTests.swift Conduit.xcodeproj/project.pbxproj
+git add Belay/Services/ChatResumeCoordinator.swift BelayTests/ChatResumeCoordinatorTests.swift Belay.xcodeproj/project.pbxproj
 git commit -m "feat: coordinate durable chat restoration"
 ```
 
@@ -749,8 +749,8 @@ git commit -m "feat: coordinate durable chat restoration"
 ### Task 4: Integrate automatic session selection with AppState
 
 **Files:**
-- Modify: `Conduit/Services/AppState.swift`
-- Modify: `ConduitTests/ChatResumeCoordinatorTests.swift`
+- Modify: `Belay/Services/AppState.swift`
+- Modify: `BelayTests/ChatResumeCoordinatorTests.swift`
 
 **Interfaces:**
 - Consumes: all coordinator APIs from Task 3.
@@ -883,7 +883,7 @@ In `handleScenePhase`:
 Run:
 
 ```bash
-xcodebuild test -project Conduit.xcodeproj -scheme Conduit -destination "platform=iOS Simulator,id=$CONDUIT_SIMULATOR_ID" -only-testing:ConduitTests/ChatResumePolicyTests -only-testing:ConduitTests/ChatResumeStoreTests -only-testing:ConduitTests/ChatResumeCoordinatorTests -only-testing:ConduitTests/ChatScrollStateTests -only-testing:ConduitTests/StreamEventParserTests -only-testing:ConduitTests/TurnStateTests CODE_SIGNING_ALLOWED=NO
+xcodebuild test -project Belay.xcodeproj -scheme Belay -destination "platform=iOS Simulator,id=$BELAY_SIMULATOR_ID" -only-testing:BelayTests/ChatResumePolicyTests -only-testing:BelayTests/ChatResumeStoreTests -only-testing:BelayTests/ChatResumeCoordinatorTests -only-testing:BelayTests/ChatScrollStateTests -only-testing:BelayTests/StreamEventParserTests -only-testing:BelayTests/TurnStateTests CODE_SIGNING_ALLOWED=NO
 ```
 
 Expected: all selected suites pass.
@@ -891,7 +891,7 @@ Expected: all selected suites pass.
 - [ ] **Step 9: Commit AppState integration**
 
 ```bash
-git add Conduit/Services/AppState.swift ConduitTests/ChatResumeCoordinatorTests.swift
+git add Belay/Services/AppState.swift BelayTests/ChatResumeCoordinatorTests.swift
 git commit -m "feat: apply resume policy during session sync"
 ```
 
@@ -900,10 +900,10 @@ git commit -m "feat: apply resume policy during session sync"
 ### Task 5: Make ChatView a restoration consumer
 
 **Files:**
-- Modify: `Conduit/Views/ChatView.swift`
-- Modify: `Conduit/Services/ChatScrollState.swift`
-- Modify: `ConduitTests/ChatScrollStateTests.swift`
-- Modify: `ConduitTests/ChatResumePolicyTests.swift`
+- Modify: `Belay/Views/ChatView.swift`
+- Modify: `Belay/Services/ChatScrollState.swift`
+- Modify: `BelayTests/ChatScrollStateTests.swift`
+- Modify: `BelayTests/ChatResumePolicyTests.swift`
 
 **Interfaces:**
 - Consumes: `AppState.chatResumeRestorationRequest`, viewport reporting/cancellation/completion methods, and semantic targets.
@@ -951,7 +951,7 @@ Retain the existing source-message re-anchor and duplicate-fingerprint cases.
 Run:
 
 ```bash
-xcodebuild test -project Conduit.xcodeproj -scheme Conduit -destination "platform=iOS Simulator,id=$CONDUIT_SIMULATOR_ID" -only-testing:ConduitTests/ChatResumePolicyTests -only-testing:ConduitTests/ChatScrollStateTests CODE_SIGNING_ALLOWED=NO
+xcodebuild test -project Belay.xcodeproj -scheme Belay -destination "platform=iOS Simulator,id=$BELAY_SIMULATOR_ID" -only-testing:BelayTests/ChatResumePolicyTests -only-testing:BelayTests/ChatScrollStateTests CODE_SIGNING_ALLOWED=NO
 ```
 
 Expected: compilation fails because `ChatResumeViewportResolver` does not exist.
@@ -1025,7 +1025,7 @@ Delete only tests that assert the old in-memory `ChatScrollStateStore` owns sess
 Run:
 
 ```bash
-xcodebuild test -project Conduit.xcodeproj -scheme Conduit -destination "platform=iOS Simulator,id=$CONDUIT_SIMULATOR_ID" -only-testing:ConduitTests/ChatScrollStateTests -only-testing:ConduitTests/ChatResumePolicyTests -only-testing:ConduitTests/ChatResumeCoordinatorTests CODE_SIGNING_ALLOWED=NO
+xcodebuild test -project Belay.xcodeproj -scheme Belay -destination "platform=iOS Simulator,id=$BELAY_SIMULATOR_ID" -only-testing:BelayTests/ChatScrollStateTests -only-testing:BelayTests/ChatResumePolicyTests -only-testing:BelayTests/ChatResumeCoordinatorTests CODE_SIGNING_ALLOWED=NO
 ```
 
 Expected: all selected suites pass.
@@ -1033,7 +1033,7 @@ Expected: all selected suites pass.
 - [ ] **Step 9: Commit the view integration**
 
 ```bash
-git add Conduit/Views/ChatView.swift Conduit/Services/ChatScrollState.swift Conduit/Services/ChatResumePolicy.swift ConduitTests/ChatScrollStateTests.swift ConduitTests/ChatResumePolicyTests.swift
+git add Belay/Views/ChatView.swift Belay/Services/ChatScrollState.swift Belay/Services/ChatResumePolicy.swift BelayTests/ChatScrollStateTests.swift BelayTests/ChatResumePolicyTests.swift
 git commit -m "fix: restore chat viewport through coordinator"
 ```
 
@@ -1042,10 +1042,10 @@ git commit -m "fix: restore chat viewport through coordinator"
 ### Task 6: Add the Chat settings control
 
 **Files:**
-- Modify: `Conduit/Views/AuxiliaryViews.swift`
-- Modify: `Conduit/Views/RootView.swift`
-- Modify: `Conduit/Services/AppState.swift`
-- Modify: `ConduitTests/ChatResumePolicyTests.swift`
+- Modify: `Belay/Views/AuxiliaryViews.swift`
+- Modify: `Belay/Views/RootView.swift`
+- Modify: `Belay/Services/AppState.swift`
+- Modify: `BelayTests/ChatResumePolicyTests.swift`
 
 **Interfaces:**
 - Consumes: `AppState.chatResumeBehavior` and `setChatResumeBehavior(_:)`.
@@ -1090,15 +1090,15 @@ persistChatResumeBehavior: { appState.setChatResumeBehavior($0) }
 Before profile-backed chat fields, render:
 
 ```swift
-ConduitSettingsSection(
-    title: "When returning to Conduit",
+BelaySettingsSection(
+    title: "When returning to Belay",
     symbol: "arrow.uturn.backward.circle",
-    tint: .conduitAccent
+    tint: .belayAccent
 ) {
-    Text("Choose whether Conduit preserves your exact reading position or follows the newest conversation.")
+    Text("Choose whether Belay preserves your exact reading position or follows the newest conversation.")
         .font(.footnote)
         .foregroundStyle(.secondary)
-    Picker("When returning to Conduit", selection: $behavior) {
+    Picker("When returning to Belay", selection: $behavior) {
         Text("Continue").tag(ChatResumeBehavior.continueWhereLeftOff)
         Text("Latest").tag(ChatResumeBehavior.latestActivity)
     }
@@ -1113,7 +1113,7 @@ Initialize local state from the snapshot and persist immediately on selection. L
 Run the focused policy tests, then:
 
 ```bash
-xcodebuild build -project Conduit.xcodeproj -scheme Conduit -destination "platform=iOS Simulator,id=$CONDUIT_SIMULATOR_ID" CODE_SIGNING_ALLOWED=NO
+xcodebuild build -project Belay.xcodeproj -scheme Belay -destination "platform=iOS Simulator,id=$BELAY_SIMULATOR_ID" CODE_SIGNING_ALLOWED=NO
 ```
 
 Expected: tests pass and the app builds.
@@ -1121,7 +1121,7 @@ Expected: tests pass and the app builds.
 - [ ] **Step 6: Commit Settings integration**
 
 ```bash
-git add Conduit/Views/AuxiliaryViews.swift Conduit/Views/RootView.swift Conduit/Services/AppState.swift Conduit/Services/ChatResumePolicy.swift ConduitTests/ChatResumePolicyTests.swift
+git add Belay/Views/AuxiliaryViews.swift Belay/Views/RootView.swift Belay/Services/AppState.swift Belay/Services/ChatResumePolicy.swift BelayTests/ChatResumePolicyTests.swift
 git commit -m "feat: add chat return behavior setting"
 ```
 
@@ -1131,7 +1131,7 @@ git commit -m "feat: add chat return behavior setting"
 
 **Files:**
 - Modify only files required by failures directly caused by Tasks 1-6.
-- Verify: all `ConduitTests` and both user-facing behavior modes.
+- Verify: all `BelayTests` and both user-facing behavior modes.
 
 **Interfaces:**
 - Consumes: completed implementation from Tasks 1-6.
@@ -1155,13 +1155,13 @@ Confirm `ChatView` no longer observes scene phase, the coordinator store is the 
 Resolve an available iPhone UDID using the same JSON selection strategy as `.github/workflows/ci.yml`, then run:
 
 ```bash
-CONDUIT_RESULT_DIR=$(mktemp -d /tmp/conduit-chat-resume.XXXXXX)
+BELAY_RESULT_DIR=$(mktemp -d /tmp/belay-chat-resume.XXXXXX)
 xcodebuild test \
-  -project Conduit.xcodeproj \
-  -scheme Conduit \
-  -destination "platform=iOS Simulator,id=$CONDUIT_SIMULATOR_ID" \
+  -project Belay.xcodeproj \
+  -scheme Belay \
+  -destination "platform=iOS Simulator,id=$BELAY_SIMULATOR_ID" \
   -configuration Debug \
-  -resultBundlePath "$CONDUIT_RESULT_DIR/TestResults.xcresult" \
+  -resultBundlePath "$BELAY_RESULT_DIR/TestResults.xcresult" \
   CODE_SIGN_IDENTITY="" \
   CODE_SIGNING_REQUIRED=NO \
   CODE_SIGNING_ALLOWED=NO \
@@ -1176,9 +1176,9 @@ Expected: all tests pass. Preserve the `.xcresult` if any test fails.
 On an iPhone Simulator connected to a test Hermes instance:
 
 1. Select A and scroll to an older message.
-2. Background Conduit and create or receive newer activity in B.
+2. Background Belay and create or receive newer activity in B.
 3. Return and verify A remains selected at the same anchor with jump-to-latest available.
-4. Terminate and relaunch Conduit; verify A and its anchor restore again.
+4. Terminate and relaunch Belay; verify A and its anchor restore again.
 5. Add messages to A while backgrounded and verify the viewport does not move.
 
 - [ ] **Step 4: Run simulator acceptance in latest mode**

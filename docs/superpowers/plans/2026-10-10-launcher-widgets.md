@@ -1,9 +1,9 @@
-# Conduit Launcher Widgets Implementation Plan
-> **Superseded 2026-10-14:** the planned App Group `group.com.milim.relay.widgets` could not be registered (globally taken by another team). The shipped group is `group.com.milim.relay.launcher`, assigned to both `com.milim.relay` and `com.milim.relay.widgets`; see docs/WIDGETS.md.
+# Belay Launcher Widgets Implementation Plan
+> **Superseded 2026-10-14:** the planned App Group `group.live.tomkins.belay.widgets` could not be registered (globally taken by another team). The shipped group is `group.live.tomkins.belay.launcher`, assigned to both `live.tomkins.belay` and `live.tomkins.belay.widgets`; see docs/WIDGETS.md.
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Ship attractive Native and Conduit-chan medium widgets that reliably resume a conversation, create a text chat, or start fresh foreground voice.
+**Goal:** Ship attractive Native and Belay-chan medium widgets that reliably resume a conversation, create a text chat, or start fresh foreground voice.
 
 **Architecture:** A dedicated App Group holds a bounded, atomic display snapshot. Both WidgetKit entries read it and emit typed links to one process-owned app coordinator, which resolves exact dashboard/profile/conversation ownership through existing app flows. The extension never connects to Hermes or handles authentication/audio.
 
@@ -13,13 +13,13 @@
 
 ## Global Constraints
 
-- Two medium Home Screen gallery entries, **Native** and **Conduit-chan**, with identical actions and independent per-instance configuration.
+- Two medium Home Screen gallery entries, **Native** and **Belay-chan**, with identical actions and independent per-instance configuration.
 - iOS 17+; iPhone and iPad; system typography, accessible labels, Dynamic Type, privacy-sensitive titles and an option to hide them.
 - Follow current dashboard/workspace profile or choose a saved workspace; optional saved conversation selection.
 - Each displayed timeline entry captures its exact workspace; a later app switch cannot redirect its tap.
-- Dedicated group `group.com.milim.relay.widgets`; display metadata and identifiers only; no notification group, credentials, Keychain, gateway URLs, tickets or transcripts.
+- Dedicated group `group.live.tomkins.belay.widgets`; display metadata and identifiers only; no notification group, credentials, Keychain, gateway URLs, tickets or transcripts.
 - Retain at most 100 workspace records and 20 saved conversation choices per workspace; last, pinned, then recent priority.
-- Cache eviction shows **Open Conduit to refresh**; it never implies deletion or substitutes another conversation.
+- Cache eviction shows **Open Belay to refresh**; it never implies deletion or substitutes another conversation.
 - Pending launches are process-local and expire after 30 seconds on a monotonic deadline, including authentication/connection time.
 - New explicit navigation or sign-out supersedes older work; active-call policy is respected; Talk uses current voice settings and foreground readiness.
 - No Live Activities, live counts/status, background widget networking, inline approvals, prompt presets, extra sizes, or Siri/Watch/CarPlay behavior changes.
@@ -46,17 +46,17 @@ Source inspection used `origin/main` `46f25da3`. Recheck names against the execu
 |---|---|
 | `Shared/Widgets/WidgetSnapshot.swift`, `WidgetSnapshotStore.swift`, `WidgetLaunchLink.swift`, `WidgetSelection.swift` | Foundation-only DTOs, atomic storage, strict route codec and pure entry selection |
 | `Shared/Widgets/WidgetConfiguration.swift` | Local snapshot-backed AppIntent configuration and entities |
-| `Conduit/Services/WidgetSnapshotPublisher.swift`, `AppState+Widgets.swift` | Settled app projection, identity adapter, pruning and reload coalescing |
-| `Conduit/Services/WidgetLaunchCoordinator.swift`, `AppState+WidgetLaunch.swift` | Process-local request ownership/deadline and existing app action adapters |
-| `Conduit/Services/AppState.swift`, `Conduit/ConduitApp.swift` | Narrow publication, explicit-navigation and async ownership hooks |
-| `ConduitWidgets/ConduitWidgets.swift`, `WidgetViews.swift`, `Assets.xcassets`, `Info.plist`, `ConduitWidgets.entitlements` | Bundle, provider, both layouts, artwork and extension packaging |
-| `project.yml`, `Conduit/Conduit.entitlements`, `Conduit/Localizable.xcstrings` | Target embedding, isolated group membership and localized widget/app feedback |
-| `ConduitTests/WidgetSnapshotTests.swift`, `WidgetLaunchLinkTests.swift`, `WidgetSnapshotPublisherTests.swift`, `WidgetLaunchCoordinatorTests.swift`, `AppStateWidgetLaunchTests.swift` | Focused pure/model and app integration coverage |
-| `Conduit/Services/WidgetLaunchUITestFixture.swift`, `ConduitUITests/WidgetLaunchUITests.swift`, `docs/WIDGETS.md` | DEBUG-only URL-delivery fixture, foreground launch scenarios and configuration/validation notes |
+| `Belay/Services/WidgetSnapshotPublisher.swift`, `AppState+Widgets.swift` | Settled app projection, identity adapter, pruning and reload coalescing |
+| `Belay/Services/WidgetLaunchCoordinator.swift`, `AppState+WidgetLaunch.swift` | Process-local request ownership/deadline and existing app action adapters |
+| `Belay/Services/AppState.swift`, `Belay/BelayApp.swift` | Narrow publication, explicit-navigation and async ownership hooks |
+| `BelayWidgets/BelayWidgets.swift`, `WidgetViews.swift`, `Assets.xcassets`, `Info.plist`, `BelayWidgets.entitlements` | Bundle, provider, both layouts, artwork and extension packaging |
+| `project.yml`, `Belay/Belay.entitlements`, `Belay/Localizable.xcstrings` | Target embedding, isolated group membership and localized widget/app feedback |
+| `BelayTests/WidgetSnapshotTests.swift`, `WidgetLaunchLinkTests.swift`, `WidgetSnapshotPublisherTests.swift`, `WidgetLaunchCoordinatorTests.swift`, `AppStateWidgetLaunchTests.swift` | Focused pure/model and app integration coverage |
+| `Belay/Services/WidgetLaunchUITestFixture.swift`, `BelayUITests/WidgetLaunchUITests.swift`, `docs/WIDGETS.md` | DEBUG-only URL-delivery fixture, foreground launch scenarios and configuration/validation notes |
 
 Execute tasks 1 → 2 → 3 → 4 → 5. Task 4 may follow task 2 once task 1's interfaces are accepted, but serialize overlapping `project.yml`, catalogs and app edits. No dependency updates or CI workflow changes are planned.
 
-**Validation shorthand used below:** start with XcodeBuildMCP `session_show_defaults`, confirm the isolated Mac checkout, Conduit scheme and simulator, then `build_sim(buildForTesting: true)` and `test_sim(extraArgs: ["-only-testing:ConduitTests/<Class>"])`. Substitute the exact class listed in a task. Use simulator signing overrides if required. An unavailable harness/Mac is a recorded validation limitation; it is not a passing test cycle. Never build against the intentional Mac release checkout or start competing simulator builds.
+**Validation shorthand used below:** start with XcodeBuildMCP `session_show_defaults`, confirm the isolated Mac checkout, Belay scheme and simulator, then `build_sim(buildForTesting: true)` and `test_sim(extraArgs: ["-only-testing:BelayTests/<Class>"])`. Substitute the exact class listed in a task. Use simulator signing overrides if required. An unavailable harness/Mac is a recorded validation limitation; it is not a passing test cycle. Never build against the intentional Mac release checkout or start competing simulator builds.
 
 ### Task 1: Shared snapshot, selection and link contract
 
@@ -86,7 +86,7 @@ XCTAssertEqual(store.read(), previous)
 XCTAssertNil(store.read())
 // testSelectionCapturesDisplayedWorkspaceAndDoesNotReplaceEvictedTarget
 XCTAssertEqual(entry.resumeLink.workspace, displayedWorkspace)
-XCTAssertEqual(evicted.title, "Open Conduit to refresh")
+XCTAssertEqual(evicted.title, "Open Belay to refresh")
 // testWidgetLinkRoundTripAndStrictNamespace
 XCTAssertEqual(WidgetLaunchLink(url: link.url), link)
 XCTAssertNil(WidgetLaunchLink(url: malformedURL))
@@ -94,12 +94,12 @@ XCTAssertNil(WidgetLaunchLink(url: malformedURL))
 
 Also cover Unicode/percent-encoded profiles, repeated/unknown query keys, unsupported versions/actions, missing required identity, foreign schemes/hosts, resume without a reference, and New Chat/Talk carrying a conversation. Encoded routes contain only action/identity, never labels or arbitrary endpoints. Add `testLongRTLTitleRoundTripsAndHiddenTitleRedactsDisplay`: assert the stored Unicode title is unchanged, hidden entry copy is generic, and its exact target link is unchanged.
 - [ ] Run both focused classes; confirm meaningful failures before implementation.
-- [ ] Implement the interfaces. Use `conduit://widget/v1/<action>` plus `URLComponents` query fields for exact workspace and typed identity; reject ambiguous or inconsistent shapes. Keep `ConduitAppLink` unchanged. Write `launcher-v1.json` atomically; decode unknown/corrupt data safely. Apply deterministic caps without treating eviction as deletion.
+- [ ] Implement the interfaces. Use `belay://widget/v1/<action>` plus `URLComponents` query fields for exact workspace and typed identity; reject ambiguous or inconsistent shapes. Keep `BelayAppLink` unchanged. Write `launcher-v1.json` atomically; decode unknown/corrupt data safely. Apply deterministic caps without treating eviction as deletion.
 - [ ] Run both classes to completion; inspect the diff for group isolation and round-trip fidelity.
 
 ### Task 2: Publish settled app metadata
 
-**Files:** Create `WidgetSnapshotPublisher.swift`, `AppState+Widgets.swift`, `WidgetSnapshotPublisherTests.swift`; add narrow hooks in `AppState.swift` and the existing language-change callback in `ConduitApp.swift`.
+**Files:** Create `WidgetSnapshotPublisher.swift`, `AppState+Widgets.swift`, `WidgetSnapshotPublisherTests.swift`; add narrow hooks in `AppState.swift` and the existing language-change callback in `BelayApp.swift`.
 
 **Interfaces:**
 - Consumes Task 1 DTOs/store and existing `SessionReference`/saved-dashboard registry.
@@ -113,7 +113,7 @@ Also cover Unicode/percent-encoded profiles, repeated/unknown query keys, unsupp
 
 ### Task 3: Own foreground launches through startup and suspension
 
-**Files:** Create `WidgetLaunchCoordinator.swift`, `AppState+WidgetLaunch.swift`, `WidgetLaunchCoordinatorTests.swift`, `AppStateWidgetLaunchTests.swift`; modify only routing/ownership seams in `ConduitApp.swift` and `AppState.swift`.
+**Files:** Create `WidgetLaunchCoordinator.swift`, `AppState+WidgetLaunch.swift`, `WidgetLaunchCoordinatorTests.swift`, `AppStateWidgetLaunchTests.swift`; modify only routing/ownership seams in `BelayApp.swift` and `AppState.swift`.
 
 **Interfaces:**
 - Consumes `WidgetLaunchLink`, workspace/reference adapters, existing dashboard/profile readiness, session identity and voice flows.
@@ -143,31 +143,31 @@ Add named `testAuthCancellationIsTerminal`, `testStableOfflineFailureDoesNotRepl
 - [ ] Implement the coordinator with a process-generated ownership token, one in-flight equivalent request and a single 30-second timer. Coalesce only while in flight; do not persist requests or embed a permanent deduplication token in links. Stable failure/canceled auth ends the request; readiness changes may retry only current deferred work.
 - [ ] Implement the app adapters. Validate saved dashboard and exact profile, respect active calls before mutation, and use typed ownership for Bot Chats. Resume through current identity-aware open paths; New Chat through owned creation; Talk through the existing fresh voice path/current engine settings. Thread the lease through the minimal async action seams so checks occur inside the actual preparation path after suspension and immediately before selection/presentation/microphone arming, not merely around an outer await. Preserve existing callers through optional/default ownership parameters.
 - [ ] Route widget URLs before the ordinary external parser. At validated admission, include pending widget ownership in `hasPendingExplicitNavigation` and call `cancelChatResumeRestoration()` before waiting for connection/authentication. Use `beginExplicitChatViewportTransition()` only when the conversation action starts; do not freeze the viewport throughout sign-in. Clear only the matching generation. Connect non-widget explicit navigation and sign-out to supersession without changing their destinations. Preserve the process runtime registry, push/Siri flows and iPad window guard. Invalid widget URLs do nothing and cannot become permissive ordinary links.
-- [ ] Run both classes and relevant existing regressions: `AppStateChatResumeTests`, `AppStateMultiDashboardTests`, `PendingVoiceIntentLifecycleTests`, plus external-link coverage in `HermesVoiceGatewayTimeoutTests` (its source is `ConduitExternalLinkTests.swift`). Record assertion failures separately from incomplete/infrastructure runs.
+- [ ] Run both classes and relevant existing regressions: `AppStateChatResumeTests`, `AppStateMultiDashboardTests`, `PendingVoiceIntentLifecycleTests`, plus external-link coverage in `HermesVoiceGatewayTimeoutTests` (its source is `BelayExternalLinkTests.swift`). Record assertion failures separately from incomplete/infrastructure runs.
 
 ### Task 4: Package and render both widget styles
 
-**Files:** Create the extension files/resources and `Shared/Widgets/WidgetConfiguration.swift`; modify `project.yml`, app entitlements and `Conduit/Localizable.xcstrings`; extend `WidgetSnapshotTests.swift` for configuration resolution.
+**Files:** Create the extension files/resources and `Shared/Widgets/WidgetConfiguration.swift`; modify `project.yml`, app entitlements and `Belay/Localizable.xcstrings`; extend `WidgetSnapshotTests.swift` for configuration resolution.
 
 **Interfaces:**
 - Consumes snapshot store, exact selection resolution and route links.
 - Produces `WidgetWorkspaceEntity: AppEntity`, `WidgetConversationEntity: AppEntity`, snapshot-only `EntityQuery` implementations and `LauncherWidgetConfigurationIntent: WidgetConfigurationIntent` with workspace, optional conversation and `hideTitle` parameters.
-- Produces `LauncherTimelineProvider: AppIntentTimelineProvider`, `NativeLauncherWidget`, `CharacterLauncherWidget`, and `ConduitWidgets: WidgetBundle`. Stable kinds are `com.milim.relay.widgets.native` and `com.milim.relay.widgets.character`; both support only `.systemMedium`.
+- Produces `LauncherTimelineProvider: AppIntentTimelineProvider`, `NativeLauncherWidget`, `CharacterLauncherWidget`, and `BelayWidgets: WidgetBundle`. Stable kinds are `live.tomkins.belay.widgets.native` and `live.tomkins.belay.widgets.character`; both support only `.systemMedium`.
 
 - [ ] Add `testFixedWorkspaceConfigurationDoesNotFollowCurrent`, `testUnknownConfiguredEntityShowsRefresh`, `testConfiguredConversationBelongsToSelectedWorkspace`, `testNoWorkspaceShowsSetup`, `testKnownWorkspaceWithoutChatKeepsNewChatAndTalk`, and `testHideTitleKeepsGenericExactTargetLink`. Assert resolved action/identity and exact fallback copy. Entity IDs encode full identity, never bare profile/session ID; queries cannot fetch network data or silently replace unavailable selections.
 - [ ] Run focused selection tests before implementation; confirm failures.
 - [ ] Implement configuration/provider and both layouts from the approved concepts using system medium margins. Render three `Link` destinations, explicit accessible action labels, decorative existing artwork, adaptive contrast, `.privacySensitive()` title and generic Resume/Open Chat when hidden. Guard newer tinted/clear rendering APIs by availability and inspect their actual rendering on a supported simulator/device. Capture targets when creating entries; use cached data and `.never` timeline policy with app-triggered reloads.
-- [ ] Reuse the app's String Catalog as an extension resource without compiling app services. Read `docs/LOCALIZATION.md`; add widget/configuration/feedback keys for every shipped language and retain draft stripping in both bundles, reusing the app Info.plist's draft list. Preserve System Default language semantics; do not add languages. Populate minimal `WidgetCharacter`/`WidgetMark` image sets from `Conduit/Resources/Assets.xcassets/AppIconPreview.imageset/icon.png` and `AppIconLightPreview.imageset/icon-light.png`; retain the approved artwork through SwiftUI cropping and avoid unrelated application resources.
-- [ ] Add `ConduitWidgets` app-extension (`com.milim.relay.widgets`, iOS 17, device families 1/2, `APPLICATION_EXTENSION_API_ONLY: YES`, `SKIP_INSTALL: YES`), app embedding dependency, WidgetKit extension Info.plist and widget entitlements containing only the launcher group. Add that group to app entitlements while preserving existing groups. Compile only `Shared/Widgets` into the widget; exclude `Widgets/**` from the notification extension's broad Shared source inclusion. Keep app version/build unchanged. Use the established manual signing approach with widget profile `Conduit Widgets App Store`; record that device/archive signing requires its App ID/profile and group membership, without modifying release/signing credentials.
-- [ ] On the isolated Mac checkout, extend PATH for Homebrew and run `xcodegen generate`; follow generated-project policy. Build the app/embedded extension through the harness, inspect new compiler warnings and built `PlugIns/ConduitWidgets.appex`. Check target membership and entitlement isolation; run `python3 scripts/check-l10n-coverage.py --repo-root .`. Missing signing resources do not prevent an unsigned simulator build.
+- [ ] Reuse the app's String Catalog as an extension resource without compiling app services. Read `docs/LOCALIZATION.md`; add widget/configuration/feedback keys for every shipped language and retain draft stripping in both bundles, reusing the app Info.plist's draft list. Preserve System Default language semantics; do not add languages. Populate minimal `WidgetCharacter`/`WidgetMark` image sets from `Belay/Resources/Assets.xcassets/AppIconPreview.imageset/icon.png` and `AppIconLightPreview.imageset/icon-light.png`; retain the approved artwork through SwiftUI cropping and avoid unrelated application resources.
+- [ ] Add `BelayWidgets` app-extension (`live.tomkins.belay.widgets`, iOS 17, device families 1/2, `APPLICATION_EXTENSION_API_ONLY: YES`, `SKIP_INSTALL: YES`), app embedding dependency, WidgetKit extension Info.plist and widget entitlements containing only the launcher group. Add that group to app entitlements while preserving existing groups. Compile only `Shared/Widgets` into the widget; exclude `Widgets/**` from the notification extension's broad Shared source inclusion. Keep app version/build unchanged. Use the established manual signing approach with widget profile `Belay Widgets App Store`; record that device/archive signing requires its App ID/profile and group membership, without modifying release/signing credentials.
+- [ ] On the isolated Mac checkout, extend PATH for Homebrew and run `xcodegen generate`; follow generated-project policy. Build the app/embedded extension through the harness, inspect new compiler warnings and built `PlugIns/BelayWidgets.appex`. Check target membership and entitlement isolation; run `python3 scripts/check-l10n-coverage.py --repo-root .`. Missing signing resources do not prevent an unsigned simulator build.
 
 ### Task 5: Exercise routing, inspect real widgets and hand off evidence
 
-**Files:** Create `Conduit/Services/WidgetLaunchUITestFixture.swift`, `ConduitUITests/WidgetLaunchUITests.swift` and `docs/WIDGETS.md`; add only the fixture attachment in `ConduitApp.swift`.
+**Files:** Create `Belay/Services/WidgetLaunchUITestFixture.swift`, `BelayUITests/WidgetLaunchUITests.swift` and `docs/WIDGETS.md`; add only the fixture attachment in `BelayApp.swift`.
 
 **Interfaces:** Consumes the finished launcher routes, widgets and app coordinator. Produces DEBUG-only `WidgetLaunchUITestFixture.launchURL(arguments: [String]) -> URL?` and `WidgetLaunchUITestFixtureModifier: ViewModifier`, plus focused UI coverage and a verification record separating source, XCTest, simulator/device, signing and hosted results.
 
-- [ ] Add named UI scenarios `testColdWidgetResumeOpensRequestedWorkspace`, `testWarmWidgetNewChatCreatesFreshConversation`, `testWidgetTalkWaitsForForegroundReadiness`, and `testRemovedWidgetTargetShowsRecovery`. Reuse the seeded connected-dashboard/profile fixture pattern from `ProfilePickerUITests`; no existing UI URL-delivery helper was found. Add `-CONDUIT_UI_TEST_WIDGET_URL` for cold delivery and a test-only control with accessibility ID `widgetUITestDeliverURL` for warm delivery, enabled only in DEBUG with `CONDUIT_UITEST=1`. Both call the same URL ingestion used by `.onOpenURL`; release builds omit the fixture. Assertions check visible requested workspace/conversation, fresh-chat identity, deferred voice presentation and recovery feedback. These are fixture-delivery tests; actual OS delivery is checked with installed widgets below. Unit spies from Task 3 prove microphone non-activation; a UI label assertion is not audio proof.
+- [ ] Add named UI scenarios `testColdWidgetResumeOpensRequestedWorkspace`, `testWarmWidgetNewChatCreatesFreshConversation`, `testWidgetTalkWaitsForForegroundReadiness`, and `testRemovedWidgetTargetShowsRecovery`. Reuse the seeded connected-dashboard/profile fixture pattern from `ProfilePickerUITests`; no existing UI URL-delivery helper was found. Add `-BELAY_UI_TEST_WIDGET_URL` for cold delivery and a test-only control with accessibility ID `widgetUITestDeliverURL` for warm delivery, enabled only in DEBUG with `BELAY_UITEST=1`. Both call the same URL ingestion used by `.onOpenURL`; release builds omit the fixture. Assertions check visible requested workspace/conversation, fresh-chat identity, deferred voice presentation and recovery feedback. These are fixture-delivery tests; actual OS delivery is checked with installed widgets below. Unit spies from Task 3 prove microphone non-activation; a UI label assertion is not audio proof.
 - [ ] Run the focused UI class through `test_sim` and finish the required relevant unit coverage. Run `python3 scripts/plan-tests.py validate`, `python3 scripts/plan-tests.py hosted`, and `python3 scripts/plan-tests.py smoke`; expect successful discovery/coverage with new classes automatically assigned. No shard-count/workflow edits are needed. If a CI-tooling change becomes necessary, also run `python3 -m unittest discover -s scripts/tests`.
 - [ ] Inspect actual installed widgets on iPhone/iPad: both styles together with different fixed/follow configurations, warm/cold taps, light/dark and supported tinted/clear modes, accessibility text, long/RTL titles, hidden titles, no account and evicted conversation. Verify touch regions and contrast after WidgetKit rendering. Record screenshots and unsupported/unavailable device/OS cases; the browser concept is only a design reference.
 - [ ] Document widget setup, local-only picker availability, cache versus deletion recovery, dedicated group/signing prerequisites and verified/unverified environments in `docs/WIDGETS.md`. Record actual build/test completion and warnings. Future hosted CI cannot be claimed without a pushed exact head and completed `CI Gate`; this task does not authorize publishing to obtain it.

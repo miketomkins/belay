@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CI v2 timing extraction and report aggregation for Hermes Conduit.
+"""CI v2 timing extraction and report aggregation for Hermes Belay.
 
 Subcommands
 -----------

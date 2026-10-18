@@ -1,6 +1,6 @@
 # Localization
 
-Conduit's UI languages are data, not code. Adding a language means adding
+Belay's UI languages are data, not code. Adding a language means adding
 its translations to the String Catalogs and passing CI; no Swift or tooling
 change is needed.
 
@@ -10,13 +10,13 @@ change is needed.
   development region. Catalog keys are the English source strings, and any
   key a language lacks falls back to them.
 - **Shipped languages**: every other language that appears in
-  `Conduit/Localizable.xcstrings`, `AppShortcuts.xcstrings` or
+  `Belay/Localizable.xcstrings`, `AppShortcuts.xcstrings` or
   `InfoPlist.xcstrings`, except drafts. At runtime `AppLocalizations` reads
   them from the built app's lproj folders, and the App language picker
   offers System Default plus each one, labelled by its own translation of
   the `Name of this language` entry.
-- **Draft languages**: identifiers listed in `Conduit/Info.plist` under
-  `ConduitDraftLanguages`. A draft can be partial. The last build phase
+- **Draft languages**: identifiers listed in `Belay/Info.plist` under
+  `BelayDraftLanguages`. A draft can be partial. The last build phase
   (`scripts/strip-draft-localizations.py`) removes its lproj from the app,
   so it is not listed on the App Store, not offered in iOS Settings or the
   picker, and never shown under System Default.
@@ -27,7 +27,7 @@ change is needed.
    Use the identifier Xcode offers: the bare language code (`ja`, `fr`)
    unless a regional or script variant is deliberate (`pt-BR`, `zh-Hant`).
 2. While the translation is incomplete, add the identifier to
-   `ConduitDraftLanguages`. Drafts can land on `main` in small pieces.
+   `BelayDraftLanguages`. Drafts can land on `main` in small pieces.
 3. Translate every entry in all three catalogs. Translate
    `Name of this language` as the language's own name (for example 日本語).
    `Built-in stop phrases` and `Built-in end conversation phrases` are the
@@ -36,11 +36,11 @@ change is needed.
    (English: `stop|stop talking|be quiet`).
 4. Run `python3 scripts/check-l10n-coverage.py --repo-root .`. It lists
    what is missing or malformed and says when a draft is complete.
-5. Remove the identifier from `ConduitDraftLanguages`. The language now
+5. Remove the identifier from `BelayDraftLanguages`. The language now
    ships. If a local build doesn't show it in the picker, clean the build
    folder once: the strip phase deleted its lproj from the earlier build.
 
-To preview a draft in the simulator, remove it from `ConduitDraftLanguages`
+To preview a draft in the simulator, remove it from `BelayDraftLanguages`
 in your working copy only.
 
 ## Translating with worksheets
@@ -89,7 +89,7 @@ put both forms in the catalog. The checker reads an interpolation as an
 write counts that way; a plain `\(remaining)` is read as `%@` and never
 finds its key at runtime.
 
-Durations and lists Conduit formats itself use
+Durations and lists Belay formats itself use
 `AppLocalization.formattingLocale`, so they follow the UI language
 (`DateComponentsFormatter`, `.formatted(.list(…))`).
 
@@ -131,9 +131,9 @@ availability`, not `availability.title == "Ready"`).
   key (labels excepted, see above), and no count is passed as
   `String(count)` in front of a plural noun;
 - no SwiftUI title gets a raw string literal as a ternary branch;
-- no raw string literal reaches one of Conduit's own String display
+- no raw string literal reaches one of Belay's own String display
   parameters (`STRING_DISPLAY_PARAMETERS` in the checker:
-  `SettingsMetricRow(label:value:)`, `ConduitSettingsSection(title:)`,
+  `SettingsMetricRow(label:value:)`, `BelaySettingsSection(title:)`,
   `homeSection(_:)` and other views and helpers that show a `String` with
   `Text(title)`), directly, as a ternary branch, as an operand of a `??`
   chain or in an array; no display property (`STRING_DISPLAY_PROPERTIES`:

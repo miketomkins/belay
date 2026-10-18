@@ -1,16 +1,16 @@
 # Voice settings & provider configuration
 
-How Conduit's Voice settings map onto the Hermes profile configuration, and
+How Belay's Voice settings map onto the Hermes profile configuration, and
 what the provider endpoint overrides do and do not change.
 
 ## Where TTS requests run
 
-All speech synthesis is relayed through the user's Hermes host: Conduit calls
+All speech synthesis is relayed through the user's Hermes host: Belay calls
 `/api/audio/speak-stream` (streamed PCM) on the Hermes server and falls back
-to `/api/audio/speak` (whole-file) when streaming is unavailable. Conduit
+to `/api/audio/speak` (whole-file) when streaming is unavailable. Belay
 never talks to TTS providers directly, and it never uses Hermes'
 `voice.client_direct` credential hand-off — provider API keys remain on the
-Hermes host, where Conduit can only see whether each key is set.
+Hermes host, where Belay can only see whether each key is set.
 
 ## Custom OpenAI-compatible endpoints
 
@@ -18,11 +18,11 @@ The OpenAI TTS provider accepts two endpoint overrides:
 
 - `tts.openai.base_url` — points Hermes at any OpenAI-compatible speech
   endpoint (for example `https://your-host/v1`). This configures the provider
-  **Hermes** calls; it does not change the server Conduit connects to, and it
+  **Hermes** calls; it does not change the server Belay connects to, and it
   is not the Hermes dashboard URL. Clearing the field removes the override
   key from the profile config, returning the provider to its default.
 - `tts.openai.speed` — speech rate multiplier. Upstream clamps values into
-  0.25–4.0; Conduit validates and refuses out-of-range or malformed input
+  0.25–4.0; Belay validates and refuses out-of-range or malformed input
   rather than saving something upstream would silently rewrite, and accepts
   comma decimals (`1,5` is stored as `1.5`). Clearing the field removes the
   override key, restoring the upstream/global default. Note: this setting
@@ -46,13 +46,13 @@ reads that config key.
 OpenAI-compatible does not guarantee streaming compatibility. Hermes decides
 streaming per provider: when its configured provider has a chunked-PCM
 implementation, `/api/audio/speak-stream` returns streamed PCM; otherwise the
-server explicitly signals `fallback` and Conduit fetches whole-file audio
+server explicitly signals `fallback` and Belay fetches whole-file audio
 from `/api/audio/speak`. A provider selected for streaming whose streaming
-request fails before producing audio also falls back client-side. Conduit's
+request fails before producing audio also falls back client-side. Belay's
 provider test therefore reports success only when audible speech data was
 actually delivered — a silent stream is a failed test, not a pass.
 
-## What Conduit does not expose
+## What Belay does not expose
 
 Local-engine and server-administration knobs (Whisper device/compute
 settings, Piper paths and tuning, command-provider command definitions,
@@ -63,7 +63,7 @@ generic model/language/voice fields.
 
 ## Keep listening when locked
 
-Classic Voice normally suspends when Conduit leaves the foreground and is
+Classic Voice normally suspends when Belay leaves the foreground and is
 restored, not listening, when the user returns. "Keep listening when locked"
 (per profile, off by default) keeps a conversation that is already listening
 running instead, through the same path that keeps Voice live while CarPlay
@@ -95,9 +95,9 @@ GPT-Live's settings have a **Billing** choice, per profile:
 
 The two are kept apart so nobody pays for the one they didn't pick:
 
-- Choosing the API key asks first and says what it costs. Anything Conduit can't read back from an older or newer build counts as the ChatGPT plan.
+- Choosing the API key asks first and says what it costs. Anything Belay can't read back from an older or newer build counts as the ChatGPT plan.
 - The server has to allow it too: `voice.gpt_live.conduit_api_billing: true` in the profile's config. An OpenAI key that is there for speech-to-text or TTS is not enough on its own. The server also caps API-key calls per day (`voice.gpt_live.conduit_api_daily_calls`, 20 by default).
-- Every call asks the server for one path by name, and the server answers with the path it used. If they differ, Conduit hangs up before any audio, and neither path ever falls back to the other.
+- Every call asks the server for one path by name, and the server answers with the path it used. If they differ, Belay hangs up before any audio, and neither path ever falls back to the other.
 - The call screen shows which path a call is on, under its title ("ChatGPT plan", or "API key · billed per minute" in orange), and the minimised bar says "GPT-Live · API key".
 - An API-key call has a time limit (20 minutes by default, or none): when it's reached, the model says goodbye and the call ends.
 - When Hermes calls you, the call uses the ChatGPT plan unless "Calls from Hermes on the API key" is on.
@@ -111,7 +111,7 @@ Gemini Live, Grok Live and GPT-Live end hands-free. One of your goodbye phrases 
 
 Every voice mode lets you cut in by speaking when you wear headphones, AirPods or a wired headset: the microphone stays open while the agent talks, and the agent stops when you start. GPT-Live also allows it on the phone's speaker and in the car, because WebRTC cancels the speaker's echo.
 
-Grok Live sometimes speaks a tool call as text ("<tool_call>…") instead of calling it. Conduit stops the speech at the markup, keeps it out of the transcript, and tells Grok after its turn that nothing ran, so it can call the tool properly. Grok is told to say a job has started only once start_job answers. A call whose arguments aren't valid JSON runs nothing and gets an error saying so. Diagnostics & logs (Last connection) shows the last Grok Live call's tool steps: the setup, which functions xAI took, each call's name and how it was answered (started, error…), and any markup that was cut. It never shows what was said or a call's arguments.
+Grok Live sometimes speaks a tool call as text ("<tool_call>…") instead of calling it. Belay stops the speech at the markup, keeps it out of the transcript, and tells Grok after its turn that nothing ran, so it can call the tool properly. Grok is told to say a job has started only once start_job answers. A call whose arguments aren't valid JSON runs nothing and gets an error saying so. Diagnostics & logs (Last connection) shows the last Grok Live call's tool steps: the setup, which functions xAI took, each call's name and how it was answered (started, error…), and any markup that was cut. It never shows what was said or a call's arguments.
 
 Classic Voice, Gemini Live and Grok Live close the microphone while the agent talks on the speaker, in the car or over AirPlay (plus a short echo tail), because their microphone would hear the agent and it would keep interrupting itself. Use the Interrupt button there instead.
 
@@ -121,10 +121,10 @@ Classic Voice, Gemini Live and Grok Live close the microphone while the agent ta
 
 "Live call style" in Voice settings (shown once a live mode is on, shared by Gemini Live, Grok Live and GPT-Live) sets how calls sound, per profile, from the next call:
 
-- **Greet me when a call connects**: the model greets you as soon as the call is live, in one short sentence, then waits. Leave the greeting text empty for one in its own words, or type your own (one line, up to 200 characters). Off by default: the call stays silent until you speak. GPT-Live needs the up-to-date Hermes notifier plugin, which swaps its "wait for the user" opening for a greeting; with an older plugin Conduit asks for the greeting once the call is ready instead. Gemini and Grok get it as the first turn of the call, never again on a reconnect.
+- **Greet me when a call connects**: the model greets you as soon as the call is live, in one short sentence, then waits. Leave the greeting text empty for one in its own words, or type your own (one line, up to 200 characters). Off by default: the call stays silent until you speak. GPT-Live needs the up-to-date Hermes notifier plugin, which swaps its "wait for the user" opening for a greeting; with an older plugin Belay asks for the greeting once the call is ready instead. Gemini and Grok get it as the first turn of the call, never again on a reconnect.
 - **Tone**: Model default, Relaxed, Neutral or Professional. Model default leaves the model's tone and your Hermes server's voice persona alone; the others add a short style block after the persona that replaces its tone and pace guidance.
 - **Backchannels**: on by default. Off tells the model not to say "mm-hmm", "right" and the like while you talk.
-- **What Conduit sends** shows the text Conduit adds to the current live mode's instructions, with the style applied. Memory and personality are shown as placeholders, since they are read when a call starts.
+- **What Belay sends** shows the text Belay adds to the current live mode's instructions, with the style applied. Memory and personality are shown as placeholders, since they are read when a call starts.
 
 ## Dictate into the composer
 

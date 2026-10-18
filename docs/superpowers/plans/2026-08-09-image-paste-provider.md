@@ -20,14 +20,14 @@
 
 ## File Map
 
-- Modify: Conduit/Views/Components/ComposerPasteTextView.swift — add item-provider image detection and asynchronous data loading while retaining legacy paste behavior.
-- Create: ConduitTests/ComposerPasteTextViewTests.swift — exercise the item-provider image callback and ordinary text fallback through the real ImagePasteTextView.
+- Modify: Belay/Views/Components/ComposerPasteTextView.swift — add item-provider image detection and asynchronous data loading while retaining legacy paste behavior.
+- Create: BelayTests/ComposerPasteTextViewTests.swift — exercise the item-provider image callback and ordinary text fallback through the real ImagePasteTextView.
 - Create: docs/superpowers/specs/2026-08-09-image-paste-provider-design.md — approved design record, already committed in the feature worktree.
 
 ### Task 1: Add the failing image-provider regression test
 
 **Files:**
-- Create: ConduitTests/ComposerPasteTextViewTests.swift
+- Create: BelayTests/ComposerPasteTextViewTests.swift
 
 **Interfaces:**
 - Consumes: ImagePasteTextView.paste(itemProviders:) and its onPastedImage: ((Data) -> Void)? callback.
@@ -40,7 +40,7 @@ import Foundation
 import UniformTypeIdentifiers
 import UIKit
 import XCTest
-@testable import Conduit
+@testable import Belay
 
 final class ComposerPasteTextViewTests: XCTestCase {
     func testPasteItemProvidersDeliversImageData() {
@@ -75,10 +75,10 @@ Run:
 ~~~shell
 xcodegen generate
 xcodebuild test \
-  -project Conduit.xcodeproj \
-  -scheme Conduit \
+  -project Belay.xcodeproj \
+  -scheme Belay \
   -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
-  -only-testing:ConduitTests/ComposerPasteTextViewTests/testPasteItemProvidersDeliversImageData \
+  -only-testing:BelayTests/ComposerPasteTextViewTests/testPasteItemProvidersDeliversImageData \
   CODE_SIGN_IDENTITY='' \
   CODE_SIGNING_REQUIRED=NO \
   CODE_SIGNING_ALLOWED=NO \
@@ -93,7 +93,7 @@ If the named simulator is unavailable, substitute an available iOS simulator UDI
 ### Task 2: Implement the minimal item-provider image path
 
 **Files:**
-- Modify: Conduit/Views/Components/ComposerPasteTextView.swift
+- Modify: Belay/Views/Components/ComposerPasteTextView.swift
 
 **Interfaces:**
 - Consumes: [NSItemProvider] passed to UIKit's paste API and the existing onPastedImage callback.
@@ -145,14 +145,14 @@ Expected: testPasteItemProvidersDeliversImageData passes and the callback receiv
 - [ ] **Step 4: Commit the focused implementation**
 
 ~~~shell
-git add Conduit/Views/Components/ComposerPasteTextView.swift ConduitTests/ComposerPasteTextViewTests.swift
+git add Belay/Views/Components/ComposerPasteTextView.swift BelayTests/ComposerPasteTextViewTests.swift
 git commit -m "Fix image paste from item providers"
 ~~~
 
 ### Task 3: Verify text fallback and the complete test suite
 
 **Files:**
-- Modify: ConduitTests/ComposerPasteTextViewTests.swift
+- Modify: BelayTests/ComposerPasteTextViewTests.swift
 
 **Interfaces:**
 - Consumes: The production item-provider override from Task 2.
@@ -193,10 +193,10 @@ Run:
 
 ~~~shell
 xcodebuild test \
-  -project Conduit.xcodeproj \
-  -scheme Conduit \
+  -project Belay.xcodeproj \
+  -scheme Belay \
   -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
-  -only-testing:ConduitTests/ComposerPasteTextViewTests \
+  -only-testing:BelayTests/ComposerPasteTextViewTests \
   CODE_SIGN_IDENTITY='' \
   CODE_SIGNING_REQUIRED=NO \
   CODE_SIGNING_ALLOWED=NO \
@@ -225,8 +225,8 @@ for runtime, devices in data["devices"].items():
 sys.exit(1)
 ')
 xcodebuild test \
-  -project Conduit.xcodeproj \
-  -scheme Conduit \
+  -project Belay.xcodeproj \
+  -scheme Belay \
   -destination "platform=iOS Simulator,id=$SIMULATOR" \
   -configuration Debug \
   -resultBundlePath TestResults.xcresult \
@@ -237,7 +237,7 @@ xcodebuild test \
   PROVISIONING_PROFILE_SPECIFIER=''
 ~~~
 
-Expected: the complete ConduitTests suite passes with zero failures and the command exits 0.
+Expected: the complete BelayTests suite passes with zero failures and the command exits 0.
 
 - [ ] **Step 4: Inspect the final diff**
 
@@ -247,7 +247,7 @@ Run:
 git diff origin/main...HEAD --check
 git status -sb
 git diff origin/main...HEAD --stat
-git diff origin/main...HEAD -- Conduit/Views/Components/ComposerPasteTextView.swift ConduitTests/ComposerPasteTextViewTests.swift
+git diff origin/main...HEAD -- Belay/Views/Components/ComposerPasteTextView.swift BelayTests/ComposerPasteTextViewTests.swift
 ~~~
 
 Confirm the production diff only adds item-provider image handling and the test diff only covers image delivery and text fallback.
@@ -263,14 +263,14 @@ Confirm the production diff only adds item-provider image handling and the test 
 
 - [ ] **Step 1: Build and install the app using the connected-device workflow**
 
-Use the available Xcode/device workflow to build the Conduit scheme for the connected iOS 27 device. If the device is not discoverable, record that limitation and retain the simulator test evidence.
+Use the available Xcode/device workflow to build the Belay scheme for the connected iOS 27 device. If the device is not discoverable, record that limitation and retain the simulator test evidence.
 
 - [ ] **Step 2: Reproduce issue #26**
 
 On the device:
 
 1. Copy an image or screenshot.
-2. Open Conduit and enter a chat.
+2. Open Belay and enter a chat.
 3. Focus the composer.
 4. Tap the keyboard's “Photo to paste” action.
 5. Confirm the image preview/attachment appears in the composer without sending.

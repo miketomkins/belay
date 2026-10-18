@@ -1,6 +1,6 @@
 //
 //  GeminiLiveSession.swift
-//  Conduit
+//  Belay
 //
 //  One logical Gemini Live conversation over one or more WebSockets. Every
 //  connection gets a fresh single-use token from Hermes. A GoAway or a lost
@@ -13,7 +13,7 @@
 import Foundation
 import OSLog
 
-private let geminiLiveLogger = Logger(subsystem: "com.milim.relay", category: "GeminiLive")
+private let geminiLiveLogger = Logger(subsystem: "live.tomkins.belay", category: "GeminiLive")
 
 // MARK: - Transport
 

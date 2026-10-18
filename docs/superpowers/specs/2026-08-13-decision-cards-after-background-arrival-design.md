@@ -1,4 +1,4 @@
-# Design Spec: Surface Decision Cards That Arrive While Conduit Is Backgrounded
+# Design Spec: Surface Decision Cards That Arrive While Belay Is Backgrounded
 
 **Date:** 2026-08-13
 **Branch:** `fix/decision-cards-after-background-arrival`
@@ -7,7 +7,7 @@
 
 ## Problem
 
-When Hermes raises a clarification or approval request while the Conduit iOS
+When Hermes raises a clarification or approval request while the Belay iOS
 app is backgrounded, the user gets a push notification, taps it, the app
 returns to the correct session — but **the answerable card never appears.**
 
@@ -21,7 +21,7 @@ nothing cached to restore.
 
 A pending decision can only reach the iOS client today via a **one-shot live
 WebSocket event** — `clarify`/`clarify.request` or `approval.request`
-(`Conduit/Services/StreamEventParser.swift:93-106`), materialized by
+(`Belay/Services/StreamEventParser.swift:93-106`), materialized by
 `AppState.applyStreamEvent` (`AppState.swift:6810-6847`) and gated on the app
 being foregrounded with that session active. When the decision is raised while
 the app is backgrounded, iOS is suspended and never receives that event.
@@ -58,7 +58,7 @@ background gap. No purely client-side change can show the card.
 
 ## Existing notification pipeline (already a plugin → relay → APNs path)
 
-Conduit already has a delivery channel for these events. From the Conduit
+Belay already has a delivery channel for these events. From the Belay
 README and `kaishi00/hermes-conduit-notifier`:
 
 1. **Notifier plugin** (`hermes-conduit-notifier`, repo `kaishi00/...`).
@@ -76,20 +76,20 @@ README and `kaishi00/hermes-conduit-notifier`:
 2. **Relay server** (`push.milim.dev`; source is `relay/` in
    `kaishi00/hermes-conduit-notifier` — Node.js, self-hostable). Receives
    `/v1/events`, maps them to APNs, and pushes to iOS. `notificationFor()`
-   builds the APNs `conduit` payload, which currently carries only
+   builds the APNs `belay` payload, which currently carries only
    `session_id` / `profile` / `type`; `validateEvent()` whitelists event fields
    and drops everything else.
 
 3. **iOS** `PushNotificationService.receiveNotificationPayload`
    (`PushNotificationService.swift:192`) parses only `session_id`/`profile`/
-   `type` into a `ConduitNotificationTarget` and discards everything else.
+   `type` into a `BelayNotificationTarget` and discards everything else.
 
 So the pipe that could carry card content already exists end to end — it just
 only carries a routing stub today.
 
 ## Goal
 
-When a clarification or approval is raised while Conduit is backgrounded, the
+When a clarification or approval is raised while Belay is backgrounded, the
 full answerable card (question + choices for clarify; description + choices +
 the identity needed to respond for approval) is delivered to the device **at
 notification time**, cached locally, and rendered on the next foreground —
@@ -146,7 +146,7 @@ untouched.
 at the trust boundary (kind must be `approval` and agree with the event type;
 choices whitelisted to the gateway approval vocabulary; `session_key` +
 `description` + non-empty choices required) and forwards it into the APNs
-`conduit` payload — **gated on a dedicated `decision_cards` preference**
+`belay` payload — **gated on a dedicated `decision_cards` preference**
 (default on, independent of `show_previews`: previews only control banner
 text, while this controls functional answerability, and the audience running
 approval gates is exactly who the cards are for). If the encoded payload
@@ -155,7 +155,7 @@ degrades to the routing stub.
 
 **iOS change (shipped):** `PushNotificationService` parses the `decision`
 (strictly — an approval without display text or usable choices degrades to a
-plain routing target) onto `ConduitNotificationTarget`. When the user opens
+plain routing target) onto `BelayNotificationTarget`. When the user opens
 the notification, `AppState.openNotificationTarget` builds the `.pending`
 `ApprovalActivity` card and records it via a new non-destructive
 `SessionPresentationCache.recordPendingDecision` upsert, under both the
@@ -223,12 +223,12 @@ and clarify answerability is required).
 | Component | Repo | Change |
 | --- | --- | --- |
 | Notifier plugin | `kaishi00/hermes-conduit-notifier` | Attach structured **approval** `decision` content (`session_key`, `description`, `once`/`deny` choices) to `approval.needed` events. Clarify is deliberately not emitted (see the Clarify section). |
-| Relay server | `kaishi00/hermes-conduit-notifier` under `relay/` (Node.js; same repo as the plugin) | `relay/src/server.mjs`: re-validate the decision (approval-only, kind↔type bound, choice whitelist) and forward it into the APNs `conduit` payload, gated on `decision_cards` and the APNs size cap. Contract below. |
+| Relay server | `kaishi00/hermes-conduit-notifier` under `relay/` (Node.js; same repo as the plugin) | `relay/src/server.mjs`: re-validate the decision (approval-only, kind↔type bound, choice whitelist) and forward it into the APNs `belay` payload, gated on `decision_cards` and the APNs size cap. Contract below. |
 | iOS client | `hermes-conduit` (this repo) | Parse `decision` from the APNs payload; record the card via `SessionPresentationCache.recordPendingDecision` when the notification is opened; PR #54 restores it on resume. |
 
 ### Relay → APNs payload contract (shipped)
 
-Extend the existing `conduit` object. Keep `session_id`/`profile`/`type` as
+Extend the existing `belay` object. Keep `session_id`/`profile`/`type` as
 today; add an optional `decision` object, present only for
 `approval.needed` notifications, only when the user's `decision_cards`
 preference is enabled (default on; independent of `show_previews`), and only
@@ -236,7 +236,7 @@ when the encoded payload stays under the APNs ~4 KB cap:
 
 ```jsonc
 {
-  "conduit": {
+  "belay": {
     "session_id": "<runtime session id>",
     "profile": "default",
     "type": "approval.needed",
@@ -262,7 +262,7 @@ section), degrading either case to the plain routing stub.
 ### iOS changes (this repo, shipped)
 
 1. `PushNotificationService.notificationTarget(from:)`: parse the optional
-   `decision` object onto `ConduitNotificationTarget`. Strict validation — an
+   `decision` object onto `BelayNotificationTarget`. Strict validation — an
    approval requires a non-empty `session_key`, non-empty `description`, and
    at least one usable choice; anything less degrades to the plain routing
    target (a cached card with no choices would otherwise render the approval
@@ -300,7 +300,7 @@ section), degrading either case to the plain routing stub.
   payload-forwarding change is a normal PR alongside the plugin — no closed
   component blocks the fix.
 - **Self-hosting.** Because the relay is published, self-hosters receive
-  decision content too once they update. (Conduit still defaults to the shared
+  decision content too once they update. (Belay still defaults to the shared
   `push.milim.dev` for zero-setup use.)
 - **Privacy** — the raw approval `command` never enters the payload (omitted
   at the plugin), and the `decision` content is gated on a dedicated
@@ -341,7 +341,7 @@ section), degrading either case to the plain routing stub.
 ## Acceptance tests
 
 - An approval raised while the app is backgrounded produces an APNs payload
-  whose `conduit.decision` carries `kind`/`session_key`/`description` and the
+  whose `belay.decision` carries `kind`/`session_key`/`description` and the
   `once`/`deny` choices — but only when `decision_cards` is enabled, and never
   the raw `command`.
 - iOS, when the notification is opened, records a pending `ApprovalActivity`

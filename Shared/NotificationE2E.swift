@@ -2,7 +2,7 @@ import CryptoKit
 import Foundation
 import Security
 
-/// End-to-end encrypted notification content (#431), shared by Conduit and
+/// End-to-end encrypted notification content (#431), shared by Belay and
 /// its Notification Service Extension.
 ///
 /// Each relay pairing gets a 32-byte root secret created on this iPhone and
@@ -15,7 +15,7 @@ import Security
 /// Wire format and derivation mirror hermes-conduit-notifier's `e2e.py`;
 /// NotificationE2ETests checks both against vectors produced by it.
 enum NotificationE2E {
-    static let appGroup = "group.com.milim.relay.notifications"
+    static let appGroup = "group.live.tomkins.belay.notifications"
     static let userInfoKey = "conduit_e2e"
     static let answerPrefix = "e2e1."
     static let maxAge: TimeInterval = 24 * 60 * 60
@@ -131,7 +131,7 @@ enum NotificationE2E {
         /// stored_session_id, decision.
         let content: [String: Any]
 
-        /// The routing payload Conduit's push parser reads, built only from
+        /// The routing payload Belay's push parser reads, built only from
         /// authenticated data: the decrypted content, the type bound in the
         /// associated data, and the gateway and dashboard this key was
         /// provisioned for (never the relay's routing stub).
@@ -146,9 +146,9 @@ enum NotificationE2E {
         }
     }
 
-    /// The relay's routing stub (top-level `conduit`, else `body.conduit`).
+    /// The relay's routing stub (top-level `belay`, else `body.belay`).
     static func routingStub(_ userInfo: [AnyHashable: Any]) -> [String: Any]? {
-        (userInfo["conduit"] as? [String: Any]) ?? ((userInfo["body"] as? [String: Any])?["conduit"] as? [String: Any])
+        (userInfo["belay"] as? [String: Any]) ?? ((userInfo["body"] as? [String: Any])?["belay"] as? [String: Any])
     }
 
     /// `knownGatewayIDs` are the keyless relay pairings this iPhone may still
@@ -248,7 +248,7 @@ enum NotificationE2E {
 
     // MARK: Generic copy
 
-    /// The private fallback for a notification Conduit can't verify. Kept
+    /// The private fallback for a notification Belay can't verify. Kept
     /// word for word with the relay's generic copy (English, like every
     /// relay-written alert), so a push reads the same whether the relay or
     /// the extension wrote it.
@@ -310,7 +310,7 @@ protocol E2EKeyStoring {
 /// group). Readable after first unlock so the extension can decrypt while the
 /// iPhone is locked, and never synced or restored to another device.
 struct KeychainE2EKeyStore: E2EKeyStoring {
-    static let service = "com.milim.relay.e2e"
+    static let service = "live.tomkins.belay.e2e"
 
     private var baseQuery: [String: Any] {
         [
@@ -516,7 +516,7 @@ final class E2ESeenStore {
 
 /// Settings the extension needs from the app, mirrored into the App Group.
 enum NotificationSharedSettings {
-    private static let showPreviewsKey = "conduit.notifications.showPreviews"
+    private static let showPreviewsKey = "belay.notifications.showPreviews"
 
     static var defaults: UserDefaults? { UserDefaults(suiteName: NotificationE2E.appGroup) }
 
@@ -525,7 +525,7 @@ enum NotificationSharedSettings {
         set { defaults?.set(newValue, forKey: showPreviewsKey) }
     }
 
-    private static let knownGatewayIDsKey = "conduit.notifications.knownGatewayIDs"
+    private static let knownGatewayIDsKey = "belay.notifications.knownGatewayIDs"
     private static let keysProvisionedMarker = "e2e-keys-provisioned"
 
     /// Whether this iPhone has stored an encryption key: a file in the App

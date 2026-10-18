@@ -2,9 +2,9 @@ import Foundation
 
 /// WidgetKit kinds, shared so the app reloads the same widgets the
 /// extension declares.
-enum ConduitWidgetKind {
-    static let native = "com.milim.relay.widgets.native"
-    static let character = "com.milim.relay.widgets.character"
+enum BelayWidgetKind {
+    static let native = "live.tomkins.belay.widgets.native"
+    static let character = "live.tomkins.belay.widgets.character"
 }
 
 struct WidgetWorkspaceID: Codable, Hashable {

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Shared CI runner primitives for Hermes Conduit CI v2.
+# Shared CI runner primitives for Hermes Belay CI v2.
 #
 # Sourced by ci-build-for-testing.sh and ci-test-lane.sh. Bash 3.2 compatible
 # (GitHub macOS runners default to /bin/bash).

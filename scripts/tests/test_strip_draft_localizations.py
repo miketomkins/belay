@@ -1,4 +1,4 @@
-"""Regression coverage for scripts/strip-draft-localizations.py (the Conduit
+"""Regression coverage for scripts/strip-draft-localizations.py (the Belay
 target's last build phase)."""
 
 import importlib.util
@@ -20,7 +20,7 @@ class StripDraftLocalizationsTests(unittest.TestCase):
     def setUp(self):
         self.directory = tempfile.TemporaryDirectory()
         self.addCleanup(self.directory.cleanup)
-        self.bundle = os.path.join(self.directory.name, "Conduit.app")
+        self.bundle = os.path.join(self.directory.name, "Belay.app")
         for name in ("Base.lproj", "en.lproj", "ja.lproj", "pt-BR.lproj",
                      "zh-Hans.lproj"):
             os.makedirs(os.path.join(self.bundle, name))
@@ -49,18 +49,18 @@ class StripDraftLocalizationsTests(unittest.TestCase):
         self.assertEqual(len(self.contents()), 6)
 
     def test_drafts_are_read_from_info_plist(self):
-        path = self.write_info_plist({"ConduitDraftLanguages": ["ja"]})
+        path = self.write_info_plist({"BelayDraftLanguages": ["ja"]})
         self.assertEqual(strip_drafts.draft_languages(path), ["ja"])
         path = self.write_info_plist({})
         self.assertEqual(strip_drafts.draft_languages(path), [])
 
     def test_a_malformed_draft_list_is_rejected(self):
-        path = self.write_info_plist({"ConduitDraftLanguages": ["ja", ""]})
+        path = self.write_info_plist({"BelayDraftLanguages": ["ja", ""]})
         with self.assertRaises(ValueError):
             strip_drafts.draft_languages(path)
 
     def test_command_line_strips_and_reports(self):
-        plist = self.write_info_plist({"ConduitDraftLanguages": ["ja"]})
+        plist = self.write_info_plist({"BelayDraftLanguages": ["ja"]})
         result = subprocess.run(
             [sys.executable, SCRIPT, "--info-plist", plist, "--bundle", self.bundle],
             capture_output=True, text=True, check=False)
@@ -69,7 +69,7 @@ class StripDraftLocalizationsTests(unittest.TestCase):
         self.assertNotIn("ja.lproj", self.contents())
 
     def test_command_line_fails_the_build_on_a_missing_bundle(self):
-        plist = self.write_info_plist({"ConduitDraftLanguages": ["ja"]})
+        plist = self.write_info_plist({"BelayDraftLanguages": ["ja"]})
         missing = os.path.join(self.directory.name, "Missing.app")
         result = subprocess.run(
             [sys.executable, SCRIPT, "--info-plist", plist, "--bundle", missing],
@@ -79,7 +79,7 @@ class StripDraftLocalizationsTests(unittest.TestCase):
         self.assertNotIn("Traceback", result.stderr)
 
     def test_command_line_refuses_to_strip_the_development_language(self):
-        plist = self.write_info_plist({"ConduitDraftLanguages": ["ja", "EN"]})
+        plist = self.write_info_plist({"BelayDraftLanguages": ["ja", "EN"]})
         result = subprocess.run(
             [sys.executable, SCRIPT, "--info-plist", plist, "--bundle", self.bundle,
              "--development-language", "en"],
@@ -89,7 +89,7 @@ class StripDraftLocalizationsTests(unittest.TestCase):
         self.assertEqual(len(self.contents()), 6, "nothing is stripped")
 
     def test_command_line_refuses_to_strip_base(self):
-        plist = self.write_info_plist({"ConduitDraftLanguages": ["ja", "base"]})
+        plist = self.write_info_plist({"BelayDraftLanguages": ["ja", "base"]})
         result = subprocess.run(
             [sys.executable, SCRIPT, "--info-plist", plist, "--bundle", self.bundle],
             capture_output=True, text=True, check=False)

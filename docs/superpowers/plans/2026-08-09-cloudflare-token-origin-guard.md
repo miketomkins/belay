@@ -20,18 +20,18 @@
 
 ## File map
 
-- Modify `Conduit/Services/CloudflareAccess.swift`: add JSON-safe literal generation and origin-aware fetch/XHR guards.
-- Modify `Conduit/Views/LoginView.swift`: pass the normalized dashboard URL and set `forMainFrameOnly: true`.
-- Modify `Conduit/Services/DashboardTicketBridge.swift`: use the same origin-aware script and main-frame restriction.
-- Modify `ConduitTests/CloudflareAccessTests.swift`: prove escaping, origin scoping, and fail-closed generation.
-- Regenerate `Conduit.xcodeproj` with XcodeGen; do not hand-edit generated project files.
+- Modify `Belay/Services/CloudflareAccess.swift`: add JSON-safe literal generation and origin-aware fetch/XHR guards.
+- Modify `Belay/Views/LoginView.swift`: pass the normalized dashboard URL and set `forMainFrameOnly: true`.
+- Modify `Belay/Services/DashboardTicketBridge.swift`: use the same origin-aware script and main-frame restriction.
+- Modify `BelayTests/CloudflareAccessTests.swift`: prove escaping, origin scoping, and fail-closed generation.
+- Regenerate `Belay.xcodeproj` with XcodeGen; do not hand-edit generated project files.
 
 ### Task 1: Prove safe credential serialization
 
 **Files:**
 
-- Modify: `ConduitTests/CloudflareAccessTests.swift`
-- Modify: `Conduit/Services/CloudflareAccess.swift`
+- Modify: `BelayTests/CloudflareAccessTests.swift`
+- Modify: `Belay/Services/CloudflareAccess.swift`
 
 **Interfaces:**
 
@@ -50,9 +50,9 @@ control characters inside the assigned values.
 Run:
 
 ~~~bash
-xcodebuild -project Conduit.xcodeproj -scheme Conduit \
+xcodebuild -project Belay.xcodeproj -scheme Belay \
   -destination 'platform=iOS Simulator,name=iPhone 17 Pro' \
-  -only-testing:ConduitTests/CloudflareAccessTests \
+  -only-testing:BelayTests/CloudflareAccessTests \
   test
 ~~~
 
@@ -84,7 +84,7 @@ the existing Cloudflare tests.
 - [ ] **Step 5: Commit the serializer change**
 
 ~~~bash
-git add Conduit/Services/CloudflareAccess.swift ConduitTests/CloudflareAccessTests.swift
+git add Belay/Services/CloudflareAccess.swift BelayTests/CloudflareAccessTests.swift
 git commit -m "fix: serialize Cloudflare injection credentials safely"
 ~~~
 
@@ -92,8 +92,8 @@ git commit -m "fix: serialize Cloudflare injection credentials safely"
 
 **Files:**
 
-- Modify: `ConduitTests/CloudflareAccessTests.swift`
-- Modify: `Conduit/Services/CloudflareAccess.swift`
+- Modify: `BelayTests/CloudflareAccessTests.swift`
+- Modify: `Belay/Services/CloudflareAccess.swift`
 
 **Interfaces:**
 
@@ -112,9 +112,9 @@ Keep the existing header and quote tests pointed at the new method.
 Run:
 
 ~~~bash
-xcodebuild -project Conduit.xcodeproj -scheme Conduit \
+xcodebuild -project Belay.xcodeproj -scheme Belay \
   -destination 'platform=iOS Simulator,name=iPhone 17 Pro' \
-  -only-testing:ConduitTests/CloudflareAccessTests \
+  -only-testing:BelayTests/CloudflareAccessTests \
   test
 ~~~
 
@@ -138,7 +138,7 @@ and existing credential tests pass.
 - [ ] **Step 5: Commit the origin guard**
 
 ~~~bash
-git add Conduit/Services/CloudflareAccess.swift ConduitTests/CloudflareAccessTests.swift
+git add Belay/Services/CloudflareAccess.swift BelayTests/CloudflareAccessTests.swift
 git commit -m "fix: scope Cloudflare headers to dashboard origin"
 ~~~
 
@@ -146,8 +146,8 @@ git commit -m "fix: scope Cloudflare headers to dashboard origin"
 
 **Files:**
 
-- Modify: `Conduit/Views/LoginView.swift`
-- Modify: `Conduit/Services/DashboardTicketBridge.swift`
+- Modify: `Belay/Views/LoginView.swift`
+- Modify: `Belay/Services/DashboardTicketBridge.swift`
 
 **Interfaces:**
 
@@ -173,7 +173,7 @@ navigation policy unchanged.
 Run:
 
 ~~~bash
-rg -n "fetchInjectionUserScript|forMainFrameOnly" Conduit
+rg -n "fetchInjectionUserScript|forMainFrameOnly" Belay
 ~~~
 
 Expected: both Cloudflare injection call sites pass an expected base URL and
@@ -183,7 +183,7 @@ frame policy.
 - [ ] **Step 4: Commit the WebView boundary changes**
 
 ~~~bash
-git add Conduit/Views/LoginView.swift Conduit/Services/DashboardTicketBridge.swift
+git add Belay/Views/LoginView.swift Belay/Services/DashboardTicketBridge.swift
 git commit -m "fix: restrict Cloudflare injection to dashboard main frames"
 ~~~
 
@@ -191,7 +191,7 @@ git commit -m "fix: restrict Cloudflare injection to dashboard main frames"
 
 **Files:**
 
-- Modify: regenerated `Conduit.xcodeproj` only if XcodeGen changes it.
+- Modify: regenerated `Belay.xcodeproj` only if XcodeGen changes it.
 
 - [ ] **Step 1: Regenerate the Xcode project and inspect the diff**
 
@@ -206,9 +206,9 @@ Expected: no unrelated source changes and no whitespace errors.
 - [ ] **Step 2: Run the focused regression suite**
 
 ~~~bash
-xcodebuild -project Conduit.xcodeproj -scheme Conduit \
+xcodebuild -project Belay.xcodeproj -scheme Belay \
   -destination 'platform=iOS Simulator,name=iPhone 17 Pro' \
-  -only-testing:ConduitTests/CloudflareAccessTests \
+  -only-testing:BelayTests/CloudflareAccessTests \
   test
 ~~~
 
@@ -218,10 +218,10 @@ Expected: all Cloudflare tests pass.
 
 ~~~bash
 set -o pipefail
-xcodebuild -project Conduit.xcodeproj -scheme Conduit \
+xcodebuild -project Belay.xcodeproj -scheme Belay \
   -destination 'platform=iOS Simulator,name=iPhone 17 Pro' \
-  test -resultBundlePath /tmp/conduit-cloudflare-token-guard.xcresult \
-  | tee /tmp/conduit-cloudflare-token-guard.log | tail -160
+  test -resultBundlePath /tmp/belay-cloudflare-token-guard.xcresult \
+  | tee /tmp/belay-cloudflare-token-guard.log | tail -160
 ~~~
 
 Expected: `** TEST SUCCEEDED **` and zero test failures.

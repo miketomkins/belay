@@ -1,6 +1,6 @@
 //
 //  LocationSharedStore.swift
-//  Conduit
+//  Belay
 //
 //  Where location sharing keeps its state, shared by the app and the
 //  Location Push extension through the App Group:
@@ -22,7 +22,7 @@ import OSLog
 import Security
 
 enum LocationSharedStore {
-    private static let log = Logger(subsystem: "com.milim.relay", category: "location")
+    private static let log = Logger(subsystem: "live.tomkins.belay", category: "location")
     static var folder: URL? {
         FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: NotificationE2E.appGroup)?
             .appendingPathComponent("Location", isDirectory: true)
@@ -161,8 +161,8 @@ struct LocationUnsent: Codable, Equatable {
 /// Generic items in the App Group Keychain: readable after first unlock,
 /// never synced or restored to another device.
 enum LocationKeychain {
-    private static let log = Logger(subsystem: "com.milim.relay", category: "location")
-    static let service = "com.milim.relay.location"
+    private static let log = Logger(subsystem: "live.tomkins.belay", category: "location")
+    static let service = "live.tomkins.belay.location"
     static let keyAccount = "location-key.v1"
     static let hostPassAccount = "location-host-pass.v1"
 

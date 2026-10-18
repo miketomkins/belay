@@ -7,7 +7,7 @@
 
 ## Problem
 
-A clarify raised while Conduit is backgrounded misses the one-shot
+A clarify raised while Belay is backgrounded misses the one-shot
 `clarify.request` stream event. Unlike approval, `clarify.respond` is
 request-id-only and that id is minted inside the gateway (`_block`), so no
 plugin hook can observe it — Phase 1's approval architecture (observer hook +
@@ -17,7 +17,7 @@ source:
 - The clarify text-intercept (`resolve_text_response_for_session`,
   `get_pending_for_session(include_choice_prompts=True)`) is wired only into
   chat-platform adapters (`gateway/platforms/base.py`), not the TUI/desktop
-  WebSocket path Conduit uses.
+  WebSocket path Belay uses.
 - Typed replies during a pending clarify are **queued** (`prompt.submit`
   mid-turn queueing), not intercepted — they reach the agent only after the
   clarify resolves (default `agent.clarify_timeout` = 3600s; `<= 0` unlimited).
@@ -45,7 +45,7 @@ So the plugin registers **`tool_execution` middleware** filtered to
 `tool_name == "clarify"`:
 
 1. Read `args` (question, choices, multi_select).
-2. Mint `clarify_id = "conduit-push-" + uuid4().hex[:12]` (prefix lets iOS
+2. Mint `clarify_id = "belay-push-" + uuid4().hex[:12]` (prefix lets iOS
    route answers to the relay instead of `clarify.respond`).
 3. Enqueue the `input.needed` event with the structured decision
    `{kind: "clarify", request_id, question, choices}` (labels flattened via
@@ -91,7 +91,7 @@ like eventIds):
 - `recordNotificationDecision` records a normal pending `ClarifyActivity`
   with the plugin request id — the standard clarify card renders with
   working buttons.
-- `AppState.respondToClarify` routes by id prefix: `conduit-push-` ids POST
+- `AppState.respondToClarify` routes by id prefix: `belay-push-` ids POST
   to the relay via `PushNotificationService` (relay URL the device already
   holds); gateway ids keep the `clarify.respond` RPC. Relay `unknown/expired`
   failures reuse the expired-prompt card UX from #60.

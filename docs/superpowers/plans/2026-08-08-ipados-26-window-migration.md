@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Remove the iPadOS 26 full-screen compatibility behavior that can leave Conduit in a non-maximized, visually stale orientation window while preserving portrait-only behavior on iPhone.
+**Goal:** Remove the iPadOS 26 full-screen compatibility behavior that can leave Belay in a non-maximized, visually stale orientation window while preserving portrait-only behavior on iPhone.
 
 **Architecture:** Keep orientation policy in the idiom-specific `Info.plist` keys. Remove the deprecated `UIRequiresFullScreen` compatibility flag so iPadOS can manage a resizable SwiftUI `WindowGroup` scene normally, and declare all four iPad orientations required by the iPadOS 26 windowing model. No runtime orientation override or scene delegate is needed for this migration.
 
@@ -19,10 +19,10 @@
 ### Task 1: Lock the iPadOS 26 plist contract with a failing test
 
 **Files:**
-- Modify: `ConduitTests/InterfaceOrientationTests.swift`
+- Modify: `BelayTests/InterfaceOrientationTests.swift`
 
 **Interfaces:**
-- Consumes: the raw shipped `Conduit.app/Info.plist` parser already used by `InterfaceOrientationTests`.
+- Consumes: the raw shipped `Belay.app/Info.plist` parser already used by `InterfaceOrientationTests`.
 - Produces: a regression contract asserting the iPad orientation set and absence of `UIRequiresFullScreen`.
 
 - [ ] **Step 1: Update the existing iPad contract test before changing production configuration**
@@ -56,11 +56,11 @@ if [ -z "$simulator" ]; then
   simulator="$(xcrun simctl list devices available | awk -F '[()]' '/iPhone/ {print $2; exit}')"
 fi
 xcodebuild test \
-  -project Conduit.xcodeproj \
-  -scheme Conduit \
+  -project Belay.xcodeproj \
+  -scheme Belay \
   -destination "platform=iOS Simulator,id=$simulator" \
   -derivedDataPath /tmp/hermes-conduit-ipados26-red-derived \
-  -only-testing:ConduitTests/InterfaceOrientationTests
+  -only-testing:BelayTests/InterfaceOrientationTests
 ```
 
 Expected: `testIPadOrientationsIncludeBothLandscapeDirections` fails because the current plist omits `UIInterfaceOrientationPortraitUpsideDown` and still contains `UIRequiresFullScreen`.
@@ -68,14 +68,14 @@ Expected: `testIPadOrientationsIncludeBothLandscapeDirections` fails because the
 - [ ] **Step 3: Commit the failing contract test**
 
 ```bash
-git add ConduitTests/InterfaceOrientationTests.swift
+git add BelayTests/InterfaceOrientationTests.swift
 git commit -m "Test iPadOS 26 windowing contract"
 ```
 
 ### Task 2: Remove the deprecated compatibility mode
 
 **Files:**
-- Modify: `Conduit/Info.plist:93-101`
+- Modify: `Belay/Info.plist:93-101`
 
 **Interfaces:**
 - Consumes: the failing plist contract from Task 1.
@@ -112,12 +112,12 @@ if [ -z "$simulator" ]; then
   simulator="$(xcrun simctl list devices available | awk -F '[()]' '/iPhone/ {print $2; exit}')"
 fi
 xcodebuild test \
-  -project Conduit.xcodeproj \
-  -scheme Conduit \
+  -project Belay.xcodeproj \
+  -scheme Belay \
   -destination "platform=iOS Simulator,id=$simulator" \
   -derivedDataPath /tmp/hermes-conduit-ipados26-green-derived \
-  -only-testing:ConduitTests/InterfaceOrientationTests
-plutil -lint Conduit/Info.plist
+  -only-testing:BelayTests/InterfaceOrientationTests
+plutil -lint Belay/Info.plist
 git diff --check
 ```
 
@@ -126,14 +126,14 @@ Expected: both orientation tests pass, `plutil` reports `OK`, and `git diff --ch
 - [ ] **Step 3: Commit the production configuration**
 
 ```bash
-git add Conduit/Info.plist
+git add Belay/Info.plist
 git commit -m "Migrate iPad orientation support for iPadOS 26"
 ```
 
 ### Task 3: Verify the built app and orientation transitions
 
 **Files:**
-- Verify: generated `Conduit.app/Info.plist` and simulator-installed app; no source edits expected.
+- Verify: generated `Belay.app/Info.plist` and simulator-installed app; no source edits expected.
 
 **Interfaces:**
 - Consumes: the migrated plist and orientation contract.
@@ -145,8 +145,8 @@ Run `xcodegen generate`, then:
 
 ```bash
 xcodebuild test \
-  -project Conduit.xcodeproj \
-  -scheme Conduit \
+  -project Belay.xcodeproj \
+  -scheme Belay \
   -destination "platform=iOS Simulator,id=$simulator" \
   -derivedDataPath /tmp/hermes-conduit-ipados26-full-derived \
   -resultBundlePath /tmp/hermes-conduit-ipados26-full-tests.xcresult
@@ -158,11 +158,11 @@ Expected: all existing tests pass with zero failures.
 
 ```bash
 xcodebuild build \
-  -project Conduit.xcodeproj \
-  -scheme Conduit \
+  -project Belay.xcodeproj \
+  -scheme Belay \
   -destination "platform=iOS Simulator,id=0A743B4B-B5DE-4974-8263-D867D98329F0" \
   -derivedDataPath /tmp/hermes-conduit-ipados26-ui-derived
-plutil -p /tmp/hermes-conduit-ipados26-ui-derived/Build/Products/Debug-iphonesimulator/Conduit.app/Info.plist
+plutil -p /tmp/hermes-conduit-ipados26-ui-derived/Build/Products/Debug-iphonesimulator/Belay.app/Info.plist
 ```
 
 Expected: the built plist has no `UIRequiresFullScreen`, has four iPad orientations, and keeps the universal portrait-only array.

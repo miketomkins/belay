@@ -1,6 +1,6 @@
 //
 //  GrokLiveProtocol.swift
-//  Conduit and the Conduit Watch app
+//  Belay and the Belay Watch app
 //
 //  Wire format for xAI's realtime voice API (Grok Live), whose events
 //  follow OpenAI's Realtime API: session.update, input_audio_buffer.append,
@@ -61,7 +61,7 @@ enum GrokLiveProtocol {
 
     /// Names xAI keeps for its own tools. A client function with one of
     /// them clashes with the native tool, and a call by one of them is
-    /// xAI's to run, never Conduit's.
+    /// xAI's to run, never Belay's.
     static let reservedToolNames: Set<String> = ["web_search", "x_search", "browse_page", "file_search"]
 
     // MARK: Client → server
@@ -266,7 +266,7 @@ enum GrokLiveProtocol {
             guard let text = object["transcript"] as? String, !text.isEmpty else { return [] }
             return [.outputTranscriptDone(text)]
         case "response.function_call_arguments.done":
-            // xAI runs its own search tools: their calls aren't Conduit's.
+            // xAI runs its own search tools: their calls aren't Belay's.
             guard let call = functionCall(object), !reservedToolNames.contains(call.name) else { return [] }
             return [.event(.toolCall([call]))]
         case "response.output_item.done":
@@ -295,7 +295,7 @@ enum GrokLiveProtocol {
         return added.isEmpty ? nil : added
     }
 
-    /// `arguments` is a JSON string; Conduit's tools take string values.
+    /// `arguments` is a JSON string; Belay's tools take string values.
     static func functionCall(_ object: [String: Any]) -> GeminiLiveProtocol.FunctionCall? {
         guard let id = object["call_id"] as? String, !id.isEmpty,
               let name = object["name"] as? String, !name.isEmpty else { return nil }

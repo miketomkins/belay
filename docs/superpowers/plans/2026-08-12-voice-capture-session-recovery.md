@@ -34,8 +34,8 @@
 ### Task 1: Add the route-native audio-session policy
 
 **Files:**
-- Create: `Conduit/Voice/VoiceAudioSessionConfiguration.swift`
-- Create: `ConduitTests/VoiceAudioSessionConfigurationTests.swift`
+- Create: `Belay/Voice/VoiceAudioSessionConfiguration.swift`
+- Create: `BelayTests/VoiceAudioSessionConfigurationTests.swift`
 
 **Interfaces:**
 - Produces `VoiceAudioSessionConfiguration.capture` with `category`, `mode`, `options`, `outputSampleRate`, and `outputChannelCount` properties.
@@ -43,12 +43,12 @@
 
 - [ ] **Step 1: Write the failing policy tests**
 
-Create `ConduitTests/VoiceAudioSessionConfigurationTests.swift` with tests that assert the exact capture policy:
+Create `BelayTests/VoiceAudioSessionConfigurationTests.swift` with tests that assert the exact capture policy:
 
 ```swift
 import AVFAudio
 import XCTest
-@testable import Conduit
+@testable import Belay
 
 final class VoiceAudioSessionConfigurationTests: XCTestCase {
     func testCaptureUsesInputCapableVoiceChatBluetoothPolicy() {
@@ -76,18 +76,18 @@ Run:
 
 ```bash
 xcodegen generate
-xcodebuild test -project Conduit.xcodeproj -scheme Conduit \
+xcodebuild test -project Belay.xcodeproj -scheme Belay \
   -destination 'platform=iOS Simulator,id=6930ECCE-D36C-4E11-8AB5-EDEC4DEA8355' \
-  -derivedDataPath /tmp/conduit-voice-capture-policy \
+  -derivedDataPath /tmp/belay-voice-capture-policy \
   CODE_SIGNING_ALLOWED=NO \
-  -only-testing:ConduitTests/VoiceAudioSessionConfigurationTests
+  -only-testing:BelayTests/VoiceAudioSessionConfigurationTests
 ```
 
 Expected: compilation fails because `VoiceAudioSessionConfiguration` does not yet exist.
 
 - [ ] **Step 3: Implement the policy value**
 
-Create `Conduit/Voice/VoiceAudioSessionConfiguration.swift`:
+Create `Belay/Voice/VoiceAudioSessionConfiguration.swift`:
 
 ```swift
 import AVFAudio
@@ -116,15 +116,15 @@ Run the command from Step 2. Expected: both tests pass.
 - [ ] **Step 5: Commit the policy unit**
 
 ```bash
-git add Conduit/Voice/VoiceAudioSessionConfiguration.swift ConduitTests/VoiceAudioSessionConfigurationTests.swift
+git add Belay/Voice/VoiceAudioSessionConfiguration.swift BelayTests/VoiceAudioSessionConfigurationTests.swift
 git commit -m "test: define voice audio session policy"
 ```
 
 ### Task 2: Bind Core Haptics to the shared session
 
 **Files:**
-- Modify: `Conduit/Services/Haptics.swift:144-370`
-- Modify: `ConduitTests/HapticsTests.swift`
+- Modify: `Belay/Services/Haptics.swift:144-370`
+- Modify: `BelayTests/HapticsTests.swift`
 
 **Interfaces:**
 - Produces `HapticsEnginePolicy.response` with `usesSharedAudioSession == true` and `playsHapticsOnly == true`.
@@ -147,18 +147,18 @@ Run:
 
 ```bash
 xcodegen generate
-xcodebuild test -project Conduit.xcodeproj -scheme Conduit \
+xcodebuild test -project Belay.xcodeproj -scheme Belay \
   -destination 'platform=iOS Simulator,id=6930ECCE-D36C-4E11-8AB5-EDEC4DEA8355' \
-  -derivedDataPath /tmp/conduit-haptics-policy \
+  -derivedDataPath /tmp/belay-haptics-policy \
   CODE_SIGNING_ALLOWED=NO \
-  -only-testing:ConduitTests/HapticsTests/testResponseEngineUsesSharedHapticsOnlyPolicy
+  -only-testing:BelayTests/HapticsTests/testResponseEngineUsesSharedHapticsOnlyPolicy
 ```
 
 Expected: compilation fails because `Haptics.enginePolicy` does not yet exist.
 
 - [ ] **Step 3: Implement the shared-session haptic policy and lifecycle reset**
 
-In `Conduit/Services/Haptics.swift`, add the value type before `Haptics`:
+In `Belay/Services/Haptics.swift`, add the value type before `Haptics`:
 
 ```swift
 struct HapticsEnginePolicy: Equatable {
@@ -187,15 +187,15 @@ Run the command from Step 2. Expected: the policy test and the existing haptics 
 - [ ] **Step 5: Commit the haptics change**
 
 ```bash
-git add Conduit/Services/Haptics.swift ConduitTests/HapticsTests.swift
+git add Belay/Services/Haptics.swift BelayTests/HapticsTests.swift
 git commit -m "fix: bind response haptics to shared audio session"
 ```
 
 ### Task 3: Make capture route-native and diagnose startup failures
 
 **Files:**
-- Modify: `Conduit/Voice/AVAudioCaptureService.swift:6-159,218-235`
-- Modify: `ConduitTests/VoiceConversationControllerTests.swift:74-102,589-615`
+- Modify: `Belay/Voice/AVAudioCaptureService.swift:6-159,218-235`
+- Modify: `BelayTests/VoiceConversationControllerTests.swift:74-102,589-615`
 
 **Interfaces:**
 - `AVAudioCaptureService` consumes `VoiceAudioSessionConfiguration.capture` for session category/options and canonical output format.
@@ -234,11 +234,11 @@ Run:
 
 ```bash
 xcodegen generate
-xcodebuild test -project Conduit.xcodeproj -scheme Conduit \
+xcodebuild test -project Belay.xcodeproj -scheme Belay \
   -destination 'platform=iOS Simulator,id=6930ECCE-D36C-4E11-8AB5-EDEC4DEA8355' \
-  -derivedDataPath /tmp/conduit-capture-failure \
+  -derivedDataPath /tmp/belay-capture-failure \
   CODE_SIGNING_ALLOWED=NO \
-  -only-testing:ConduitTests/VoiceConversationControllerTests/testTranscriptionTestReportsCaptureStartFailureBeforeProviderCall
+  -only-testing:BelayTests/VoiceConversationControllerTests/testTranscriptionTestReportsCaptureStartFailureBeforeProviderCall
 ```
 
 Expected: compilation fails because `MockCapture` has no `startError` initializer parameter.
@@ -247,7 +247,7 @@ Expected: compilation fails because `MockCapture` has no `startError` initialize
 
 In `AVAudioCaptureService.swift`:
 
-1. Import `OSLog` and define a private voice-audio logger with subsystem `com.milim.conduit` and category `VoiceAudio`.
+1. Import `OSLog` and define a private voice-audio logger with subsystem `live.tomkins.belay` and category `VoiceAudio`.
 2. Build `outputFormat` from `VoiceAudioSessionConfiguration.capture.outputSampleRate` and `.outputChannelCount`.
 3. Replace the existing `setCategory` options with `VoiceAudioSessionConfiguration.capture.options`, remove `.allowBluetoothA2DP`, and remove `setPreferredSampleRate(16_000)`.
 4. Keep `setActive(true)` as the final session-configuration call before engine startup.
@@ -281,15 +281,15 @@ Run:
 
 ```bash
 xcodegen generate
-xcodebuild test -project Conduit.xcodeproj -scheme Conduit \
+xcodebuild test -project Belay.xcodeproj -scheme Belay \
   -destination 'platform=iOS Simulator,id=6930ECCE-D36C-4E11-8AB5-EDEC4DEA8355' \
-  -derivedDataPath /tmp/conduit-voice-capture-focused \
+  -derivedDataPath /tmp/belay-voice-capture-focused \
   CODE_SIGNING_ALLOWED=NO \
-  -only-testing:ConduitTests/VoiceConversationControllerTests \
-  -only-testing:ConduitTests/VoiceAudioSessionConfigurationTests \
-  -only-testing:ConduitTests/HapticsTests \
-  -only-testing:ConduitTests/InteractionHapticsTests \
-  -only-testing:ConduitTests/ResponseHapticStateTests
+  -only-testing:BelayTests/VoiceConversationControllerTests \
+  -only-testing:BelayTests/VoiceAudioSessionConfigurationTests \
+  -only-testing:BelayTests/HapticsTests \
+  -only-testing:BelayTests/InteractionHapticsTests \
+  -only-testing:BelayTests/ResponseHapticStateTests
 ```
 
 Expected: all selected tests pass. The simulator may still report its existing Audio Unit diagnostic because it has no physical microphone route; that does not substitute for device acceptance.
@@ -297,19 +297,19 @@ Expected: all selected tests pass. The simulator may still report its existing A
 - [ ] **Step 6: Commit the capture change**
 
 ```bash
-git add Conduit/Voice/AVAudioCaptureService.swift ConduitTests/VoiceConversationControllerTests.swift
+git add Belay/Voice/AVAudioCaptureService.swift BelayTests/VoiceConversationControllerTests.swift
 git commit -m "fix: use route-native voice capture startup"
 ```
 
 ### Task 4: Verify the complete change and prepare the integration handoff
 
 **Files:**
-- Verify: `Conduit/Voice/VoiceAudioSessionConfiguration.swift`
-- Verify: `Conduit/Voice/AVAudioCaptureService.swift`
-- Verify: `Conduit/Services/Haptics.swift`
-- Verify: `ConduitTests/VoiceAudioSessionConfigurationTests.swift`
-- Verify: `ConduitTests/VoiceConversationControllerTests.swift`
-- Verify: `ConduitTests/HapticsTests.swift`
+- Verify: `Belay/Voice/VoiceAudioSessionConfiguration.swift`
+- Verify: `Belay/Voice/AVAudioCaptureService.swift`
+- Verify: `Belay/Services/Haptics.swift`
+- Verify: `BelayTests/VoiceAudioSessionConfigurationTests.swift`
+- Verify: `BelayTests/VoiceConversationControllerTests.swift`
+- Verify: `BelayTests/HapticsTests.swift`
 
 **Interfaces:**
 - No new public API or provider contract is introduced.
@@ -323,16 +323,16 @@ Run:
 /Users/agrias/bin/bin/xcodegen generate
 ```
 
-Expected: `Conduit.xcodeproj` regenerates successfully and remains ignored by Git.
+Expected: `Belay.xcodeproj` regenerates successfully and remains ignored by Git.
 
 - [ ] **Step 2: Run the complete unit suite**
 
 Run:
 
 ```bash
-xcodebuild test -project Conduit.xcodeproj -scheme Conduit \
+xcodebuild test -project Belay.xcodeproj -scheme Belay \
   -destination 'platform=iOS Simulator,id=6930ECCE-D36C-4E11-8AB5-EDEC4DEA8355' \
-  -derivedDataPath /tmp/conduit-voice-capture-final \
+  -derivedDataPath /tmp/belay-voice-capture-final \
   CODE_SIGNING_ALLOWED=NO
 ```
 
@@ -348,7 +348,7 @@ git status --short --branch
 git log --oneline --decorate -4
 ```
 
-Expected: no whitespace errors, no unrelated files, and the original checkout at `/Users/agrias/Documents/Conduit` remains untouched.
+Expected: no whitespace errors, no unrelated files, and the original checkout at `/Users/agrias/Documents/Belay` remains untouched.
 
 - [ ] **Step 4: Push the feature branch and open the PR against `main`**
 

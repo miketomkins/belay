@@ -1,6 +1,6 @@
 //
 //  VoiceSpokenCommands.swift
-//  Conduit and the Conduit Watch app
+//  Belay and the Belay Watch app
 //
 //  The spoken commands a voice call answers itself, such as the end
 //  phrases, shared so a Watch call ends on the same goodbye as a call on
@@ -20,7 +20,7 @@ import Foundation
 /// pre-trimmed or lowercased.
 enum VoiceSpokenCommands {
     /// The built-in lists as they shipped before the built-ins followed the
-    /// app language (Conduit reads those from its string catalog, one list
+    /// app language (Belay reads those from its string catalog, one list
     /// per language). A stored list equal to one of these was never
     /// customized, so it goes back to following the app language.
     static let legacyStopPhrases = [
@@ -134,7 +134,7 @@ enum VoiceSpokenCommands {
     }
 
     /// "End call:" at the very start of a GPT-Live delegation: the model,
-    /// having said its goodbye, asks Conduit to close the call (GPT-Live
+    /// having said its goodbye, asks Belay to close the call (GPT-Live
     /// has no function tools, so this stands in for end_conversation).
     /// "End the call:" counts too, should the model paraphrase it.
     static func isEndCallMarker(_ request: String) -> Bool {

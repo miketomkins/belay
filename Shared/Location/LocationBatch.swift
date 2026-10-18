@@ -1,6 +1,6 @@
 //
 //  LocationBatch.swift
-//  Conduit
+//  Belay
 //
 //  What one sealed upload says (designs/location-v1-contract.md section 2),
 //  with the precision rules applied on the phone before sealing. The host

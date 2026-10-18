@@ -5,7 +5,7 @@
 # The gate orchestrates real Xcode project generation, a build-for-testing,
 # the lane runner and the summarizer, so its contract with those pieces
 # (argument shapes, paths, exit codes, the run directory layout) has no unit
-# test: this suite builds a throwaway Conduit-shaped repository and drives the
+# test: this suite builds a throwaway Belay-shaped repository and drives the
 # REAL gate against stub xcodegen/xcodebuild/xcrun binaries. No simulator, no
 # Xcode, no macOS required - it runs on the Linux CI job as well.
 #
@@ -36,9 +36,9 @@ STUBS="$WORK/stubs"
 # synthetic hang is Python time.sleep inside a fake script, not shell sleep.
 export GATE_SLEEP_SCALE=0
 mkdir -p "$STUBS"
-# CONDUIT_GATE_TEST_KEEP=1 leaves the throwaway fixture and its run directories
+# BELAY_GATE_TEST_KEEP=1 leaves the throwaway fixture and its run directories
 # in place for inspection instead of deleting them on exit.
-if [ -n "${CONDUIT_GATE_TEST_KEEP:-}" ]; then
+if [ -n "${BELAY_GATE_TEST_KEEP:-}" ]; then
   echo "keeping the test workspace at $WORK"
   trap 'echo "kept: $WORK"' EXIT
 else
@@ -130,7 +130,7 @@ if [ -n "${FAKE_DEVICE_TRACE:-}" ]; then
   fi
 fi
 bundle=""
-target="ConduitTests"
+target="BelayTests"
 classes=""
 for a in "$@"; do
   case "$a" in
@@ -178,7 +178,7 @@ case "$mode" in
     # "System Failures" entry, and NO real test case node.
     result="Failed"
     classes=""
-    extra_node='{"nodeType": "Test Case", "name": "Conduit encountered an error", "result": "Failed", "durationInSeconds": 0.0}'
+    extra_node='{"nodeType": "Test Case", "name": "Belay encountered an error", "result": "Failed", "durationInSeconds": 0.0}'
     ;;
 esac
 nodes=""
@@ -195,7 +195,7 @@ done
 # shared path for cases that assert on it.
 if [ -n "$bundle" ]; then
   cat > "$bundle.canned.json" <<DOC
-{"testNodes": [{"nodeType": "Test Plan", "name": "Conduit", "result": "Passed",
+{"testNodes": [{"nodeType": "Test Plan", "name": "Belay", "result": "Passed",
   "children": [{"nodeType": "Test bundle", "name": "$target", "result": "$result",
     "children": [$nodes]}]}]}
 DOC
@@ -204,7 +204,7 @@ DOC
   fi
 fi
 case "$mode" in
-  crash) echo "Simulator device failed to launch com.milim.relay (stub)"; exit 65 ;;
+  crash) echo "Simulator device failed to launch live.tomkins.belay (stub)"; exit 65 ;;
   fail) echo "Test Case 'testSomething' failed (stub)"; exit 65 ;;
   infra) echo "test host quit unexpectedly (stub)"; exit 70 ;;
   *) exit 0 ;;
@@ -243,7 +243,7 @@ fi
       # gate's "two workers, two devices" refusal exists for.
       echo "No runtime specified, using 'iOS 26.5 (26.5 - 23F77) - com.apple.CoreSimulator.SimRuntime.iOS-26-5'"
       case "${3:-}" in
-        "Conduit CI Gate 2") echo "7E7E7E7E-1111-2222-3333-444444444444" ;;
+        "Belay CI Gate 2") echo "7E7E7E7E-1111-2222-3333-444444444444" ;;
         *) echo "6D08B063-B890-4D18-893B-D1E89E119919" ;;
       esac
       exit 0
@@ -257,10 +257,10 @@ fi
   { "udid" : "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE",
     "name" : "iPhone 17 Pro", "state" : "Booted" },
   { "udid" : "6D08B063-B890-4D18-893B-D1E89E119919",
-    "name" : "Conduit CI Gate", "state" : "Shutdown" }],
+    "name" : "Belay CI Gate", "state" : "Shutdown" }],
  "com.apple.CoreSimulator.SimRuntime.iOS-26-5" : [
   { "udid" : "99999999-8888-7777-6666-555555555555",
-    "name" : "Conduit CI Gate", "state" : "Shutdown" }]}}
+    "name" : "Belay CI Gate", "state" : "Shutdown" }]}}
 DEV
         exit 0
       fi
@@ -276,9 +276,9 @@ DEV
   { "udid" : "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE",
     "name" : "iPhone 17 Pro", "state" : "Booted" },
   { "udid" : "6D08B063-B890-4D18-893B-D1E89E119919",
-    "name" : "Conduit CI Gate", "state" : "Shutdown" },
+    "name" : "Belay CI Gate", "state" : "Shutdown" },
   { "udid" : "7E7E7E7E-1111-2222-3333-444444444444",
-    "name" : "Conduit CI Gate 2", "state" : "Shutdown" }]}}
+    "name" : "Belay CI Gate 2", "state" : "Shutdown" }]}}
 DEV
       fi
       exit 0
@@ -351,22 +351,22 @@ EOF
 }
 
 # --- fixture repository ------------------------------------------------------
-# A Conduit-shaped tree: the real CI tooling under test, and stand-ins for the
+# A Belay-shaped tree: the real CI tooling under test, and stand-ins for the
 # two pieces the gate only needs to SUCCEED at (project generation is stubbed
 # through PATH; the build script is a fixture file, since its real
 # implementation is CI v2's build job and is exercised on macOS).
 make_fixture() { # $1 = path
   local repo="$1"
-  mkdir -p "$repo/ConduitTests" "$repo/ConduitUITests" "$repo/Conduit" "$repo/scripts/tests"
-  printf 'name: Conduit\n' > "$repo/project.yml"
-  printf 'import Foundation\n' > "$repo/Conduit/App.swift"
+  mkdir -p "$repo/BelayTests" "$repo/BelayUITests" "$repo/Belay" "$repo/scripts/tests"
+  printf 'name: Belay\n' > "$repo/project.yml"
+  printf 'import Foundation\n' > "$repo/Belay/App.swift"
   # 15 unit classes: enough for the planner to split them into THREE batches
   # (7/7/1 by the default 7-class batch cap), which is what makes the
   # continuation path reachable - a lane that stops on batch 2 still has a
   # batch it never reached.
   for name in Alpha Beta Gamma Delta Epsilon Zeta Eta Theta Iota Kappa Lambda \
               Mu Nu Xi Omicron; do
-    cat > "$repo/ConduitTests/${name}Tests.swift" <<SWIFT
+    cat > "$repo/BelayTests/${name}Tests.swift" <<SWIFT
 import XCTest
 
 final class ${name}Tests: XCTestCase {
@@ -374,7 +374,7 @@ final class ${name}Tests: XCTestCase {
 }
 SWIFT
   done
-  cat > "$repo/ConduitUITests/LaunchUITests.swift" <<'SWIFT'
+  cat > "$repo/BelayUITests/LaunchUITests.swift" <<'SWIFT'
 import XCTest
 
 final class LaunchUITests: XCTestCase {
@@ -425,11 +425,11 @@ if [ -n "${FAKE_BUILD_FAIL:-}" ]; then
   exit 1
 fi
 mkdir -p "$DERIVED_DATA_PATH/Build/Products"
-: > "$DERIVED_DATA_PATH/Build/Products/Conduit_stub.xctestrun"
+: > "$DERIVED_DATA_PATH/Build/Products/Belay_stub.xctestrun"
 mkdir -p ci-lane/build
 echo "fixture build-for-testing ok" > ci-lane/build/build.log
 printf '{"schema_version": 1, "status": "ok", "duration_s": 1, "xctestrun": "%s"}\n' \
-  "$DERIVED_DATA_PATH/Build/Products/Conduit_stub.xctestrun" \
+  "$DERIVED_DATA_PATH/Build/Products/Belay_stub.xctestrun" \
   > ci-lane/build/build-result.json
 exit 0
 SH
@@ -459,7 +459,7 @@ run_gate() { # extra args...
   # THREE batches, which is what keeps the continuation path reachable (a lane
   # that stops on batch 2 still has a batch it never reached). A case that
   # wants the gate's own default passes --unit-batch-max-classes explicitly.
-  PATH="$STUBS:$PATH" XCODEBUILD_POLL_INTERVAL_S=1 CONDUIT_PERF_TRACE=1 \
+  PATH="$STUBS:$PATH" XCODEBUILD_POLL_INTERVAL_S=1 BELAY_PERF_TRACE=1 \
     bash "$GATE" --allow-another-run --unit-batch-max-classes 7 "$@" >"$RUN_LOG" 2>&1
 }
 
@@ -514,8 +514,8 @@ rm -f "$IOS_CI_HOST_PIDFILE"
 # ---------------------------------------------------------------------------
 echo ""
 echo "--- case: clean run (on the DEFAULT gate root) ---"
-# Deliberately NO --gate-root: the default (repo parent +/conduit-local-gate
-# = $WORK/conduit-local-gate, inside this sandbox) must work - a lease block
+# Deliberately NO --gate-root: the default (repo parent +/belay-local-gate
+# = $WORK/belay-local-gate, inside this sandbox) must work - a lease block
 # placed before the GATE_ROOT default would die at mkfifo /host-lease/... .
 # This run doubles as the default-gate-root regression.
 RUN1="$(new_run_dir)"
@@ -567,7 +567,7 @@ assert_eq "xcode version recorded" \
 assert_eq "simulator runtime recorded" \
   "$(json_get "$GATE_JSON" 'doc["simulator"]["runtime"]')" "iOS 26.0"
 assert_eq "the gate ran on its OWN simulator device, not the default" \
-  "$(json_get "$GATE_JSON" 'doc["simulator"]["name"]')" "Conduit CI Gate"
+  "$(json_get "$GATE_JSON" 'doc["simulator"]["name"]')" "Belay CI Gate"
 assert_eq "the gate tooling's own commit is recorded"   "$(json_get "$GATE_JSON" 'doc["tooling_sha"]')"   "$(git -C "$WORK/repo" rev-parse HEAD)"
 assert_eq "static checks ran" \
   "$(json_get "$GATE_JSON" 'len(doc["static_checks"])')" "3"
@@ -577,7 +577,7 @@ assert_eq "build metadata moved into the run dir" \
   "$([ -f "$RUN1/build/build.log" ] && echo yes || echo no)" "yes"
 # The clean run uses the DEFAULT gate root, so its worktree-leak check must
 # inspect that root (later explicit-root runs keep their own checks).
-if [ -d "$WORK/conduit-local-gate/worktrees" ] && [ -n "$(ls -A "$WORK/conduit-local-gate/worktrees" 2>/dev/null)" ]; then
+if [ -d "$WORK/belay-local-gate/worktrees" ] && [ -n "$(ls -A "$WORK/belay-local-gate/worktrees" 2>/dev/null)" ]; then
   bad "throwaway worktree was left behind (default root)"
 else
   ok "throwaway worktree removed (default root)"
@@ -697,21 +697,21 @@ done
 assert_eq "kernel EOF released the lease holder without any trap" "$KILL_RELEASED" "0"
 
 # The default gate root is already proven by the CLEAN RUN (it ran without
-# --gate-root, on $WORK/conduit-local-gate); this only re-asserts the lease
+# --gate-root, on $WORK/belay-local-gate); this only re-asserts the lease
 # evidence landed there - a separate full gate run would spend the hosted
 # self-test job's time ceiling for no extra coverage.
 assert_eq "the default root run acquired the host lease" \
-  "$([ -s "$WORK/conduit-local-gate/host-lease/attempt.json" ] && echo yes || echo no)" "yes"
+  "$([ -s "$WORK/belay-local-gate/host-lease/attempt.json" ] && echo yes || echo no)" "yes"
 
 # ---------------------------------------------------------------------------
 echo ""
 echo "--- case: the caller's tree, index and stashes are untouched ---"
 # Model a developer mid-work: an uncommitted change, an untracked file, and a
 # stash. The gate must test the COMMIT and leave all three alone.
-( cd "$WORK/repo" && printf 'wip\n' >> Conduit/App.swift \
+( cd "$WORK/repo" && printf 'wip\n' >> Belay/App.swift \
     && git -c user.email=t@example.com -c user.name=t stash push -q -m gate-wip )
 ( cd "$WORK/repo" && printf 'untracked\n' > uncommitted.txt \
-    && printf 'dirty\n' >> Conduit/App.swift )
+    && printf 'dirty\n' >> Belay/App.swift )
 STATUS_BEFORE="$(git -C "$WORK/repo" status --porcelain)"
 STASHES_BEFORE="$(git -C "$WORK/repo" stash list)"
 STASH_REF_BEFORE="$(git -C "$WORK/repo" rev-parse refs/stash)"
@@ -908,7 +908,7 @@ fi
 assert_eq "the recovery pass exists (one retry set, one launch)" \
   "$(ls -d "$RUN8"/lanes/unit-recovery-* 2>/dev/null | wc -l | tr -d ' ')" "1"
 assert_eq "the gate ran on its own simulator device" \
-  "$(json_get "$GATE8" 'doc["simulator"]["name"]')" "Conduit CI Gate"
+  "$(json_get "$GATE8" 'doc["simulator"]["name"]')" "Belay CI Gate"
 assert_contains "the recovery is recorded, not hidden" \
   "$(cat "$RUN8/summary.md")" "recovery"
 
@@ -981,7 +981,7 @@ else
   skip "the missing-device run's verdict"
 fi
 assert_contains "the creation is visible in the log" "$(cat "$RUN_LOG")" \
-  "gate simulator 'Conduit CI Gate' created"
+  "gate simulator 'Belay CI Gate' created"
 assert_eq "the created device is recorded" \
   "$(json_get "$RUN11/gate-result.json" 'doc["simulator"]["udid"]')" \
   "6D08B063-B890-4D18-893B-D1E89E119919"
@@ -1114,7 +1114,7 @@ echo "--- case: one authoritative full-gate invocation per requested SHA ---"
 # assertions are structural and hold on every platform.)
 RUN12="$(new_run_dir)"
 FIRST_EXIT=0
-PATH="$STUBS:$PATH" XCODEBUILD_POLL_INTERVAL_S=1 CONDUIT_PERF_TRACE=1 bash "$GATE" --allow-another-run --ref HEAD --gate-root "$WORK/gate-policy" --run-dir "$RUN12" --repeat-classes "" >"$WORK/policy-first.log" 2>&1 || FIRST_EXIT=$?
+PATH="$STUBS:$PATH" XCODEBUILD_POLL_INTERVAL_S=1 BELAY_PERF_TRACE=1 bash "$GATE" --allow-another-run --ref HEAD --gate-root "$WORK/gate-policy" --run-dir "$RUN12" --repeat-classes "" >"$WORK/policy-first.log" 2>&1 || FIRST_EXIT=$?
 if [ "$FIRST_EXIT" -eq 2 ]; then
   bad "the first full gate run for this SHA was refused"
 else
@@ -1122,14 +1122,14 @@ else
 fi
 RUN13="$(new_run_dir)"
 SECOND_EXIT=0
-PATH="$STUBS:$PATH" XCODEBUILD_POLL_INTERVAL_S=1 CONDUIT_PERF_TRACE=1 bash "$GATE" --ref HEAD --gate-root "$WORK/gate-policy" --run-dir "$RUN13" --repeat-classes "" >"$WORK/policy-second.log" 2>&1 || SECOND_EXIT=$?
+PATH="$STUBS:$PATH" XCODEBUILD_POLL_INTERVAL_S=1 BELAY_PERF_TRACE=1 bash "$GATE" --ref HEAD --gate-root "$WORK/gate-policy" --run-dir "$RUN13" --repeat-classes "" >"$WORK/policy-second.log" 2>&1 || SECOND_EXIT=$?
 assert_eq "a second full gate run is refused (exit 2)" "$SECOND_EXIT" "2"
 assert_contains "the refusal states the policy" "$(cat "$WORK/policy-second.log")"   "one authoritative full-gate invocation per requested SHA"
 assert_contains "the refusal names the explicit escape" "$(cat "$WORK/policy-second.log")"   "--allow-another-run"
 assert_eq "the refused run started no work at all"   "$([ -d "$RUN13/lanes" ] && echo yes || echo no)" "no"
 RUN14="$(new_run_dir)"
 EXPLICIT_EXIT=0
-PATH="$STUBS:$PATH" XCODEBUILD_POLL_INTERVAL_S=1 CONDUIT_PERF_TRACE=1 bash "$GATE" --allow-another-run --ref HEAD --gate-root "$WORK/gate-policy" --run-dir "$RUN14" --repeat-classes "" >"$WORK/policy-third.log" 2>&1 || EXPLICIT_EXIT=$?
+PATH="$STUBS:$PATH" XCODEBUILD_POLL_INTERVAL_S=1 BELAY_PERF_TRACE=1 bash "$GATE" --allow-another-run --ref HEAD --gate-root "$WORK/gate-policy" --run-dir "$RUN14" --repeat-classes "" >"$WORK/policy-third.log" 2>&1 || EXPLICIT_EXIT=$?
 if [ "$EXPLICIT_EXIT" -eq 2 ]; then
   bad "--allow-another-run did not allow the explicitly requested run"
 else
@@ -1226,19 +1226,19 @@ echo "--- case: the SHA registry is per MODE, not per SHA ---"
 # merge then release for one SHA is the normal flow and must stay possible;
 # each mode on its own is still single-shot.
 RUN24="$(new_run_dir)"
-PATH="$STUBS:$PATH" XCODEBUILD_POLL_INTERVAL_S=1 CONDUIT_PERF_TRACE=1 \
+PATH="$STUBS:$PATH" XCODEBUILD_POLL_INTERVAL_S=1 BELAY_PERF_TRACE=1 \
   bash "$GATE" --mode merge --allow-another-run --ref HEAD \
     --gate-root "$WORK/gate-mode-registry" --run-dir "$RUN24" \
     --repeat-classes "" >/dev/null 2>&1 || true
 RUN25="$(new_run_dir)"
 MERGE_AGAIN=0
-PATH="$STUBS:$PATH" XCODEBUILD_POLL_INTERVAL_S=1 CONDUIT_PERF_TRACE=1 \
+PATH="$STUBS:$PATH" XCODEBUILD_POLL_INTERVAL_S=1 BELAY_PERF_TRACE=1 \
   bash "$GATE" --mode merge --ref HEAD --gate-root "$WORK/gate-mode-registry" \
     --run-dir "$RUN25" --repeat-classes "" >/dev/null 2>&1 || MERGE_AGAIN=$?
 assert_eq "a second merge run for the same SHA is refused" "$MERGE_AGAIN" "2"
 RUN26="$(new_run_dir)"
 RELEASE_AFTER_MERGE=0
-PATH="$STUBS:$PATH" XCODEBUILD_POLL_INTERVAL_S=1 CONDUIT_PERF_TRACE=1 \
+PATH="$STUBS:$PATH" XCODEBUILD_POLL_INTERVAL_S=1 BELAY_PERF_TRACE=1 \
   bash "$GATE" --mode release --ref HEAD --gate-root "$WORK/gate-mode-registry" \
     --run-dir "$RUN26" --repeat-classes "" >/dev/null 2>&1 || RELEASE_AFTER_MERGE=$?
 if [ "$RELEASE_AFTER_MERGE" -eq 2 ]; then
@@ -1248,7 +1248,7 @@ else
 fi
 RUN27="$(new_run_dir)"
 RELEASE_AGAIN=0
-PATH="$STUBS:$PATH" XCODEBUILD_POLL_INTERVAL_S=1 CONDUIT_PERF_TRACE=1 \
+PATH="$STUBS:$PATH" XCODEBUILD_POLL_INTERVAL_S=1 BELAY_PERF_TRACE=1 \
   bash "$GATE" --mode merge --ref HEAD --gate-root "$WORK/gate-mode-registry" \
     --run-dir "$RUN27" --repeat-classes "" >/dev/null 2>&1 || RELEASE_AGAIN=$?
 assert_eq "and a merge run is refused once a release result exists" "$RELEASE_AGAIN" "2"
@@ -1299,7 +1299,7 @@ echo "--- case: two workers may not be given one device ---"
 RUN29="$(new_run_dir)"
 SAME_DEVICE_EXIT=0
 run_gate --ref HEAD --gate-root "$WORK/gate-workers" --run-dir "$RUN29" \
-    --repeat-classes "" --second-simulator "Conduit CI Gate" \
+    --repeat-classes "" --second-simulator "Belay CI Gate" \
     >/dev/null 2>&1 || SAME_DEVICE_EXIT=$?
 assert_eq "one device for two workers is refused (exit 2)" "$SAME_DEVICE_EXIT" "2"
 assert_contains "the refusal explains the two-device requirement" \
@@ -1450,7 +1450,7 @@ export FAKE_XCODEBUILD_SLEEP=120
 export FAKE_XCODEBUILD_PIDS="$WORK/teardown-pids.txt"
 : > "$FAKE_XCODEBUILD_PIDS"
 RUN35="$(new_run_dir)"
-PATH="$STUBS:$PATH" XCODEBUILD_POLL_INTERVAL_S=1 CONDUIT_PERF_TRACE=1 \
+PATH="$STUBS:$PATH" XCODEBUILD_POLL_INTERVAL_S=1 BELAY_PERF_TRACE=1 \
   bash "$GATE" --allow-another-run --unit-batch-max-classes 7 --ref HEAD \
     --gate-root "$WORK/gate-teardown" --run-dir "$RUN35" \
     --repeat-classes "" >"$WORK/teardown.log" 2>&1 &

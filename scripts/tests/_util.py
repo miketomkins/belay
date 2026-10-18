@@ -25,17 +25,17 @@ def write_swift(path, class_name, superclass="XCTestCase", body="func testSometh
 
 
 def make_repo(root, unit_classes=(), ui_classes=(), extra_files=None):
-    """Create a synthetic repo tree with ConduitTests/ and ConduitUITests/."""
+    """Create a synthetic repo tree with BelayTests/ and BelayUITests/."""
     root.mkdir(parents=True, exist_ok=True)
     # Both target directories always exist: the planner treats a missing
     # target directory as a hard error (broken checkout), and fixtures should
     # model a valid tree unless they test exactly that error.
-    (root / "ConduitTests").mkdir(exist_ok=True)
-    (root / "ConduitUITests").mkdir(exist_ok=True)
+    (root / "BelayTests").mkdir(exist_ok=True)
+    (root / "BelayUITests").mkdir(exist_ok=True)
     for name in unit_classes:
-        write_swift(root / "ConduitTests" / (name + ".swift"), name)
+        write_swift(root / "BelayTests" / (name + ".swift"), name)
     for name in ui_classes:
-        write_swift(root / "ConduitUITests" / (name + ".swift"), name)
+        write_swift(root / "BelayUITests" / (name + ".swift"), name)
     for relpath, content in (extra_files or {}).items():
         target = root / relpath
         target.parent.mkdir(parents=True, exist_ok=True)

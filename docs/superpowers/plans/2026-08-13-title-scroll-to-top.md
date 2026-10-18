@@ -18,16 +18,16 @@
 
 ## File Map
 
-- Modify: `Conduit/Services/AppState.swift` — published top-scroll request and public request method.
-- Modify: `Conduit/Views/RootView.swift` — title button and accessibility label.
-- Modify: `Conduit/Views/ChatView.swift` — top anchor and request handler with cancellation/retry.
-- Create: `ConduitTests/ChatTitleScrollTests.swift` — monotonic request signal tests.
+- Modify: `Belay/Services/AppState.swift` — published top-scroll request and public request method.
+- Modify: `Belay/Views/RootView.swift` — title button and accessibility label.
+- Modify: `Belay/Views/ChatView.swift` — top anchor and request handler with cancellation/retry.
+- Create: `BelayTests/ChatTitleScrollTests.swift` — monotonic request signal tests.
 
 ### Task 1: Add the monotonic AppState command
 
 **Files:**
-- Create: `ConduitTests/ChatTitleScrollTests.swift`
-- Modify: `Conduit/Services/AppState.swift`
+- Create: `BelayTests/ChatTitleScrollTests.swift`
+- Modify: `Belay/Services/AppState.swift`
 
 **Interfaces:**
 - `AppState` adds `@Published private(set) var chatScrollToTopRequest = 0` beside `chatScrollRequest`.
@@ -56,9 +56,9 @@ Run:
 
 ```bash
 /Users/agrias/bin/bin/xcodegen generate
-xcodebuild test -project Conduit.xcodeproj -scheme Conduit \
+xcodebuild test -project Belay.xcodeproj -scheme Belay \
   -destination 'platform=iOS Simulator,id=6930ECCE-D36C-4E11-8AB5-EDEC4DEA8355' \
-  -only-testing:ConduitTests/ChatTitleScrollTests CODE_SIGNING_ALLOWED=NO
+  -only-testing:BelayTests/ChatTitleScrollTests CODE_SIGNING_ALLOWED=NO
 ```
 
 Expected: compilation failure for `chatScrollToTopRequest` or `requestChatScrollToTop`.
@@ -70,28 +70,28 @@ Place the property next to `chatScrollRequest` and the method next to `requestCh
 - [ ] **Step 4: Commit the AppState command**
 
 ```bash
-git add Conduit/Services/AppState.swift ConduitTests/ChatTitleScrollTests.swift
+git add Belay/Services/AppState.swift BelayTests/ChatTitleScrollTests.swift
 git commit -m "feat: add chat scroll-to-top request"
 ```
 
 ### Task 2: Turn the toolbar title into an accessible control
 
 **Files:**
-- Modify: `Conduit/Views/RootView.swift`
+- Modify: `Belay/Views/RootView.swift`
 
 **Interfaces:**
 - The principal toolbar item remains the same title surface, but its root is `Button { appState.requestChatScrollToTop() } label: { ... }` with `.buttonStyle(.plain)`.
 
 - [ ] **Step 1: Preserve the title surface inside a button**
 
-Move the existing `Text(appState.activeSessionTitle)` font, line limit, padding, and `conduitGlassSurface` modifiers into the button label without changing visual values. Add `.accessibilityLabel("Scroll to top of conversation")` and keep the title text available to VoiceOver through the button label.
+Move the existing `Text(appState.activeSessionTitle)` font, line limit, padding, and `belayGlassSurface` modifiers into the button label without changing visual values. Add `.accessibilityLabel("Scroll to top of conversation")` and keep the title text available to VoiceOver through the button label.
 
 - [ ] **Step 2: Build the app and inspect the toolbar**
 
 Run:
 
 ```bash
-xcodebuild build -project Conduit.xcodeproj -scheme Conduit \
+xcodebuild build -project Belay.xcodeproj -scheme Belay \
   -destination 'platform=iOS Simulator,id=6930ECCE-D36C-4E11-8AB5-EDEC4DEA8355' CODE_SIGNING_ALLOWED=NO
 ```
 
@@ -100,15 +100,15 @@ Expected: build succeeds, the title retains its glass surface, and the button do
 - [ ] **Step 3: Commit the toolbar control**
 
 ```bash
-git add Conduit/Views/RootView.swift
+git add Belay/Views/RootView.swift
 git commit -m "feat: make chat title scroll to top"
 ```
 
 ### Task 3: Add the lazy-layout top anchor and request handler
 
 **Files:**
-- Modify: `Conduit/Views/ChatView.swift`
-- Modify: `ConduitTests/ChatTitleScrollTests.swift`
+- Modify: `Belay/Views/ChatView.swift`
+- Modify: `BelayTests/ChatTitleScrollTests.swift`
 
 **Interfaces:**
 - `ChatView` adds a private `topAnchor` derived from the current `activeScrollSessionKey`, parallel to `bottomAnchor`.
@@ -145,14 +145,14 @@ After the scroll settles, allow `topVisibleChatID` changes to flow through the e
 
 ```bash
 /Users/agrias/bin/bin/xcodegen generate
-xcodebuild test -project Conduit.xcodeproj -scheme Conduit \
+xcodebuild test -project Belay.xcodeproj -scheme Belay \
   -destination 'platform=iOS Simulator,id=6930ECCE-D36C-4E11-8AB5-EDEC4DEA8355' \
-  -only-testing:ConduitTests/ChatTitleScrollTests \
-  -only-testing:ConduitTests/ChatScrollStateTests \
-  -only-testing:ConduitTests/AppStateChatResumeTests \
+  -only-testing:BelayTests/ChatTitleScrollTests \
+  -only-testing:BelayTests/ChatScrollStateTests \
+  -only-testing:BelayTests/AppStateChatResumeTests \
   CODE_SIGNING_ALLOWED=NO
 
-git add Conduit/Views/ChatView.swift ConduitTests/ChatTitleScrollTests.swift
+git add Belay/Views/ChatView.swift BelayTests/ChatTitleScrollTests.swift
 git commit -m "fix: scroll chat to top from the title"
 ```
 
@@ -164,7 +164,7 @@ git commit -m "fix: scroll chat to top from the title"
 - [ ] **Step 1: Run the full simulator test suite**
 
 ```bash
-xcodebuild test -project Conduit.xcodeproj -scheme Conduit \
+xcodebuild test -project Belay.xcodeproj -scheme Belay \
   -destination 'platform=iOS Simulator,id=6930ECCE-D36C-4E11-8AB5-EDEC4DEA8355' \
   CODE_SIGNING_ALLOWED=NO
 ```

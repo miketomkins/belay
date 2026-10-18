@@ -19,7 +19,7 @@ reviews:
   path_instructions:
     - path: "**/*.swift"
       instructions: |
-        This is a SwiftUI iOS app (Conduit) for Hermes Agent.
+        This is a SwiftUI iOS app (Belay) for Hermes Agent.
         Focus reviews on:
         - Concurrency safety (Swift actors, @MainActor, Sendable)
         - Memory management (weak self in closures, retain cycles)

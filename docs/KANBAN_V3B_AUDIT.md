@@ -27,7 +27,7 @@
   - name "" -> server substitutes the default display name for the slug
 - Project set (non-empty) with `default_workdir` omitted -> server MIRRORS the project primary repo into `default_workdir`. Re-sending the SAME `project_id` re-mirrors (this is the wire for "Project Default").
 - Removing the project does NOT clear the previously mirrored `default_workdir` when ONLY `project_id` is sent (backend keeps it; a Desktop comment claims otherwise — backend is authoritative).
-- CONDUIT adaptation (documented): the mobile editor's "No Project" path also lands the Default Workspace row on None/Scratch, so the Save sends an EXPLICIT `default_workdir`:"" alongside `project_id`:"" — clearing the stale mirror. The wire clears both intentfully rather than leaving a stale mirrored directory.
+- BELAY adaptation (documented): the mobile editor's "No Project" path also lands the Default Workspace row on None/Scratch, so the Save sends an EXPLICIT `default_workdir`:"" alongside `project_id`:"" — clearing the stale mirror. The wire clears both intentfully rather than leaving a stale mirrored directory.
 - Response: {board: meta (+default_workspace_kind, project_name)}.
 
 ### DELETE /boards/{slug} (plugin_api.py:2578) — delete: bool = Query(False) ("Hard-delete instead of archive")
@@ -35,9 +35,9 @@
 - delete=true -> shutil.rmtree (hard delete). V3B exposes ARCHIVE ONLY; never sends delete=true.
 - Restrictions surfaced as ValueError -> HTTP 400 (detail text preserved): the "default" board cannot be removed; unknown slug -> "board does not exist"; archiving the CURRENT board clears the server pointer back to default (backend handles); an already-archived slug no longer exists under its active name -> 400.
 - Response: {result: {slug, action, new_path}, current}.
-- NOTE: Desktop has NO archive UI (api.ts has no deleteBoard) — Conduit's Archive Board… is a mobile-native feature on the exact backend contract.
+- NOTE: Desktop has NO archive UI (api.ts has no deleteBoard) — Belay's Archive Board… is a mobile-native feature on the exact backend contract.
 
-### POST /boards/{slug}/switch (plugin_api.py:2588) — persists the server-wide current pointer; the Desktop switcher never calls it (client-side localStorage selection). Conduit likewise NEVER calls it.
+### POST /boards/{slug}/switch (plugin_api.py:2588) — persists the server-wide current pointer; the Desktop switcher never calls it (client-side localStorage selection). Belay likewise NEVER calls it.
 
 ## Desktop product semantics
 
@@ -58,9 +58,9 @@
 
 ### default_workspace_kind (plugin_api.py:2423): no workdir -> "scratch"; workdir inside a git repo -> "worktree"; else "dir".
 
-## Conduit-adapted differences (documented)
-1. Slug derivation mirrors Desktop byte-for-byte (ASCII); Conduit shows the generated slug and offers manual editing as an advanced option, validated against the upstream regex before POST.
-2. Conduit sends switch: false explicitly (deterministic test; never true). Selection after create is local-only.
+## Belay-adapted differences (documented)
+1. Slug derivation mirrors Desktop byte-for-byte (ASCII); Belay shows the generated slug and offers manual editing as an advanced option, validated against the upstream regex before POST.
+2. Belay sends switch: false explicitly (deterministic test; never true). Selection after create is local-only.
 3. Board Settings extends Desktop's name+project dialog with description + default-workdir controls (backend fields; required by the V3B spec).
-4. Archive Board… is Conduit-native (no Desktop counterpart), staging-by-value + fail-closed like card Delete.
-5. Filters live in a native sheet rather than a dropdown; the predicate is extracted as a pure policy with the same semantics (search over title/body/id per upstream; Conduit deliberately keeps its V2-preserved extra matches — latest summary and assignee — in the search set).
+4. Archive Board… is Belay-native (no Desktop counterpart), staging-by-value + fail-closed like card Delete.
+5. Filters live in a native sheet rather than a dropdown; the predicate is extracted as a pure policy with the same semantics (search over title/body/id per upstream; Belay deliberately keeps its V2-preserved extra matches — latest summary and assignee — in the search set).

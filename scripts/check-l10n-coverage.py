@@ -4,17 +4,17 @@ against a runtime-accurate key, and every SHIPPED language must carry a
 real translation of every key.
 
 Languages are data, not code. The checker reads them from the String
-Catalogs and Conduit/Info.plist, so adding a language is a catalog change:
+Catalogs and Belay/Info.plist, so adding a language is a catalog change:
 
   * source language - the catalogs' "sourceLanguage". Keys are its strings
     and every other language falls back to them.
-  * draft languages - Info.plist's ConduitDraftLanguages array: translation
+  * draft languages - Info.plist's BelayDraftLanguages array: translation
     still in progress. The build strips their lprojs
     (scripts/strip-draft-localizations.py) and the app never offers them,
     so only their integrity is checked, not their completeness.
   * shipped languages - every other language that appears in any catalog.
 
-Scans Conduit Swift sources for sites that look up String Catalog keys -
+Scans Belay Swift sources for sites that look up String Catalog keys -
 
   1. AppLocalization.string("...") / String(localized: "...") - the
      skeleton must exist in Localizable.xcstrings with the SAME placeholder
@@ -55,7 +55,7 @@ InfoPlist):
   * a raw string literal passed as a ternary branch to a SwiftUI title
     (Text(flag ? "A" : "B")) is reported at its call site: it binds the
     verbatim String overload and is never looked up;
-  * the same goes for Conduit's own String display parameters
+  * the same goes for Belay's own String display parameters
     (STRING_DISPLAY_PARAMETERS: SettingsMetricRow(label:value:),
     homeSection(_:), ...) and display properties (STRING_DISPLAY_PROPERTIES:
     displayName, errorDescription, ...): a raw letter-bearing literal passed
@@ -89,7 +89,7 @@ import xml.parsers.expat
 # Info.plist array of draft localization identifiers. The app reads the
 # same key (AppLocalizations.draftLanguagesInfoKey), and so does the build's
 # draft-stripping phase.
-DRAFT_LANGUAGES_KEY = "ConduitDraftLanguages"
+DRAFT_LANGUAGES_KEY = "BelayDraftLanguages"
 
 # SwiftUI initializers whose first argument is a LocalizedStringKey when a
 # string literal is passed directly. Variables/interpolations elsewhere are
@@ -131,12 +131,12 @@ EXEMPT_KEYS = frozenset({
     "×%@",           # multiplier badge
     "×%lld",         # multiplier badge (int interpolation)
     "A",             # typography size sample glyph
-    "Conduit", "GitHub", "Hermes", "HTTP", "HTTPS",  # brand/protocol names
+    "Belay", "GitHub", "Hermes", "HTTP", "HTTPS",  # brand/protocol names
     "https://hermes.example", "https://push.milim.dev",  # literal URLs
     "skill-name",    # example placeholder token
 })
 
-# Conduit's own views and view helpers that show a String parameter as text
+# Belay's own views and view helpers that show a String parameter as text
 # (Text(title), Label(title, systemImage:), Button(title)). A String binds
 # no LocalizedStringKey, so a raw literal passed to one is never looked up
 # and shows English in every language: the call site wraps it in
@@ -145,8 +145,8 @@ EXEMPT_KEYS = frozenset({
 # ([String]) has each element checked.
 STRING_DISPLAY_PARAMETERS = {
     # Views
-    "ConduitSettingsSection": ("title",),
-    "ConduitSheetHeader": ("title",),
+    "BelaySettingsSection": ("title",),
+    "BelaySheetHeader": ("title",),
     "SettingsMetricRow": ("label", "value"),
     "SessionListPlaceholderView": ("emptyTitle", "emptyDescription"),
     "NotificationSetupCommand": ("title",),
@@ -196,7 +196,7 @@ STRING_DISPLAY_PROPERTIES = (
 # Names no language translates, allowed as a raw display literal (the
 # EXEMPT_KEYS brand names count too).
 DISPLAY_BRAND_NAMES = frozenset({
-    "Cloudflare Access", "Hermes Conduit", "Gemini Live", "Grok Live",
+    "Cloudflare Access", "Hermes Belay", "Gemini Live", "Grok Live",
     "GPT-Live", "LaTeX", "Mermaid", "Discord", "Telegram", "API",
     "Tailscale", "Apple",
 })
@@ -1117,18 +1117,18 @@ def required_key_problems(catalog: dict, required_keys) -> dict:
     return problems
 
 
-# Every Conduit-owned catalog, in check order. Key existence is validated
+# Every Belay-owned catalog, in check order. Key existence is validated
 # only against Localizable (call-site extraction); the others carry
 # OS-resolved Siri/InfoPlist content but must cover the same languages.
 SOURCE_CATALOG = "Localizable.xcstrings"
 SECONDARY_CATALOGS = ("AppShortcuts.xcstrings", "InfoPlist.xcstrings")
-INFO_PLIST = os.path.join("Conduit", "Info.plist")
+INFO_PLIST = os.path.join("Belay", "Info.plist")
 # The Apple Watch app's sources and its own Localizable catalog.
-WATCH_DIRECTORY = "ConduitWatch"
+WATCH_DIRECTORY = "BelayWatch"
 # Each Info.plist with the InfoPlist catalog iOS reads its permission
 # prompts (NS…UsageDescription) from.
 INFO_PLIST_CATALOGS = (
-    (INFO_PLIST, os.path.join("Conduit", "InfoPlist.xcstrings")),
+    (INFO_PLIST, os.path.join("Belay", "InfoPlist.xcstrings")),
     (os.path.join(WATCH_DIRECTORY, "Info.plist"),
      os.path.join(WATCH_DIRECTORY, "InfoPlist.xcstrings")),
 )
@@ -1139,7 +1139,7 @@ WATCH_SHARED_SOURCES = (
     "Shared/GrokLive",
     "Shared/LocalLive",
     "Shared/WatchVoice",
-    "Conduit/Voice/GPTLive/GPTLiveProtocol.swift",
+    "Belay/Voice/GPTLive/GPTLiveProtocol.swift",
 )
 
 
@@ -1336,18 +1336,18 @@ def check(repo_root: str):
     """Full check. Returns (checked_site_count, missing_sites,
     key_problems, language_plan). Raises CatalogError for a catalog that
     can't be read."""
-    conduit = os.path.join(repo_root, "Conduit")
+    belay = os.path.join(repo_root, "Belay")
     catalogs = {}
     duplicates = {}
     for name in (SOURCE_CATALOG,) + SECONDARY_CATALOGS:
-        path = os.path.join(conduit, name)
+        path = os.path.join(belay, name)
         if name != SOURCE_CATALOG and not os.path.exists(path):
             continue
         try:
             catalogs[name], duplicates[name] = load_catalog(path)
         except (OSError, ValueError) as error:
             # json.JSONDecodeError and UnicodeDecodeError are ValueErrors.
-            raise CatalogError(f"Conduit/{name}: {error}") from error
+            raise CatalogError(f"Belay/{name}: {error}") from error
     catalog = catalogs[SOURCE_CATALOG]
     catalog_keys = set(catalog["strings"])
 
@@ -1362,7 +1362,7 @@ def check(repo_root: str):
         key_problems.setdefault("languages", []).extend(plan.problems)
 
     missing = {}
-    checked = scan_sites(conduit, catalog_keys, repo_root, missing, key_problems)
+    checked = scan_sites(belay, catalog_keys, repo_root, missing, key_problems)
     # The iPhone app compiles Shared/ too (project.yml).
     checked += scan_sites(os.path.join(repo_root, "Shared"), catalog_keys, repo_root, missing, key_problems)
 
@@ -1413,7 +1413,7 @@ def check(repo_root: str):
                 xml.parsers.expat.ExpatError) as error:
             key_problems.setdefault(plist_name, []).append(f"unreadable: {error}")
             continue
-        if catalog_name == os.path.join("Conduit", SECONDARY_CATALOGS[1]):
+        if catalog_name == os.path.join("Belay", SECONDARY_CATALOGS[1]):
             prompts_catalog = catalogs.get(SECONDARY_CATALOGS[1], {})
         elif os.path.exists(catalog_path):
             try:
@@ -1507,7 +1507,7 @@ def describe(languages) -> str:
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Verify every localizable call site resolves in "
-                    "Conduit/Localizable.xcstrings and every shipped "
+                    "Belay/Localizable.xcstrings and every shipped "
                     "language has a complete, well-formed translation.")
     parser.add_argument("--repo-root", default=".",
                         help="Repository root (default: current directory).")

@@ -1,6 +1,6 @@
 //
 //  WatchToolRelayClient.swift
-//  Conduit Watch app (built into Conduit too, for its tests)
+//  Belay Watch app (built into Belay too, for its tests)
 //
 //  A Watch call's web_search and recall_memory through the push relay, over
 //  the Watch's own internet, for while the iPhone can't be reached (wrist

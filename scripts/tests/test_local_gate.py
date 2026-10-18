@@ -25,7 +25,7 @@ local_gate = load_module("local_gate", "local-gate.py")
 
 UNIT_LANE = {
     "lane": "unit-1",
-    "target": "ConduitTests",
+    "target": "BelayTests",
     "classes": ["AlphaTests", "BetaTests", "GammaTests"],
     "batches": [
         {"classes": ["AlphaTests", "BetaTests"], "predicted_s": 10.0, "timeout_s": 600},
@@ -38,7 +38,7 @@ UNIT_LANE = {
 
 UI_LANE = {
     "lane": "ui-1",
-    "target": "ConduitUITests",
+    "target": "BelayUITests",
     "classes": ["LaunchUITests"],
     "class_timeouts": "LaunchUITests=420",
     "class_estimates": "LaunchUITests=100.0",
@@ -135,7 +135,7 @@ def lane_artifacts(lane_dir, *, status="pass", classes=("AlphaTests",),
             "schema_version": 1,
             "lane": "unit-1",
             "kind": "unit",
-            "target": "ConduitTests",
+            "target": "BelayTests",
             # lane_classes models the production UI shape: the runner writes
             # its DECLARED class list even when the invocation produced no
             # results, and a lane with per-class invocations carries no
@@ -373,8 +373,8 @@ class RecoveryVerdictTests(unittest.TestCase):
 
     SHA = "1" * 40
     WEDGE_FAILURE = [{"class": "System Failures",
-                      "test": "Conduit encountered an error", "attempts": []}]
-    BUSY_LOG = 'iOSSimulator: Failed to launch app with identifier: com.milim.relay ' \
+                      "test": "Belay encountered an error", "attempts": []}]
+    BUSY_LOG = 'iOSSimulator: Failed to launch app with identifier: live.tomkins.belay ' \
                '(BSErrorCodeDescription=Busy)'
     WEDGE_ATTEMPTS = [{"mode": "batch", "n": 1, "class": "all",
                        "status": "test-failures"},
@@ -404,7 +404,7 @@ class RecoveryVerdictTests(unittest.TestCase):
         write_json(self.run_dir / "meta.json", {
             "schema_version": 1, "requested_ref": "origin/main",
             "tested_sha": self.SHA, "xcode_version": "Xcode 27.0",
-            "simulator": {"name": "Conduit CI Gate", "runtime": "iOS 26.5",
+            "simulator": {"name": "Belay CI Gate", "runtime": "iOS 26.5",
                           "udid": "GATE-DEVICE"},
             "started_at": "2026-09-21T00:00:00Z",
             "finished_at": "2026-09-21T01:00:00Z", "wall_s": 3600,
@@ -426,14 +426,14 @@ class RecoveryVerdictTests(unittest.TestCase):
             "schema_version": 1, "phase": "build", "status": "pass",
             "duration_s": 60, "details": {"xctestrun": "/tmp/x.xctestrun"}})
         write_workers(self.run_dir, [
-            {"name": "unit", "device_name": "Conduit CI Gate",
+            {"name": "unit", "device_name": "Belay CI Gate",
              "udid": "GATE-DEVICE"},
-            {"name": "ui", "device_name": "Conduit CI Gate",
+            {"name": "ui", "device_name": "Belay CI Gate",
              "udid": "GATE-DEVICE"},
         ])
         lane_artifacts(self.run_dir / "lanes" / "ui", status="pass",
                        classes=("LaunchUITests",), cases=3,
-                       simulator=("Conduit CI Gate", "GATE-DEVICE"))
+                       simulator=("Belay CI Gate", "GATE-DEVICE"))
 
     def _wedge_log(self, lane_dir):
         logs = lane_dir / "logs"
@@ -1046,7 +1046,7 @@ class RecoveryVerdictTests(unittest.TestCase):
         base = self.run_dir / "repeats" / "AlphaTests"
         lane_artifacts(base / "iter-1", status="fail", classes=(), cases=0,
                        failures=[{"class": "System Failures",
-                                  "test": "Conduit encountered an error",
+                                  "test": "Belay encountered an error",
                                   "attempts": []}],
                        attempts=[{"mode": "batch", "n": 1, "class": "all",
                                   "status": "test-failures"}],
@@ -1122,7 +1122,7 @@ class RecoveryVerdictTests(unittest.TestCase):
                        classes=("GammaTests",), cases=1)
         self._recovery_phase("pass")
         _, doc = self._summarize()
-        self.assertEqual(doc["simulator"]["name"], "Conduit CI Gate")
+        self.assertEqual(doc["simulator"]["name"], "Belay CI Gate")
         self.assertEqual(doc["simulator"]["udid"], "GATE-DEVICE")
 
 
@@ -1136,8 +1136,8 @@ class UIRecoveryVerdictTests(unittest.TestCase):
 
     SHA = "1" * 40
     WEDGE_FAILURE = [{"class": "System Failures",
-                      "test": "Conduit encountered an error", "attempts": []}]
-    BUSY_LOG = ("Simulator device failed to launch com.milim.relay "
+                      "test": "Belay encountered an error", "attempts": []}]
+    BUSY_LOG = ("Simulator device failed to launch live.tomkins.belay "
                 "(BSErrorCodeDescription=Busy)")
 
     def setUp(self):
@@ -1153,7 +1153,7 @@ class UIRecoveryVerdictTests(unittest.TestCase):
         write_json(self.run_dir / "meta.json", {
             "schema_version": 1, "requested_ref": "origin/main",
             "tested_sha": self.SHA, "xcode_version": "Xcode 27.0",
-            "simulator": {"name": "Conduit CI Gate", "runtime": "iOS 26.5",
+            "simulator": {"name": "Belay CI Gate", "runtime": "iOS 26.5",
                           "udid": "6D08B063-B890-4D18-893B-D1E89E119919"},
             "started_at": "2026-09-22T00:00:00Z",
             "finished_at": "2026-09-22T01:00:00Z", "wall_s": 3600,
@@ -1171,15 +1171,15 @@ class UIRecoveryVerdictTests(unittest.TestCase):
             "schema_version": 1, "phase": "build", "status": "pass",
             "duration_s": 30, "details": {"xctestrun": "/tmp/x.xctestrun"}})
         write_workers(self.run_dir, [
-            {"name": "unit", "device_name": "Conduit CI Gate",
+            {"name": "unit", "device_name": "Belay CI Gate",
              "udid": "6D08B063-B890-4D18-893B-D1E89E119919"},
-            {"name": "ui", "device_name": "Conduit CI Gate",
+            {"name": "ui", "device_name": "Belay CI Gate",
              "udid": "6D08B063-B890-4D18-893B-D1E89E119919"},
         ])
         # A clean unit lane so only the UI suite decides the verdict.
         lane_artifacts(self.run_dir / "lanes" / "unit",
                        classes=("AlphaTests", "BetaTests", "GammaTests"),
-                       cases=3, simulator=("Conduit CI Gate",
+                       cases=3, simulator=("Belay CI Gate",
                                            "6D08B063-B890-4D18-893B-D1E89E119919"),
                        batches=[{"batch": 1,
                                           "classes": ["AlphaTests", "BetaTests",
@@ -1412,9 +1412,9 @@ class RecoverySpecTests(unittest.TestCase):
                 line + "\n", encoding="utf-8")
 
     WEDGE_FAILURE = [{"class": "System Failures",
-                      "test": "Conduit encountered an error", "attempts": []}]
+                      "test": "Belay encountered an error", "attempts": []}]
     BUSY_LOG = ['iOSSimulator: 6930ECCE: Failed to launch app with identifier: '
-                'com.milim.relay (error = ... BSErrorCodeDescription=Busy)']
+                'live.tomkins.belay (error = ... BSErrorCodeDescription=Busy)']
     WEDGE_ATTEMPTS = [{"mode": "batch", "n": 1, "class": "all",
                        "status": "test-failures"},
                       {"mode": "batch", "n": 2, "class": "all",
@@ -1542,14 +1542,14 @@ class IsInfraOnlyTests(unittest.TestCase):
         lane_artifacts(self.lane_dir, status="fail",
                        classes=("AlphaTests",), cases=1,
                        failures=[{"class": "System Failures",
-                                  "test": "Conduit encountered an error",
+                                  "test": "Belay encountered an error",
                                   "attempts": []}],
                        attempts=[{"mode": "batch", "n": 1, "class": "all",
                                   "status": "test-failures"}])
         logs = self.lane_dir / "logs"
         logs.mkdir(exist_ok=True)
         (logs / "batch-1-a1.log").write_text(
-            "Simulator device failed to launch com.milim.relay "
+            "Simulator device failed to launch live.tomkins.belay "
             "(BSErrorCodeDescription=Busy)" + chr(10), encoding="utf-8")
         self.assertEqual(self._decide(), 0,
                          "the verified launch wedge is exactly what may be "
@@ -1570,7 +1570,7 @@ class IsInfraOnlyTests(unittest.TestCase):
         logs = self.lane_dir / "logs"
         logs.mkdir(exist_ok=True)
         (logs / "batch-1-a1.log").write_text(
-            "Simulator device failed to launch com.milim.relay "
+            "Simulator device failed to launch live.tomkins.belay "
             "(BSErrorCodeDescription=Busy)" + chr(10), encoding="utf-8")
         self.assertEqual(self._decide(), 1,
                          "a genuine failing test stays final even when the "
@@ -1696,7 +1696,7 @@ class SummarizeTests(unittest.TestCase):
         write_json(self.run_dir / "build" / "phase.json", {
             "schema_version": 1, "phase": "build", "status": "pass",
             "duration_s": 300,
-            "details": {"xctestrun": "/tmp/derived-data/Conduit.xctestrun"}})
+            "details": {"xctestrun": "/tmp/derived-data/Belay.xctestrun"}})
         self._lane(self.run_dir / "lanes" / "unit",
                        classes=("AlphaTests", "BetaTests", "GammaTests"),
                        cases=11,
@@ -2119,7 +2119,7 @@ class SummarizeTests(unittest.TestCase):
                        classes=("AlphaTests", "BetaTests", "GammaTests"),
                        cases=11,
                        failures=[{"class": "System Failures",
-                                  "test": "Conduit encountered an error",
+                                  "test": "Belay encountered an error",
                                   "attempts": [{"result": "Failed",
                                                 "seconds": 0.0}]}],
                        attempts=[{"mode": "batch", "n": 1, "class": "all",
@@ -2144,7 +2144,7 @@ class SummarizeTests(unittest.TestCase):
         write_json(parts / "detail-batch-2-a1.json",
                    {"schema_version": 1, "attempts": [], "failures": [
                        {"class": "System Failures",
-                        "test": "Conduit encountered an error", "attempts": []}]})
+                        "test": "Belay encountered an error", "attempts": []}]})
         code, doc, _ = self._summarize()
         self.assertEqual(code, 1)
         self.assertEqual(doc["verdict"], "FAIL")
@@ -2423,7 +2423,7 @@ class SummarizeTests(unittest.TestCase):
         self._lane(self.run_dir / "lanes" / "ui", status="fail",
                        classes=("LaunchUITests",), cases=2,
                        failures=[{"class": "System Failures",
-                                  "test": "Conduit encountered an error",
+                                  "test": "Belay encountered an error",
                                   "attempts": []}],
                        attempts=[{"mode": "class", "n": 1,
                                   "class": "LaunchUITests",
@@ -2433,7 +2433,7 @@ class SummarizeTests(unittest.TestCase):
         write_json(parts / "detail-LaunchUITests-a1.json",
                    {"schema_version": 1, "attempts": [], "failures": [
                        {"class": "System Failures",
-                        "test": "Conduit encountered an error", "attempts": []}]})
+                        "test": "Belay encountered an error", "attempts": []}]})
         # The unit lane is metric-neutral for this test: make it clean.
         self._lane(self.run_dir / "lanes" / "unit",
                        classes=("AlphaTests", "BetaTests", "GammaTests"), cases=11)

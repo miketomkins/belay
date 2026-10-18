@@ -1,6 +1,6 @@
 //
 //  VoiceChatToolText.swift
-//  Conduit and the Conduit Watch app
+//  Belay and the Belay Watch app
 //
 //  What a live call's voice model hears from the chat tools (find_chat,
 //  open_chat, read_chat, and GPT-Live's "Find chat:", "Open chat:" and
@@ -150,7 +150,7 @@ enum VoiceChatToolText {
     static let delegatedNoMatches = "[No chats match that. Tell the user, and offer to try other words.]"
 
     static func delegatedSearchFailed(_ reason: String) -> String {
-        "[Conduit couldn't search the chats: \(reason) Tell the user in a few words.]"
+        "[Belay couldn't search the chats: \(reason) Tell the user in a few words.]"
     }
 
     static func delegatedRead(chat: String) -> String {
@@ -164,6 +164,6 @@ enum VoiceChatToolText {
     static let delegatedUnknownChat = "[That isn't one of the chats found. Delegate \"Find chat:\" with a few words from the topic first.]"
 
     static func delegatedReadFailed(_ reason: String) -> String {
-        "[Conduit couldn't read the chat: \(reason) Tell the user in a few words.]"
+        "[Belay couldn't read the chat: \(reason) Tell the user in a few words.]"
     }
 }

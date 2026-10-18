@@ -1,6 +1,6 @@
 //
 //  WatchVoiceWire.swift
-//  Conduit and the Conduit Watch app
+//  Belay and the Belay Watch app
 //
 //  What the Apple Watch and the iPhone send each other over
 //  WatchConnectivity for a Watch voice call
@@ -115,7 +115,7 @@ enum WatchVoiceWire {
     struct BridgeSession: Codable, Equatable {
         var engine: String
         var grant: DirectToolGrant
-        /// Conduit's rules, persona and memory for the call as
+        /// Belay's rules, persona and memory for the call as
         /// zlib-compressed UTF-8: they can be long.
         var briefing: Data
         /// The briefing's size before compression, for the log.
@@ -243,7 +243,7 @@ enum WatchVoiceWire {
     }
 
     /// A finished Watch call, queued to the iPhone to save in voice
-    /// history whenever Conduit next runs there.
+    /// history whenever Belay next runs there.
     struct DirectTranscript: Codable, Equatable {
         /// Names the saved call, so a transcript delivered twice is saved once.
         var callUUID: String

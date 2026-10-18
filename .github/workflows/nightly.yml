@@ -226,7 +226,7 @@ jobs:
             fi
             batch_args=()
             for cls in "$@"; do
-              batch_args+=("-only-testing:ConduitTests/${cls}")
+              batch_args+=("-only-testing:BelayTests/${cls}")
             done
             batch_log="${RUNNER_TEMP:-${TMPDIR:-/tmp}}/unit-batch-$batch_no.log"
             batch_start=$(date +%s)
@@ -359,7 +359,7 @@ jobs:
           IFS=',' read -r -a CLASSES <<< "$TIMING_CLASSES"
           args=()
           for cls in "${CLASSES[@]}"; do
-            args+=("-only-testing:ConduitTests/${cls}")
+            args+=("-only-testing:BelayTests/${cls}")
           done
           # Per-test allowance only, no wall-clock watchdog: a hang past the
           # allowance is killed by xcodebuild, and a wedged simulator ends at
@@ -410,7 +410,7 @@ jobs:
           IFS=',' read -r -a CLASSES <<< "$UI_CLASSES"
           args=()
           for cls in "${CLASSES[@]}"; do
-            args+=("-only-testing:ConduitUITests/${cls}")
+            args+=("-only-testing:BelayUITests/${cls}")
           done
           xcodebuild test-without-building \
             -xctestrun "$XCRUN_FILE" \

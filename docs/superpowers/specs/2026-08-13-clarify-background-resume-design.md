@@ -6,7 +6,7 @@
 
 ## Problem
 
-When Conduit receives a clarification request or approval request while the app
+When Belay receives a clarification request or approval request while the app
 is backgrounded, the notification arrives and the surrounding transcript is
 present after the app returns to the foreground, but the answerable card can be
 missing. The resume path merges the server transcript with the locally
@@ -19,7 +19,7 @@ answerable representation of the request.
 ## Goal
 
 After a background-to-foreground resume, a pending clarification or approval
-remains visible and answerable whenever Conduit has not received a gateway
+remains visible and answerable whenever Belay has not received a gateway
 record that resolves that exact decision.
 
 The behavior must hold when the resume snapshot explicitly reports
@@ -62,12 +62,12 @@ separate concerns.
 
 ## Expected implementation surface
 
-- `Conduit/Services/AppState.swift`: unify pending-decision resume eligibility,
+- `Belay/Services/AppState.swift`: unify pending-decision resume eligibility,
   remove settled approval pruning, preserve idle turn state for explicit false,
   and apply bounded persistence to gateway-provided pending decisions.
-- `Conduit/Services/SessionPresentationCache.swift`: use the shared pending-key
+- `Belay/Services/SessionPresentationCache.swift`: use the shared pending-key
   helpers for reconciliation and keep expiry behavior type-independent.
-- `ConduitTests/SessionPresentationCacheTests.swift`: cover cached and
+- `BelayTests/SessionPresentationCacheTests.swift`: cover cached and
   gateway-provided clarification and approval cards, explicit settled state,
   expiry, and resolved-decision suppression.
 
@@ -93,6 +93,6 @@ separate concerns.
 ## Verification
 
 Run the focused pending-decision resume tests first, then run the complete
-`Conduit` XCTest suite in the iOS Simulator. Review the final diff to confirm
+`Belay` XCTest suite in the iOS Simulator. Review the final diff to confirm
 that the change is limited to pending-decision resume reconciliation and its
 tests.

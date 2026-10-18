@@ -147,8 +147,8 @@ write_doc() {
     sep=","
   done
   cat > "$FAKE_CANNED" <<DOC
-{"testNodes": [{"nodeType": "Test Plan", "name": "Conduit", "result": "Passed",
-  "children": [{"nodeType": "Unit test bundle", "name": "ConduitTests", "result": "Passed",
+{"testNodes": [{"nodeType": "Test Plan", "name": "Belay", "result": "Passed",
+  "children": [{"nodeType": "Unit test bundle", "name": "BelayTests", "result": "Passed",
     "children": [$nodes]}]}]}
 DOC
 }
@@ -171,8 +171,8 @@ reset_unit_stub_vars() {
 
 write_canned() { # $1=file $2=class $3=result
   cat > "$1" <<EOF
-{"testNodes": [{"nodeType": "Test Plan", "name": "Conduit", "result": "Passed",
-  "children": [{"nodeType": "Unit test bundle", "name": "ConduitTests", "result": "Passed",
+{"testNodes": [{"nodeType": "Test Plan", "name": "Belay", "result": "Passed",
+  "children": [{"nodeType": "Unit test bundle", "name": "BelayTests", "result": "Passed",
     "children": [{"nodeType": "Test Suite", "name": "$2", "result": "Passed",
       "children": [{"nodeType": "Test Case", "name": "testC()", "result": "$3",
         "durationInSeconds": 0.1}]}]}]}]}
@@ -217,7 +217,7 @@ end_case() { # closes the current case's timing line (suite-progress telemetry)
 run_lane() { # $1=classes $2=timeout $3=iterations (one batch per class)
   _classes="$1"; _timeout="$2"; _iters="$3"; shift 3
   bash "$SCRIPTS/ci-test-lane.sh" \
-    --kind unit --lane unit-t --target ConduitTests \
+    --kind unit --lane unit-t --target BelayTests \
     --classes "$_classes" \
     --batches-json "$(batches_json_for "$_classes" "$_timeout")" \
     --predicted 42 --timeout "$_timeout" \
@@ -230,7 +230,7 @@ run_lane() { # $1=classes $2=timeout $3=iterations (one batch per class)
 run_lane_raw() { # $1=classes $2=RAW batches json (for malformed-layout cases)
   _classes="$1"; _raw="$2"
   bash "$SCRIPTS/ci-test-lane.sh" \
-    --kind unit --lane unit-t --target ConduitTests \
+    --kind unit --lane unit-t --target BelayTests \
     --classes "$_classes" \
     --batches-json "$_raw" \
     --predicted 42 --timeout 300 \
@@ -242,7 +242,7 @@ run_lane_raw() { # $1=classes $2=RAW batches json (for malformed-layout cases)
 
 run_lane_missing_batches() { # $1=classes: no --batches-json at all
   bash "$SCRIPTS/ci-test-lane.sh" \
-    --kind unit --lane unit-t --target ConduitTests \
+    --kind unit --lane unit-t --target BelayTests \
     --classes "$1" \
     --predicted 42 --timeout 300 \
     --iterations 3 \
@@ -303,7 +303,7 @@ print(d.get('retried_classes'))
 
 run_ui_lane() { # $1=classes $2=lane-timeout(bookkeeping) $3=class-timeouts
   _classes="$1"; _timeout="$2"; _cto="$3"
-  bash "$SCRIPTS/ci-test-lane.sh"     --kind ui --lane ui-t --target ConduitUITests     --classes "$_classes"     --class-timeouts "$_cto"     --predicted 42 --timeout "$_timeout"     --xctestrun "$WORK/fake.xctestrun"     --result-dir "$WORKCASE" >"$WORKCASE/stdout.log" 2>&1
+  bash "$SCRIPTS/ci-test-lane.sh"     --kind ui --lane ui-t --target BelayUITests     --classes "$_classes"     --class-timeouts "$_cto"     --predicted 42 --timeout "$_timeout"     --xctestrun "$WORK/fake.xctestrun"     --result-dir "$WORKCASE" >"$WORKCASE/stdout.log" 2>&1
   echo $? > "$WORKCASE/exit-code"
 }
 
@@ -368,8 +368,8 @@ write_doc_multi() {
     sep=","
   done
   cat > "$FAKE_CANNED" <<DOC
-{"testNodes": [{"nodeType": "Test Plan", "name": "Conduit", "result": "Passed",
-  "children": [{"nodeType": "UI test bundle", "name": "ConduitUITests", "result": "Passed",
+{"testNodes": [{"nodeType": "Test Plan", "name": "Belay", "result": "Passed",
+  "children": [{"nodeType": "UI test bundle", "name": "BelayUITests", "result": "Passed",
     "children": [$nodes]}]}]}
 DOC
 }

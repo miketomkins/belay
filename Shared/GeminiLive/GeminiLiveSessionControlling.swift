@@ -1,6 +1,6 @@
 //
 //  GeminiLiveSessionControlling.swift
-//  Conduit and the Conduit Watch app
+//  Belay and the Belay Watch app
 //
 //  The seam a live voice conversation drives its session through: Gemini
 //  Live's own, or Grok Live's (xAI's events read as Gemini Live's), on

@@ -26,7 +26,7 @@
 #   scripts/bench-unit-batches.sh --summarize DIR
 #
 # Run it under the host simulator-test lease, as the gate does:
-#   ~/.local/bin/ios-ci-host acquire simulator-test --project Conduit \
+#   ~/.local/bin/ios-ci-host acquire simulator-test --project Belay \
 #     --workflow batch-benchmark --fail-if-busy --exec -- \
 #     bash scripts/bench-unit-batches.sh ...
 #
@@ -184,7 +184,7 @@ run_batch() { # $1=dir $2=batch-number, rest=classes
   local -a args=()
   local cls
   for cls in "$@"; do
-    args+=("-only-testing:ConduitTests/${cls}")
+    args+=("-only-testing:BelayTests/${cls}")
   done
   started=$(date +%s)
   xcodebuild test-without-building \

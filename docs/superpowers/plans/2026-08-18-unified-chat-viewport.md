@@ -24,18 +24,18 @@
 
 ## Repository facts an executor needs
 
-- Worktree: `/Users/agrias/Documents/Conduit/.worktrees/unified-chat-viewport`, branch `unified-chat-viewport`. All paths below are relative to the worktree root.
+- Worktree: `/Users/agrias/Documents/Belay/.worktrees/unified-chat-viewport`, branch `unified-chat-viewport`. All paths below are relative to the worktree root.
 - Generate the Xcode project after adding/removing files: `xcodegen generate` (repo has no checked-in .xcodeproj).
 - Build/test commands (isolated derived data; iPhone 17 sim UDID `124B405C-07CF-44F4-A024-9AD87B9992B0` is already booted; if it wedges, reboot via `xcrun simctl shutdown/boot`):
   ```bash
-  xcodebuild build-for-testing -project Conduit.xcodeproj -scheme Conduit \
+  xcodebuild build-for-testing -project Belay.xcodeproj -scheme Belay \
     -destination 'platform=iOS Simulator,id=124B405C-07CF-44F4-A024-9AD87B9992B0' \
     -derivedDataPath .dd 2>&1 | tail -3
 
-  xcodebuild test-without-building -project Conduit.xcodeproj -scheme Conduit \
+  xcodebuild test-without-building -project Belay.xcodeproj -scheme Belay \
     -destination 'platform=iOS Simulator,id=124B405C-07CF-44F4-A024-9AD87B9992B0' \
     -derivedDataPath .dd \
-    -only-testing:ConduitTests/<SuiteName> 2>&1 | grep -E "Test Suite|Executed|failed" | tail -10
+    -only-testing:BelayTests/<SuiteName> 2>&1 | grep -E "Test Suite|Executed|failed" | tail -10
   ```
 - Focused suites that must stay green (baseline verified green on this branch): `ChatScrollStateTests` (47), `ChatResumeCoordinatorTests`, `ChatResumePolicyTests`, `ChatResumeStoreTests`, `ChatTitleScrollTests` (7), `AppStateChatResumeTests` (82). Selection/table suites (`ChatTextSelectionTests`, `MarkdownSelectionCoordinatorTests`, `MarkdownTableLayoutTests`) must stay green once Tasks 2 and 8 are done.
 - Key existing types (do not rewrite semantics, only relocate/fold):
@@ -50,8 +50,8 @@
 ## Task 0 (Phase 0): Characterize current behavior — trace + analysis + characterization tests
 
 **Files:**
-- Create: `Conduit/Services/ChatViewportTrace.swift`
-- Create: `ConduitTests/ChatViewportCharacterizationTests.swift`
+- Create: `Belay/Services/ChatViewportTrace.swift`
+- Create: `BelayTests/ChatViewportCharacterizationTests.swift`
 - Create: `docs/viewport-rewrite-analysis.md`
 
 **Interfaces:**
@@ -60,7 +60,7 @@
 - [ ] **Step 1: Write the DEBUG-only trace recorder**
 
 ```swift
-// Conduit/Services/ChatViewportTrace.swift
+// Belay/Services/ChatViewportTrace.swift
 import Foundation
 import os
 
@@ -80,7 +80,7 @@ final class ChatViewportTrace {
 
     private(set) var entries: [Entry] = []
     private let limit = 600
-    private let logger = Logger(subsystem: "com.milim.relay", category: "viewport")
+    private let logger = Logger(subsystem: "live.tomkins.belay", category: "viewport")
 
     func log(_ text: String) {
         entries.append(Entry(time: CFAbsoluteTimeGetCurrent(), text: text))
@@ -104,9 +104,9 @@ final class ChatViewportTrace {
 - [ ] **Step 3: Write the characterization tests** that pin today's *composed* policy decisions for the spec's Phase-0 scenarios. These are logic-level (no view rendering); they drive the existing pure policies in the same order ChatView's onChange cascade does. They are intentionally implementation-coupled and will be rewritten against the controller in Task 7 (mapping documented in the PR).
 
 ```swift
-// ConduitTests/ChatViewportCharacterizationTests.swift
+// BelayTests/ChatViewportCharacterizationTests.swift
 import XCTest
-@testable import Conduit
+@testable import Belay
 
 /// Phase-0 characterization of the CURRENT viewport decision pipeline.
 /// Each test documents the composed decision for one spec repro scenario.
@@ -260,13 +260,13 @@ final class ChatViewportCharacterizationTests: XCTestCase {
 
 - [ ] **Step 5: Build + run characterization suite**
 
-Run: `xcodegen generate` then build-for-testing, then `-only-testing:ConduitTests/ChatViewportCharacterizationTests`.
+Run: `xcodegen generate` then build-for-testing, then `-only-testing:BelayTests/ChatViewportCharacterizationTests`.
 Expected: PASS (all new tests pin current behavior).
 
 - [ ] **Step 6: Commit**
 
 ```bash
-git add Conduit/Services/ChatViewportTrace.swift ConduitTests/ChatViewportCharacterizationTests.swift Conduit/Views/ChatView.swift docs/viewport-rewrite-analysis.md project.yml 2>/dev/null || git add Conduit/Services/ChatViewportTrace.swift ConduitTests/ChatViewportCharacterizationTests.swift Conduit/Views/ChatView.swift docs/viewport-rewrite-analysis.md
+git add Belay/Services/ChatViewportTrace.swift BelayTests/ChatViewportCharacterizationTests.swift Belay/Views/ChatView.swift docs/viewport-rewrite-analysis.md project.yml 2>/dev/null || git add Belay/Services/ChatViewportTrace.swift BelayTests/ChatViewportCharacterizationTests.swift Belay/Views/ChatView.swift docs/viewport-rewrite-analysis.md
 git commit -m "viewport: add Phase-0 trace instrumentation and behavior characterization"
 ```
 
@@ -275,8 +275,8 @@ git commit -m "viewport: add Phase-0 trace instrumentation and behavior characte
 ## Task 1 (Phase 1): `ChatViewportController` — core state machine, tests first
 
 **Files:**
-- Create: `Conduit/Services/ChatViewportController.swift`
-- Create: `ConduitTests/ChatViewportControllerTests.swift`
+- Create: `Belay/Services/ChatViewportController.swift`
+- Create: `BelayTests/ChatViewportControllerTests.swift`
 
 **Interfaces:**
 - Consumes: `ChatScrollSessionKey/Identity`, `ChatMessageScrollTarget/Cache` + `ChatMessageScrollTargetCacheUpdate`, `ChatRenderedScrollScope/Content/Targets`, `ChatResumeRestorationRequest`, `ChatResumeViewportResolver` + `ChatScrollTargetAvailability`, `ChatScrollSnapshot`, `ChatRenderedViewportSnapshot` (all existing).
@@ -292,7 +292,7 @@ git commit -m "viewport: add Phase-0 trace instrumentation and behavior characte
 - [ ] **Step 0: Add the `ChatRenderedRowFrame` support type first** (Task 2 needs it in ChatScrollState.swift, the controller needs it now):
 
 ```swift
-// Append to Conduit/Services/ChatScrollState.swift
+// Append to Belay/Services/ChatScrollState.swift
 
 /// Global-space frame of one rendered stable message row, scoped to the
 /// rendered scroll scope that produced it. Only rows SwiftUI actually laid
@@ -399,12 +399,12 @@ final class ChatViewportControllerTests: XCTestCase {
   - `testViewDisappearedAbandonsDrag`.
   - `testRenderedSnapshotMapsFollowingTopAndSyntheticTopAnchor` — `renderedViewportSnapshot` with mode following → `followsLatest: true`; browsing at stable row → semantic anchor + metadata + source id; stable top == nil above first row → first target's anchor (never the synthetic top marker id).
 
-- [ ] **Step 2: Run tests to verify they fail** — `ConduitTests/ChatViewportControllerTests` fails to build (type doesn't exist). Expected.
+- [ ] **Step 2: Run tests to verify they fail** — `BelayTests/ChatViewportControllerTests` fails to build (type doesn't exist). Expected.
 
 - [ ] **Step 3: Implement `ChatViewportController`.** Full skeleton with the folded policies; the design (keep faithful — the tests above are its contract):
 
 ```swift
-// Conduit/Services/ChatViewportController.swift
+// Belay/Services/ChatViewportController.swift
 import Foundation
 
 enum ChatViewportMode: Equatable {
@@ -516,8 +516,8 @@ struct ChatViewportController: Equatable {
 ## Task 2 (Phase 2): Stable viewport observation in ChatView
 
 **Files:**
-- Modify: `Conduit/Views/ChatView.swift` (row frames preference, viewport bounds both edges, derived `stableTopMessageID`; snapshot provider reads derived value)
-- Modify: `Conduit/Services/ChatScrollState.swift` (only if any frame plumbing remained)
+- Modify: `Belay/Views/ChatView.swift` (row frames preference, viewport bounds both edges, derived `stableTopMessageID`; snapshot provider reads derived value)
+- Modify: `Belay/Services/ChatScrollState.swift` (only if any frame plumbing remained)
 
 **Interfaces:**
 - Consumes: `ChatRenderedRowFrame`, `ChatRenderedScrollTargets.row(_:scope:frame:)` (Task 1 Step 0).
@@ -604,8 +604,8 @@ func testStableTopMessagePicksFirstTargetOrderRowIntersectingViewport() {
 ## Task 3 (Phase 3): Single scroll executor + controller ownership of latest/top/drag
 
 **Files:**
-- Modify: `Conduit/Views/ChatView.swift`
-- Modify: `ConduitTests/ChatTitleScrollTests.swift` (only if it referenced deleted members — it shouldn't yet; ChatScrollOwnerState survives until Task 7)
+- Modify: `Belay/Views/ChatView.swift`
+- Modify: `BelayTests/ChatTitleScrollTests.swift` (only if it referenced deleted members — it shouldn't yet; ChatScrollOwnerState survives until Task 7)
 
 **Interfaces:**
 - Consumes: full Task 1 controller API.
@@ -669,7 +669,7 @@ private func executeScrollCommand(_ command: ChatViewportCommand, using proxy: S
 private func runScroll(_ command: ChatViewportCommand, using proxy: ScrollViewProxy) {
     ChatViewportTrace.shared.log("scroll \(command.destination) gen=\(command.generation) animated=\(command.animated)")
     var transaction = Transaction()
-    transaction.animation = command.animated ? ConduitMotion.response : nil
+    transaction.animation = command.animated ? BelayMotion.response : nil
     withTransaction(transaction) {
         switch command.destination {
         case .bottom(let anchorID): proxy.scrollTo(anchorID, anchor: .bottom)
@@ -695,7 +695,7 @@ private func runScroll(_ command: ChatViewportCommand, using proxy: ScrollViewPr
   | `.onChange(of: appState.messages)` (:265) | `performViewportEffects(viewport.transcriptChanged(messages: newMessages, transcriptRevision: appState.chatTranscriptRevision), using: proxy)` — but ONLY the reassert part moves now; the target-cache update + rendered-revision mirroring inside the controller updates `viewport.renderedScrollScope` which the preference payloads read; ALSO keep `notificationHandoffPending` bookkeeping until Task 4 (leave those lines) |
   | `.onChange(of: appState.isBusy)` (:422) | interim: `if !isBusy, viewport.isFollowingLatest, !hasPendingRestoration { performViewportEffects(viewport.transcriptSettledAfterActivity(), using: proxy) }` — add a thin controller method emitting the animated bottom command only-when-following (deleted in Task 6) |
 
-  Interim bridging rule (prevents dual authority): `followsLatest` @State is DELETED in this task; every remaining legacy read (streaming onChange :418, restoration loop :582/:619/:623, notification branches :328/:346/:372/:379/:385/:408/:432/:777/:784/:792 — until Tasks 4–6 take them) becomes `viewport.isFollowingLatest`, and every legacy WRITE (`followsLatest = x`) becomes a call to a transitional controller method `viewport.legacySetFollowingLatest(_:) -> [ChatViewportEffect]` that just sets mode (`.followingLatest` / `.browsing`) without generation bumps, returning `[]`. These transitional calls are deleted by Tasks 4–6 and must not survive Task 7. Grep-audit at the end of this task: `grep -n "legacySetFollowingLatest" Conduit/Views/ChatView.swift` — every hit must have a TODO(task-4/5/6) comment naming its removal task.
+  Interim bridging rule (prevents dual authority): `followsLatest` @State is DELETED in this task; every remaining legacy read (streaming onChange :418, restoration loop :582/:619/:623, notification branches :328/:346/:372/:379/:385/:408/:432/:777/:784/:792 — until Tasks 4–6 take them) becomes `viewport.isFollowingLatest`, and every legacy WRITE (`followsLatest = x`) becomes a call to a transitional controller method `viewport.legacySetFollowingLatest(_:) -> [ChatViewportEffect]` that just sets mode (`.followingLatest` / `.browsing`) without generation bumps, returning `[]`. These transitional calls are deleted by Tasks 4–6 and must not survive Task 7. Grep-audit at the end of this task: `grep -n "legacySetFollowingLatest" Belay/Views/ChatView.swift` — every hit must have a TODO(task-4/5/6) comment naming its removal task.
 
   The snapshot-provider capture closure (:202-222) now returns `viewport.renderedViewportSnapshot(pendingRestorationGeneration: appState.chatResumeRestorationRequest?.generation)` (it captures the `@State` box, so it reads live values exactly like the old bindings did).
 
@@ -710,7 +710,7 @@ private func runScroll(_ command: ChatViewportCommand, using proxy: ScrollViewPr
 ## Task 4 (Phase 4): Session transitions + notification handoff through the controller
 
 **Files:**
-- Modify: `Conduit/Views/ChatView.swift`
+- Modify: `Belay/Views/ChatView.swift`
 
 **Interfaces:**
 - Consumes: `renderedSessionChanged`, `activeIdentityRefreshed`, `notificationHandoffBegan/layoutMeasured/destinationReady`.
@@ -734,9 +734,9 @@ private func runScroll(_ command: ChatViewportCommand, using proxy: ScrollViewPr
 ## Task 5 (Phase 5): Automatic restoration → controller `.restoring`
 
 **Files:**
-- Modify: `Conduit/Services/ChatViewportController.swift` (activate `RestorationState`)
-- Modify: `Conduit/Views/ChatView.swift` (delete `applyChatResumeRestoration` loop internals)
-- Modify: `ConduitTests/ChatViewportControllerTests.swift` (restoration tests)
+- Modify: `Belay/Services/ChatViewportController.swift` (activate `RestorationState`)
+- Modify: `Belay/Views/ChatView.swift` (delete `applyChatResumeRestoration` loop internals)
+- Modify: `BelayTests/ChatViewportControllerTests.swift` (restoration tests)
 
 **Interfaces:**
 - Consumes: `ChatResumeRestorationRequest`, `ChatResumeViewportResolver`, `ChatRenderedScrollContent/Targets`, folded `ChatResumeRenderRestorationState` semantics (maximumChecks 80, retryInterval 4, 25ms tick — the interval stays view-side).
@@ -784,8 +784,8 @@ private func runScroll(_ command: ChatViewportCommand, using proxy: ScrollViewPr
 ## Task 6 (Phase 6): Follow rendered growth; delete streamingText scrolling
 
 **Files:**
-- Modify: `Conduit/Views/ChatView.swift`
-- Modify: `Conduit/Services/ChatViewportController.swift` (nothing new needed if Task 1's follow-growth is complete; otherwise finish it)
+- Modify: `Belay/Views/ChatView.swift`
+- Modify: `Belay/Services/ChatViewportController.swift` (nothing new needed if Task 1's follow-growth is complete; otherwise finish it)
 
 **Interfaces:** none new.
 
@@ -808,8 +808,8 @@ private func runScroll(_ command: ChatViewportCommand, using proxy: ScrollViewPr
 ## Task 7 (Phase 7): Remove obsolete ownership machinery + replace obsolete tests
 
 **Files:**
-- Modify: `Conduit/Views/ChatView.swift`, `Conduit/Services/ChatScrollState.swift`
-- Modify/Create tests: `ConduitTests/ChatTitleScrollTests.swift` (rewritten), `ConduitTests/ChatScrollStateTests.swift` (drag/restoration families removed with mapping), `ConduitTests/ChatViewportCharacterizationTests.swift` (deleted)
+- Modify: `Belay/Views/ChatView.swift`, `Belay/Services/ChatScrollState.swift`
+- Modify/Create tests: `BelayTests/ChatTitleScrollTests.swift` (rewritten), `BelayTests/ChatScrollStateTests.swift` (drag/restoration families removed with mapping), `BelayTests/ChatViewportCharacterizationTests.swift` (deleted)
 
 **Interfaces:** none new; deletions only.
 
@@ -837,7 +837,7 @@ private func runScroll(_ command: ChatViewportCommand, using proxy: ScrollViewPr
 
   No existing test may be weakened to make the rewrite pass; if a kept test needs a mechanical update (type moved), the assertion strength must be identical.
 
-- [ ] **Step 4: Audit for leftovers.** `grep -rn "legacySetFollowingLatest\|scrollOwnerState\|ChatDragLifecycleState\|ChatResumeRenderRestorationState\|ChatScrollOwnerState\|topVisibleChatID\|scrollTargetLayout\|scrollPosition" Conduit ConduitTests` must return zero hits (except `.scrollPosition` if Step 1 kept it with justification). `grep -n "proxy.scrollTo\|proxy\.scrollTo" Conduit/Views/ChatView.swift` must show hits ONLY inside `runScroll`. `grep -n "onChange(of: appState.streamingText)" Conduit` must be empty.
+- [ ] **Step 4: Audit for leftovers.** `grep -rn "legacySetFollowingLatest\|scrollOwnerState\|ChatDragLifecycleState\|ChatResumeRenderRestorationState\|ChatScrollOwnerState\|topVisibleChatID\|scrollTargetLayout\|scrollPosition" Belay BelayTests` must return zero hits (except `.scrollPosition` if Step 1 kept it with justification). `grep -n "proxy.scrollTo\|proxy\.scrollTo" Belay/Views/ChatView.swift` must show hits ONLY inside `runScroll`. `grep -n "onChange(of: appState.streamingText)" Belay` must be empty.
 
 - [ ] **Step 5: Run ALL focused suites + selection/table suites.** Green.
 
@@ -849,8 +849,8 @@ private func runScroll(_ command: ChatViewportCommand, using proxy: ScrollViewPr
 
 **Files:** none new (except PR body).
 
-- [ ] **Step 1: Run the full simulator suite** once (fresh boot first): `xcrun simctl shutdown 124B405C-07CF-44F4-A024-9AD87B9992B0; xcrun simctl boot 124B405C-07CF-44F4-A024-9AD87B9992B0; xcrun simctl bootstatus 124B405C-07CF-44F4-A024-9AD87B9992B0 -b` then `xcodebuild test -project Conduit.xcodeproj -scheme Conduit -destination '...' -derivedDataPath .dd`. If the local sim wedges (known issue), erase+reboot once, retry once, then fall back to pushing the branch and validating via CI per repo practice.
-- [ ] **Step 2: Manual/simulator streaming stress checklist** (spec's 10 scenarios; use the real gateway if reachable, else the chaos harness at /tmp/conduit-chaos for transport; record `ChatViewportTrace.dump()` for each run and confirm: never more than one current command generation, no scroll command during active drag, no latest command while browsing):
+- [ ] **Step 1: Run the full simulator suite** once (fresh boot first): `xcrun simctl shutdown 124B405C-07CF-44F4-A024-9AD87B9992B0; xcrun simctl boot 124B405C-07CF-44F4-A024-9AD87B9992B0; xcrun simctl bootstatus 124B405C-07CF-44F4-A024-9AD87B9992B0 -b` then `xcodebuild test -project Belay.xcodeproj -scheme Belay -destination '...' -derivedDataPath .dd`. If the local sim wedges (known issue), erase+reboot once, retry once, then fall back to pushing the branch and validating via CI per repo practice.
+- [ ] **Step 2: Manual/simulator streaming stress checklist** (spec's 10 scenarios; use the real gateway if reachable, else the chaos harness at /tmp/belay-chaos for transport; record `ChatViewportTrace.dump()` for each run and confirm: never more than one current command generation, no scroll command during active drag, no latest command while browsing):
   1. long normal answer untouched; 2. scroll up during stream; 3. manual return to bottom resumes follow; 4. title tap during stream; 5. latest button after title tap; 6. rapid conversation switching during streaming; 7. background/foreground in Continue and Latest modes; 8. large Markdown table/code response; 9. notification open while another transcript visible; 10. text selection + nested horizontal table scrolling afterwards.
 - [ ] **Step 3: Final-review invariant sweep** (spec's list — verify each in the finished diff, note evidence in PR body): one viewport state machine; one scrollTo boundary; `onChange(streamingText)` does not scroll; geometry reports facts (no independent ownership booleans mutated in geometry callbacks); no ephemeral ID can become a persisted anchor; all delayed commands carry validated tokens; automatic restoration yields to every explicit action; reconnect never uses Latest preference to navigate; resume-store data compatible (schema untouched); no new global gesture; no connection-code cleanup; no weakened tests.
 - [ ] **Step 4: Push + open PR** against `main` with: summary, phase-by-phase commit list, old-test→new-test mapping table, behavior-ledger reference (`docs/viewport-rewrite-analysis.md`), invariant checklist results, manual-run trace notes. Then dispatch the three local reviewers per the established pipeline (code-reviewer full diff, second-reviewer, local-reviewer on diff-only) BEFORE pushing to GitHub if the diff is ready — order: local reviewers → fix → single push → CI → bots.

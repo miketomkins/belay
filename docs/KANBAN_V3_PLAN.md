@@ -1,4 +1,4 @@
-# Hermes Conduit — Kanban V3 Plan (V3A implemented here; V3B–V3D scoped)
+# Hermes Belay — Kanban V3 Plan (V3A implemented here; V3B–V3D scoped)
 
 Status: V3A implementation in progress. Written 2026-08-23.
 
@@ -6,12 +6,12 @@ Status: V3A implementation in progress. Written 2026-08-23.
 - Repo: kaishi00/hermes-conduit (origin: https://github.com/kaishi00/hermes-conduit.git)
 - Branch: feature/kanban-v3a-orchestration-triage (tracking origin/main; PR #94)
 - Base commit: 10719f4 — "Merge pull request #93 from kaishi00/feature/kanban-v2" (V2 merged; upstream iOS baseline)
-- iOS test target: the Harness ios_test tool against this repo (scheme Conduit, prepare 'xcodegen generate'; see .ios-test.json at the repo root)
-- project.yml picks up Conduit/** and ConduitTests/** automatically (XcodeGen). Never edit Conduit.xcodeproj.
+- iOS test target: the Harness ios_test tool against this repo (scheme Belay, prepare 'xcodegen generate'; see .ios-test.json at the repo root)
+- project.yml picks up Belay/** and BelayTests/** automatically (XcodeGen). Never edit Belay.xcodeproj.
 
 ## Keep-out list (do NOT modify)
-- Conduit/Services/HermesClient.swift, chat/session WebSocket transport, reconnect logic, session restoration, prompt submission, streaming, message handling, viewport restoration.
-- Conduit/Models/KanbanStatus.swift status policy UNLESS the current upstream audit proves the contract changed (then isolate + regress-test the change).
+- Belay/Services/HermesClient.swift, chat/session WebSocket transport, reconnect logic, session restoration, prompt submission, streaming, message handling, viewport restoration.
+- Belay/Models/KanbanStatus.swift status policy UNLESS the current upstream audit proves the contract changed (then isolate + regress-test the change).
 - V1/V2 invariants: DashboardTicketBridge-only Kanban networking; dedicated KanbanService; KanbanStore mutation ownership (KanbanOperationContext, configurationGeneration, performMutation, loadedBoardSlug, loadedContextStamp); concrete board slug pinning; stale-board non-actionability; shared cross-profile semantics (no ?profile= fabrication); post-mutation superseding reconciliation; dirty task drafts; dependency/model-editor identity isolation; context-bound destructive confirmation; polling fallback; lane-chip + vertical-card layout.
 
 ## Session playbook (how to continue if interrupted)
@@ -33,14 +33,14 @@ Status: V3A implementation in progress. Written 2026-08-23.
 - Preserve entire existing suite; run full ios_test.
 
 ## Planned file layout (V3A)
-- Conduit/Models/KanbanModels.swift: extend with orchestrations-patch/profile-description/(specify+decompose response) model types; tolerant decode; Codable wire fidelity from audit.
-- Conduit/Services/KanbanService.swift: fetchProfileDescriptions (profiles already fetched), updateProfileDescription(profile:description:), generateProfileDescription(profile:), updateOrchestration(_ patch:), specifyTask(id:board:), decomposeTask(id:board:), manual nudge (or reuse scheduleDispatcherNudge with immediate-post variant); all behind DashboardJSONRequester; no HermesClient.
-- Conduit/Services/KanbanStore.swift: store mutations mirrored on existing performMutation discipline; new published state for profile descriptions if needed (profiles already published); orchestration update; specify/decompose completion reconciliation (superseding reload of board+detail).
-- Conduit/Views/KanbanViews.swift: board header gains an ellipsis '…' menu (Orchestration Settings…, Profiles routing list, Nudge Dispatcher). Keep header uncrowded.
-- Conduit/Views/Kanban/KanbanOrchestrationSettingsSheet.swift (new): toggles + profile pickers; render 'Default (resolved)' clearly for configured-vs-resolved.
-- Conduit/Views/Kanban/KanbanProfileRoutingScreen.swift (new): list + editor with multiline TextEditor, Save, Generate Automatically, generated-review banner, dirty ownership.
-- Conduit/Views/Kanban/KanbanTaskDetailView.swift: 'Triage Actions' section gated on eligibility; Specify button; Decompose button + confirmationDialog ("Decompose this task?" with wording); semantic failure shown inline; success -> authoritative reload.
-- ConduitTests/KanbanV3ATests.swift (new): policy + store-level deterministic tests with ContextRaceMockRequester-style mock (define locally in the test file).
+- Belay/Models/KanbanModels.swift: extend with orchestrations-patch/profile-description/(specify+decompose response) model types; tolerant decode; Codable wire fidelity from audit.
+- Belay/Services/KanbanService.swift: fetchProfileDescriptions (profiles already fetched), updateProfileDescription(profile:description:), generateProfileDescription(profile:), updateOrchestration(_ patch:), specifyTask(id:board:), decomposeTask(id:board:), manual nudge (or reuse scheduleDispatcherNudge with immediate-post variant); all behind DashboardJSONRequester; no HermesClient.
+- Belay/Services/KanbanStore.swift: store mutations mirrored on existing performMutation discipline; new published state for profile descriptions if needed (profiles already published); orchestration update; specify/decompose completion reconciliation (superseding reload of board+detail).
+- Belay/Views/KanbanViews.swift: board header gains an ellipsis '…' menu (Orchestration Settings…, Profiles routing list, Nudge Dispatcher). Keep header uncrowded.
+- Belay/Views/Kanban/KanbanOrchestrationSettingsSheet.swift (new): toggles + profile pickers; render 'Default (resolved)' clearly for configured-vs-resolved.
+- Belay/Views/Kanban/KanbanProfileRoutingScreen.swift (new): list + editor with multiline TextEditor, Save, Generate Automatically, generated-review banner, dirty ownership.
+- Belay/Views/Kanban/KanbanTaskDetailView.swift: 'Triage Actions' section gated on eligibility; Specify button; Decompose button + confirmationDialog ("Decompose this task?" with wording); semantic failure shown inline; success -> authoritative reload.
+- BelayTests/KanbanV3ATests.swift (new): policy + store-level deterministic tests with ContextRaceMockRequester-style mock (define locally in the test file).
 
 ## V3A completion checklist (from task)
 [ ] upstream lifecycle semantics re-audited (SHA + date recorded)
@@ -75,4 +75,4 @@ Status: V3A implementation in progress. Written 2026-08-23.
 - Own branch + PR + tests + ios_test.
 
 ## Final V3A report (17 items)
-1 starting Conduit commit (10719f4) 2 upstream SHA+audit date 3 lifecycle matrix + V2 diffs 4 endpoints/contracts audited 5 orchestration settings implemented 6 default/inheritance semantics 7 profile description editing/generation 8 nudge behavior 9 Specify behavior 10 Decompose behavior 11 semantic failure handling 12 concurrency/context ownership 13 files changed 14 tests added 15 exact full ios_test count 16 confirmation HermesClient/session transport untouched 17 V3B/V3C/V3D scope.
+1 starting Belay commit (10719f4) 2 upstream SHA+audit date 3 lifecycle matrix + V2 diffs 4 endpoints/contracts audited 5 orchestration settings implemented 6 default/inheritance semantics 7 profile description editing/generation 8 nudge behavior 9 Specify behavior 10 Decompose behavior 11 semantic failure handling 12 concurrency/context ownership 13 files changed 14 tests added 15 exact full ios_test count 16 confirmation HermesClient/session transport untouched 17 V3B/V3C/V3D scope.

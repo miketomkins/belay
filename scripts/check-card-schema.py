@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Fail when Conduit's copy of the rich card schema differs from the plugin's.
+"""Fail when Belay's copy of the rich card schema differs from the plugin's.
 
 Rich cards (maps and places) are defined once, in hermes-conduit-notifier's
 cards/card-schema.json; its card-vectors.json holds the examples both test
-suites run. Conduit ships byte-identical copies (Conduit/Cards/card-schema.json
-for the app, ConduitTests/Fixtures/card-vectors.json for RichCardSchemaTests),
+suites run. Belay ships byte-identical copies (Belay/Cards/card-schema.json
+for the app, BelayTests/Fixtures/card-vectors.json for RichCardSchemaTests),
 so the live models' show_on_screen and the chat's cards check exactly what
 the plugin checks. This compares them with hermes-conduit-notifier main and
 fails until they match: change the plugin first, merge it, then copy both
@@ -23,10 +23,10 @@ import urllib.error
 import urllib.request
 
 PLUGIN_RAW = "https://raw.githubusercontent.com/kaishi00/hermes-conduit-notifier/main/"
-# Conduit's copy -> the plugin's file.
+# Belay's copy -> the plugin's file.
 COPIES = {
-    os.path.join("Conduit", "Cards", "card-schema.json"): "cards/card-schema.json",
-    os.path.join("ConduitTests", "Fixtures", "card-vectors.json"): "cards/card-vectors.json",
+    os.path.join("Belay", "Cards", "card-schema.json"): "cards/card-schema.json",
+    os.path.join("BelayTests", "Fixtures", "card-vectors.json"): "cards/card-vectors.json",
 }
 UNREACHABLE = (OSError, http.client.HTTPException)
 

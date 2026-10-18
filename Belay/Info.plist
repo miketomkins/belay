@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>CFBundleExecutable</key>
+	<string>$(EXECUTABLE_NAME)</string>
+	<key>CFBundleIcons</key>
+	<dict>
+		<key>CFBundleAlternateIcons</key>
+		<dict>
+			<key>Light</key>
+			<dict>
+				<key>CFBundleIconFiles</key>
+				<array>
+					<string>icon-light-120</string>
+					<string>icon-light-152</string>
+					<string>icon-light-167</string>
+					<string>icon-light-180</string>
+				</array>
+				<key>UIPrerenderedIcon</key>
+				<false/>
+			</dict>
+		</dict>
+		<key>CFBundlePrimaryIcon</key>
+		<string>AppIcon</string>
+	</dict>
+	<key>CFBundleIcons~ipad</key>
+	<dict>
+		<key>CFBundleAlternateIcons</key>
+		<dict>
+			<key>Light</key>
+			<dict>
+				<key>CFBundleIconFiles</key>
+				<array>
+					<string>icon-light-152</string>
+					<string>icon-light-167</string>
+				</array>
+				<key>UIPrerenderedIcon</key>
+				<false/>
+			</dict>
+		</dict>
+		<key>CFBundlePrimaryIcon</key>
+		<string>AppIcon</string>
+	</dict>
+	<key>CFBundleIdentifier</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>$(PRODUCT_NAME)</string>
+	<key>CFBundlePackageType</key>
+	<string>$(PRODUCT_BUNDLE_PACKAGE_TYPE)</string>
+	<key>CFBundleShortVersionString</key>
+	<string>$(MARKETING_VERSION)</string>
+	<key>CFBundleVersion</key>
+	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>BelayHermesCallsRing</key>
+	<true/>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>CFBundleURLName</key>
+			<string>$(PRODUCT_BUNDLE_IDENTIFIER).chat-link</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>belay</string>
+				<!-- Legacy scheme from upstream (conduit); links made before this
+				project was renamed still open the app. -->
+				<string>conduit</string>
+			</array>
+		</dict>
+	</array>
+	<key>BelayDraftLanguages</key>
+	<array/>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+		<key>NSExceptionDomains</key>
+		<dict>
+			<key>100.64.0.0/10</key>
+			<dict>
+				<key>NSExceptionAllowsInsecureHTTPLoads</key>
+				<true/>
+			</dict>
+			<key>ts.net</key>
+			<dict>
+				<key>NSExceptionAllowsInsecureHTTPLoads</key>
+				<true/>
+				<key>NSIncludesSubdomains</key>
+				<true/>
+			</dict>
+		</dict>
+	</dict>
+	<key>NSCameraUsageDescription</key>
+	<string>Belay uses the camera only when you choose to take a photo, such as for your profile picture or a chat attachment, or to scan a dashboard's sign-in code.</string>
+	<key>NSAlarmKitUsageDescription</key>
+	<string>When you let Hermes set alarms and timers, Belay sets the ones your agent asks for, after you approve them unless you chose to add without asking.</string>
+	<key>NSCalendarsFullAccessUsageDescription</key>
+	<string>When you share your calendar, Belay sends the events you choose to your own Hermes server so your agent can answer questions about your schedule, and adds or changes events when you approve them. Nothing goes to Belay's developer.</string>
+	<key>NSCalendarsWriteOnlyAccessUsageDescription</key>
+	<string>Belay adds events your Hermes agent suggests, when you approve them. It doesn't read your calendar with this access.</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>Belay uses Face ID to unlock saved Hermes credentials.</string>
+	<key>NSHealthShareUsageDescription</key>
+	<string>When you turn on Health sharing, Belay reads the categories you choose and sends them directly to your own Hermes server so your agent can answer questions about your health. Nothing goes to Belay's developer.</string>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>Belay never writes to Apple Health. It only reads the categories you choose to share with your Hermes server.</string>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>Belay connects to your own Hermes server when it is on your home or local network. Nothing goes to Belay's developer.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>When you turn on background sharing, Belay tells your own Hermes server when you arrive at or leave your saved places, and where you are when your agent asks, at the detail you choose. Nothing goes to Belay's developer.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>When you turn on location sharing, Belay sends your location to your own Hermes server as you send a message or talk to Hermes, so your agent can answer questions about where you are. Nothing goes to Belay's developer.</string>
+	<key>NSMotionUsageDescription</key>
+	<string>When you share phone status, Belay tells your own Hermes server whether you're walking, driving or still, so your agent can choose a good moment to reach you. Nothing goes to Belay's developer.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Belay uses the microphone for voice conversations and foreground wake phrases.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Belay saves images and videos from your chats to Photos when you choose Save in the share sheet.</string>
+	<key>NSRemindersFullAccessUsageDescription</key>
+	<string>When you share reminders, Belay sends the lists you choose to your own Hermes server so your agent can see what's on them, and adds or completes reminders when you approve them. Nothing goes to Belay's developer.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Belay uses on-device Apple speech recognition to turn your voice into text when you select On this iPhone.</string>
+	<key>UIApplicationSceneManifest</key>
+	<dict>
+		<key>UIApplicationSupportsMultipleScenes</key>
+		<true/>
+		<key>UISceneConfigurations</key>
+		<dict>
+			<key>CPTemplateApplicationSceneSessionRoleApplication</key>
+			<array>
+				<dict>
+					<key>UISceneClassName</key>
+					<string>CPTemplateApplicationScene</string>
+					<key>UISceneConfigurationName</key>
+					<string>CarPlayVoice</string>
+					<key>UISceneDelegateClassName</key>
+					<string>$(PRODUCT_MODULE_NAME).CarPlayVoiceSceneDelegate</string>
+				</dict>
+			</array>
+		</dict>
+	</dict>
+	<key>NSSupportsLiveActivities</key>
+	<true/>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>audio</string>
+		<string>fetch</string>
+		<string>remote-notification</string>
+		<string>voip</string>
+	</array>
+	<key>BGTaskSchedulerPermittedIdentifiers</key>
+	<array>
+		<string>live.tomkins.belay.health-sync</string>
+		<string>live.tomkins.belay.phone-sync</string>
+	</array>
+	<key>UILaunchScreen</key>
+	<dict/>
+	<key>UISupportedInterfaceOrientations</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+	</array>
+	<key>UISupportedInterfaceOrientations~ipad</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationPortraitUpsideDown</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
+</dict>
+</plist>

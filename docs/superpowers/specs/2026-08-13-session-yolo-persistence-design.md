@@ -6,7 +6,7 @@
 
 ## Problem
 
-Conduit sends a session-scoped `config.set` request when the user changes YOLO
+Belay sends a session-scoped `config.set` request when the user changes YOLO
 mode and updates `runtime.yolo` in memory. A later resume or turn snapshot can
 omit the session-level `yolo` field while including the profile-level
 `approvalsMode`; `applyRuntime` then derives `runtime.yolo` from that global
@@ -114,16 +114,16 @@ nil-baseline guard.
 
 ## Expected implementation surface
 
-- `Conduit/Services/SessionYoloStore.swift`: injectable profile/session-keyed
+- `Belay/Services/SessionYoloStore.swift`: injectable profile/session-keyed
   persistence with explicit optional override semantics, alias migration, and
   diagnostics for unreadable payloads.
-- `Conduit/Services/AppState.swift`: inject/use the store, persist successful
+- `Belay/Services/AppState.swift`: inject/use the store, persist successful
   changes, apply precedence, and refresh on session/profile transitions.
-- `Conduit/Services/ChatScrollState.swift` or the existing identity seam only
+- `Belay/Services/ChatScrollState.swift` or the existing identity seam only
   if a small reusable canonical-ID helper is needed; avoid duplicating
   normalization rules.
-- `ConduitTests/SessionYoloStoreTests.swift` and/or
-  `ConduitTests/AppStateChatResumeTests.swift`: store round trips, true/false
+- `BelayTests/SessionYoloStoreTests.swift` and/or
+  `BelayTests/AppStateChatResumeTests.swift`: store round trips, true/false
   distinction, profile/session isolation, runtime precedence, failure
   behavior, and session switching.
 
@@ -159,7 +159,7 @@ nil-baseline guard.
 
 ## Verification
 
-Run the store and AppState-focused tests first, then run the complete `Conduit`
+Run the store and AppState-focused tests first, then run the complete `Belay`
 XCTest suite in the iOS Simulator. Review the final diff to confirm that the
 store is scoped only to profile/session YOLO state and that no profile-wide
 setting is mutated.

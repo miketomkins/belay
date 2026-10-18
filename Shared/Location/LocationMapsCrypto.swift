@@ -1,6 +1,6 @@
 //
 //  LocationMapsCrypto.swift
-//  Conduit
+//  Belay
 //
 //  The sealing of a maps request the host asks this iPhone to answer
 //  (designs/maps-v1-contract.md section 2), with the location key's maps

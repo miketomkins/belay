@@ -199,7 +199,7 @@ class SmokeJobRunnerTests(unittest.TestCase):
         self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
         invocations = self._invocations()
         self.assertEqual(len(invocations), 1, invocations)
-        self.assertEqual(invocations[0].count("-only-testing:ConduitTests/"), 7)
+        self.assertEqual(invocations[0].count("-only-testing:BelayTests/"), 7)
         for flag in ("test-without-building", "-parallel-testing-enabled NO",
                      "-collect-test-diagnostics never", "-test-timeouts-enabled YES",
                      "-default-test-execution-time-allowance 180",
@@ -210,10 +210,10 @@ class SmokeJobRunnerTests(unittest.TestCase):
 
     def test_unit_smoke_failure_fails_once_without_retry_and_annotates(self):
         output = "\n".join([
-            "Test Case '-[ConduitTests.BotModeTests testA]' started.",
-            "/w/ConduitTests/BotModeTests.swift:12: error: -[ConduitTests.BotModeTests testA] :"
+            "Test Case '-[BelayTests.BotModeTests testA]' started.",
+            "/w/BelayTests/BotModeTests.swift:12: error: -[BelayTests.BotModeTests testA] :"
             " XCTAssertEqual failed: (\"100%\") is not equal to (\"0%\")",
-            "Test Case '-[ConduitTests.BotModeTests testA]' failed (0.010 seconds).",
+            "Test Case '-[BelayTests.BotModeTests testA]' failed (0.010 seconds).",
             "Failing tests:",
             "\tBotModeTests.testA()",
             "",
@@ -230,9 +230,9 @@ class SmokeJobRunnerTests(unittest.TestCase):
         self.assertEqual(notes[0].split("::", 2)[2].split("%0A"), [
             "Failing tests:",
             "\tBotModeTests.testA()",
-            "/w/ConduitTests/BotModeTests.swift:12: error: -[ConduitTests.BotModeTests testA] :"
+            "/w/BelayTests/BotModeTests.swift:12: error: -[BelayTests.BotModeTests testA] :"
             " XCTAssertEqual failed: (\"100%25\") is not equal to (\"0%25\")",
-            "Test Case '-[ConduitTests.BotModeTests testA]' failed (0.010 seconds).",
+            "Test Case '-[BelayTests.BotModeTests testA]' failed (0.010 seconds).",
         ])
         self.assertRegex(proc.stdout, r"(?m)^::notice title=unit smoke took [0-9]+s::"
                          r"its output has no test totals$")
@@ -276,7 +276,7 @@ class SmokeJobRunnerTests(unittest.TestCase):
         invocations = self._invocations()
         self.assertEqual(len(invocations), 4, invocations)
         for invocation in invocations:
-            self.assertEqual(invocation.count("-only-testing:ConduitTests/"), 8,
+            self.assertEqual(invocation.count("-only-testing:BelayTests/"), 8,
                              invocation)
         self.assertEqual(proc.stdout.count("::group::"), 4)
         self.assertEqual(proc.stdout.count("::group::"), proc.stdout.count("::endgroup::"))
@@ -296,7 +296,7 @@ class SmokeJobRunnerTests(unittest.TestCase):
         proc = self._run_step(UNIT_STEP, UNIT_CLASSES=self._classes("Unit", 20),
                               UNIT_BATCH_SIZE=8)
         self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
-        sized = [i.count("-only-testing:ConduitTests/") for i in self._invocations()]
+        sized = [i.count("-only-testing:BelayTests/") for i in self._invocations()]
         self.assertEqual(sized, [7, 7, 6], sized)
 
     def test_unit_smoke_runs_a_single_class_in_one_batch(self):
@@ -322,11 +322,11 @@ class SmokeJobRunnerTests(unittest.TestCase):
         # The job log API returns only a job's last 5,000 lines, which an early
         # batch's failures do not reach; its annotations always can be read.
         output = "\n".join([
-            "Test Case '-[ConduitTests.Unit0Tests testA]' started.",
-            "/w/ConduitTests/Unit0Tests.swift:12: error: -[ConduitTests.Unit0Tests testA] :"
+            "Test Case '-[BelayTests.Unit0Tests testA]' started.",
+            "/w/BelayTests/Unit0Tests.swift:12: error: -[BelayTests.Unit0Tests testA] :"
             " XCTAssertEqual failed: (\"100%\") is not equal to (\"0%\")",
-            "Test Case '-[ConduitTests.Unit0Tests testA]' failed (0.010 seconds).",
-            "Test Case '-[ConduitTests.Unit0Tests testB]' passed (0.001 seconds).",
+            "Test Case '-[BelayTests.Unit0Tests testA]' failed (0.010 seconds).",
+            "Test Case '-[BelayTests.Unit0Tests testB]' passed (0.001 seconds).",
             "Failing tests:",
             "\tUnit0Tests.testA()",
             "",
@@ -343,12 +343,12 @@ class SmokeJobRunnerTests(unittest.TestCase):
         self.assertEqual(notes[0].split("::", 2)[2].split("%0A"), [
             "Failing tests:",
             "\tUnit0Tests.testA()",
-            "/w/ConduitTests/Unit0Tests.swift:12: error: -[ConduitTests.Unit0Tests testA] :"
+            "/w/BelayTests/Unit0Tests.swift:12: error: -[BelayTests.Unit0Tests testA] :"
             " XCTAssertEqual failed: (\"100%25\") is not equal to (\"0%25\")",
-            "Test Case '-[ConduitTests.Unit0Tests testA]' failed (0.010 seconds).",
+            "Test Case '-[BelayTests.Unit0Tests testA]' failed (0.010 seconds).",
         ])
         self.assertNotIn("unit batch 2 failures", proc.stdout)
-        self.assertIn("Test Case '-[ConduitTests.Unit0Tests testB]' passed", proc.stdout,
+        self.assertIn("Test Case '-[BelayTests.Unit0Tests testB]' passed", proc.stdout,
                       "the batch's output still reaches the job log")
 
     def test_each_unit_batch_posts_its_timing(self):
@@ -431,7 +431,7 @@ class SmokeJobRunnerTests(unittest.TestCase):
         self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
         invocations = self._invocations()
         self.assertEqual(len(invocations), 1, invocations)
-        self.assertEqual(invocations[0].count("-only-testing:ConduitUITests/"), 2)
+        self.assertEqual(invocations[0].count("-only-testing:BelayUITests/"), 2)
 
     def test_ui_smoke_absorbs_one_runner_flake_and_reports_it(self):
         # The lane runner's rule for a failing UI batch: one targeted retry,
@@ -448,7 +448,7 @@ class SmokeJobRunnerTests(unittest.TestCase):
     @staticmethod
     def _result_doc(failed):
         return json.dumps({"testNodes": [{"children": [{"nodeType": "Test Bundle",
-            "name": "ConduitUITests", "children": [
+            "name": "BelayUITests", "children": [
                 {"nodeType": "Test Suite", "name": cls, "children": [
                     {"nodeType": "Test Case", "name": "testFixture()",
                      "result": "Failed" if cls in failed else "Passed"}]}
@@ -462,9 +462,9 @@ class SmokeJobRunnerTests(unittest.TestCase):
         self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
         invocations = self._invocations()
         self.assertEqual(len(invocations), 2)
-        self.assertIn("-only-testing:ConduitUITests/ConnectionSetupUITests", invocations[0])
-        self.assertIn("-only-testing:ConduitUITests/ProfilePickerUITests", invocations[1])
-        self.assertNotIn("-only-testing:ConduitUITests/ConnectionSetupUITests", invocations[1])
+        self.assertIn("-only-testing:BelayUITests/ConnectionSetupUITests", invocations[0])
+        self.assertIn("-only-testing:BelayUITests/ProfilePickerUITests", invocations[1])
+        self.assertNotIn("-only-testing:BelayUITests/ConnectionSetupUITests", invocations[1])
 
     def test_ui_retry_includes_multiple_failed_classes_once(self):
         proc = self._run_step(UI_STEP,
@@ -473,7 +473,7 @@ class SmokeJobRunnerTests(unittest.TestCase):
                               STUB_RESULT_DOC=self._result_doc(["ConnectionSetupUITests", "ProfilePickerUITests"]))
         self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
         self.assertEqual(len(self._invocations()), 2)
-        self.assertEqual(self._invocations()[1].count("-only-testing:ConduitUITests/"), 2)
+        self.assertEqual(self._invocations()[1].count("-only-testing:BelayUITests/"), 2)
 
     def test_ui_assertion_metadata_retries_only_the_failed_class(self):
         doc = json.loads(self._result_doc(["ProfilePickerUITests"]))
@@ -485,8 +485,8 @@ class SmokeJobRunnerTests(unittest.TestCase):
                               STUB_FAIL_FIRST_N=1, STUB_RESULT_DOC=json.dumps(doc))
         self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
         self.assertEqual(len(self._invocations()), 2)
-        self.assertIn("-only-testing:ConduitUITests/ProfilePickerUITests", self._invocations()[1])
-        self.assertNotIn("-only-testing:ConduitUITests/ConnectionSetupUITests", self._invocations()[1])
+        self.assertIn("-only-testing:BelayUITests/ProfilePickerUITests", self._invocations()[1])
+        self.assertNotIn("-only-testing:BelayUITests/ConnectionSetupUITests", self._invocations()[1])
         self.assertNotIn("retaining entire selection", proc.stderr)
 
     def _retry_with_case_children(self, children, failed_class_children=True):
@@ -512,8 +512,8 @@ class SmokeJobRunnerTests(unittest.TestCase):
         ])
         self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
         retry = self._invocations()[1]
-        self.assertIn("-only-testing:ConduitUITests/ProfilePickerUITests", retry)
-        self.assertNotIn("-only-testing:ConduitUITests/ConnectionSetupUITests", retry)
+        self.assertIn("-only-testing:BelayUITests/ProfilePickerUITests", retry)
+        self.assertNotIn("-only-testing:BelayUITests/ConnectionSetupUITests", retry)
         self.assertNotIn("retaining entire selection", proc.stderr)
 
     def test_a_passing_case_may_carry_a_runtime_warning(self):
@@ -521,7 +521,7 @@ class SmokeJobRunnerTests(unittest.TestCase):
             [{"nodeType": "Runtime Warning", "name": "Main thread checker"}],
             failed_class_children=False)
         self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
-        self.assertNotIn("-only-testing:ConduitUITests/ConnectionSetupUITests", self._invocations()[1])
+        self.assertNotIn("-only-testing:BelayUITests/ConnectionSetupUITests", self._invocations()[1])
         self.assertNotIn("retaining entire selection", proc.stderr)
 
     def test_unknown_or_inconsistent_case_children_retain_the_entire_selection(self):
@@ -536,7 +536,7 @@ class SmokeJobRunnerTests(unittest.TestCase):
         ):
             proc = self._retry_with_case_children(children, on_failed_class)
             self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
-            self.assertEqual(self._invocations()[1].count("-only-testing:ConduitUITests/"), 2,
+            self.assertEqual(self._invocations()[1].count("-only-testing:BelayUITests/"), 2,
                              "children {!r} must keep the whole selection".format(children))
             self.assertIn("retaining entire selection", proc.stderr)
 
@@ -552,7 +552,7 @@ class SmokeJobRunnerTests(unittest.TestCase):
                                   UI_CLASSES="ConnectionSetupUITests,ProfilePickerUITests",
                                   STUB_FAIL_FIRST_N=1, STUB_RESULT_DOC=json.dumps(doc))
             self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
-            self.assertEqual(self._invocations()[1].count("-only-testing:ConduitUITests/"), 2,
+            self.assertEqual(self._invocations()[1].count("-only-testing:BelayUITests/"), 2,
                              "unknown/orphan failures may not disappear into a narrowed retry")
             self.assertIn("retaining entire selection", proc.stderr)
 
@@ -565,7 +565,7 @@ class SmokeJobRunnerTests(unittest.TestCase):
                               STUB_FAIL_FIRST_N=1, STUB_SILENT_FAIL=1)
         self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
         self.assertEqual(len(self._invocations()), 2, "the retry must still run")
-        self.assertEqual(self._invocations()[1].count("-only-testing:ConduitUITests/"), 2)
+        self.assertEqual(self._invocations()[1].count("-only-testing:BelayUITests/"), 2)
 
     def test_ui_smoke_fails_when_the_targeted_retry_also_fails(self):
         proc = self._run_step(UI_STEP,

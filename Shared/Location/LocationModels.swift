@@ -1,6 +1,6 @@
 //
 //  LocationModels.swift
-//  Conduit
+//  Belay
 //
 //  Location for Hermes (designs/location-awareness.md, wire contract
 //  designs/location-v1-contract.md). Two opt-in layers: "while I'm talking
@@ -102,7 +102,7 @@ struct LocationSavedPlace: Codable, Equatable, Identifiable {
         case id, name, kind, isPrivate, latitude, longitude, radius
     }
 
-    /// Tolerates keys an older or newer Conduit didn't write. Only the
+    /// Tolerates keys an older or newer Belay didn't write. Only the
     /// coordinate is required: a place without one can't be monitored.
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -193,10 +193,10 @@ struct LocationSharingSettings: Codable, Equatable {
 
 /// Why a fix was taken (`fix.source`).
 enum LocationFixSource: String, Codable {
-    /// Layer 1: a message sent from Conduit, a voice call.
+    /// Layer 1: a message sent from Belay, a voice call.
     case message, call
     /// Layer 2: a visit, a saved place's arrive/leave, a significant move,
-    /// Conduit opened.
+    /// Belay opened.
     case visit, place, significant, app
     /// The agent's on-demand request, answered by the extension.
     case locate

@@ -1,6 +1,6 @@
 //
 //  WatchBridgeDelegation.swift
-//  Conduit and the Conduit Watch app
+//  Belay and the Belay Watch app
 //
 //  GPT-Live's delegations in a Watch call (designs/apple-watch-gpt-live.md).
 //  GPT-Live has no tools of its own on the subscription: it hands real
@@ -143,9 +143,9 @@ enum WatchBridgeDelegation {
     static func followUpReply(_ outcome: WatchJobAnswer.FollowUp) -> (text: String, speakable: Bool) {
         switch outcome {
         case .interrupted(let title):
-            return ("Conduit put the user's words into \(WatchJobAnswer.quoted(title)) at once; Hermes keeps its work so far and changes course now. Its result still follows on the earlier delegation; don't guess it.", false)
+            return ("Belay put the user's words into \(WatchJobAnswer.quoted(title)) at once; Hermes keeps its work so far and changes course now. Its result still follows on the earlier delegation; don't guess it.", false)
         case .queued(let title):
-            return ("Conduit passed the user's words to \(WatchJobAnswer.quoted(title)); Hermes takes them right after the step it is finishing. Its result still follows on the earlier delegation; don't guess it.", false)
+            return ("Belay passed the user's words to \(WatchJobAnswer.quoted(title)); Hermes takes them right after the step it is finishing. Its result still follows on the earlier delegation; don't guess it.", false)
         case .finished(let title):
             return (relay("\(WatchJobAnswer.quoted(title)) had already finished, so Hermes didn't get this. Ask the user what they want instead."), true)
         case .failed(let message):

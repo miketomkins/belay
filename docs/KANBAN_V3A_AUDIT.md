@@ -22,10 +22,10 @@
     unknown status → 400; invalid transition → 409.
 - Create (POST /tasks, plugin_api.py:623): no status field; kanban_db.create_task (3158+) → triage=True forces 'triage', else 'ready' when no
   open parents else 'todo' (VALID_INITIAL_STATUSES exists only for internal caller; not reachable from REST).
-- Conduit V2 policy conclusion: NO policy change required. review/running/scheduled remain system-owned manual destinations in Desktop
+- Belay V2 policy conclusion: NO policy change required. review/running/scheduled remain system-owned manual destinations in Desktop
   (LOCKED_COLUMNS unchanged); backend 'scheduled' still sits behind schedule_task (park semantics, not the old wake-time story, but still
   not offered by Desktop and still not a plain drag target). triage/todo/ready/blocked/done/archived remain manual move targets;
-  creation targets unchanged. Conduit's existing KanbanStatusPresentation matrix is preserved verbatim.
+  creation targets unchanged. Belay's existing KanbanStatusPresentation matrix is preserved verbatim.
 
 ## 2. Orchestration settings
 - GET /orchestration (plugin_api.py:2778-2818) → {
@@ -37,20 +37,20 @@
   auto_decompose?: bool, auto_promote_children?: bool}. Only present fields are written. "" clears the override (falls back to default).
   Unknown profile name → HTTP 400. Response = GET shape (resolved echo). Server-global (NO board query param). Not dispatcher-nudged.
 - Desktop picker (orchestration.tsx): value || '__default__' sentinel; onSave('__default__' → ''). So "Default" ⇔ "" empty string on the wire.
-  No Conduit-specific encoding needed.
+  No Belay-specific encoding needed.
 
 ## 3. Profile routing descriptions
-- GET /profiles (2628-2655) → {profiles:[{name, is_default, model, provider, description, description_auto, skill_count}]} — matches Conduit KanbanProfile.
+- GET /profiles (2628-2655) → {profiles:[{name, is_default, model, provider, description, description_auto, skill_count}]} — matches Belay KanbanProfile.
 - PATCH /profiles/{name} (2658-2688), body {description: str} → stores description (trimmed; "" clears) with description_auto=FALSE (user-authored).
   Response {ok, profile, description}. Not nudged. Unknown profile → 404. normalize_profile_name: "default" is valid.
 - POST /profiles/{name}/describe-auto (2691-2716), body {overwrite: bool} → LLM-generated; PERSISTS immediately with description_auto=TRUE.
   Response {ok, profile, reason, description}. Non-ok is NOT an HTTP error (e.g. "no auxiliary client configured") — render reason inline.
   Desktop sends overwrite:true and replaces its local draft from result.description + refetches (orchestration.tsx auto onSuccess).
-- Conduit addition required by the task (desktop has no guard): generating must NOT silently overwrite an unsaved manual draft → dirty-state ownership.
+- Belay addition required by the task (desktop has no guard): generating must NOT silently overwrite an unsaved manual draft → dirty-state ownership.
 
 ## 4. Dispatcher nudge (manual)
 - POST /dispatch?board=<slug> body {} (plugin_api.py:2281-2299) → DispatchResult asdict {spawned: list[(id, assignee, workspace)], ...}.
-  Desktop nudgeDispatcher ignores the body except {spawned?: unknown[]}; failures are non-events (nudged() .catch). Conduit: unobtrusive
+  Desktop nudgeDispatcher ignores the body except {spawned?: unknown[]}; failures are non-events (nudged() .catch). Belay: unobtrusive
   "Dispatcher nudged" only; no fabricated diagnostics. Board-scoped. Auto-nudge is debounced 400 ms (api.ts autoNudge) after task writes.
 
 ## 5. Specify
@@ -83,8 +83,8 @@
 
 ## 7. Desktop triage actions
 - Desktop exposes NO Specify/Decompose task actions (grep of board/drawer/orchestration/plugin: none). Endpoints serve the CLI and the
-  gateway auto-decompose path. Conduit's Triage Actions are a mobile-native operational addition following the backend contract exactly
+  gateway auto-decompose path. Belay's Triage Actions are a mobile-native operational addition following the backend contract exactly
   (triage-only gating, {ok, reason} result semantics, no HTTP-error conflation).
 
-## 8. Conduit file:line evidence
+## 8. Belay file:line evidence
 - Clerked above per claim (plugin_api.py / kanban_db.py / kanban_specify.py / kanban_decompose.py / api.ts / orchestration.tsx / ui.tsx / board.tsx line refs).

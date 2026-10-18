@@ -2,7 +2,7 @@
 
 ## Goal
 
-Allow Conduit to rotate between portrait and landscape on iPad while keeping
+Allow Belay to rotate between portrait and landscape on iPad while keeping
 iPhone portrait-only. This is an orientation declaration change, not a
 landscape-specific redesign of the chat UI.
 
@@ -14,7 +14,7 @@ iPad inherits the portrait-only restriction.
 
 ## Chosen approach
 
-Use idiom-specific keys in the app's explicit `Conduit/Info.plist`:
+Use idiom-specific keys in the app's explicit `Belay/Info.plist`:
 
 - Keep `UISupportedInterfaceOrientations` as portrait-only. iPhone continues to
   accept only portrait.

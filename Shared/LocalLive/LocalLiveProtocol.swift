@@ -1,6 +1,6 @@
 //
 //  LocalLiveProtocol.swift
-//  Conduit and the Conduit Watch app
+//  Belay and the Belay Watch app
 //
 //  Wire format for Local Live: a live call through the user's own speech
 //  server (Hugging Face speech-to-speech), relayed by the notifier's
@@ -9,9 +9,9 @@
 //  GrokLiveProtocol. What is Local Live's own: the session.update (no tools,
 //  the server answers each turn by itself) and the turn frames the plugin
 //  adds on the same socket. When the server asks its model address for an
-//  answer, the plugin sends `conduit.turn`; Conduit runs it as a Hermes chat
-//  turn and streams the reply back as `conduit.turn.delta`, then
-//  `conduit.turn.done`. A Watch call runs the same session through the
+//  answer, the plugin sends `belay.turn`; Belay runs it as a Hermes chat
+//  turn and streams the reply back as `belay.turn.delta`, then
+//  `belay.turn.done`. A Watch call runs the same session through the
 //  host's audio bridge, where the host answers the turns itself.
 //
 
@@ -37,7 +37,7 @@ enum LocalLiveProtocol {
     static let readinessTimeout: Duration = .seconds(90)
 
     static var pluginMissingReason: String {
-        AppLocalization.string("Update the Conduit plugin on your Hermes host to use Local Live.")
+        AppLocalization.string("Update the Belay plugin on your Hermes host to use Local Live.")
     }
 
     static var answeredWithoutHermesReason: String {
@@ -59,7 +59,7 @@ enum LocalLiveProtocol {
     // MARK: Client → server
 
     /// Server turn detection that answers on its own (the server asks the
-    /// plugin, which asks Conduit) and stops speaking when the user talks.
+    /// plugin, which asks Belay) and stops speaking when the user talks.
     /// No instructions or tools: the speech server's model is Hermes.
     static var sessionUpdate: [String: Any] {
         let format: [String: Any] = ["type": "audio/pcm", "rate": Int(sampleRate)]
@@ -78,15 +78,15 @@ enum LocalLiveProtocol {
         return ["type": "session.update", "session": session]
     }
 
-    /// The plugin keeps every `conduit.` frame for itself; this one only
+    /// The plugin keeps every `belay.` frame for itself; this one only
     /// resets the relay's idle timer.
-    static let keepalive: [String: Any] = ["type": "conduit.ping"]
+    static let keepalive: [String: Any] = ["type": "belay.ping"]
 
     /// Words no one says, sent as the readiness check's question: the
     /// server asks its model address for the reply, the plugin hands that
     /// ask to this call as a turn, and the call knows the whole path works.
     static func readinessMarker() -> String {
-        "conduit-ready-" + UUID().uuidString.lowercased()
+        "belay-ready-" + UUID().uuidString.lowercased()
     }
 
     /// An out-of-band response (conversation "none") to `marker`: the server
@@ -100,11 +100,11 @@ enum LocalLiveProtocol {
     }
 
     static func turnDelta(turnID: String, text: String) -> [String: Any] {
-        ["type": "conduit.turn.delta", "turn_id": turnID, "text": text]
+        ["type": "belay.turn.delta", "turn_id": turnID, "text": text]
     }
 
     static func turnDone(turnID: String) -> [String: Any] {
-        ["type": "conduit.turn.done", "turn_id": turnID]
+        ["type": "belay.turn.done", "turn_id": turnID]
     }
 
     /// `text` in pieces the plugin takes whole.
@@ -132,14 +132,14 @@ enum LocalLiveProtocol {
     /// The plugin's turn frame in `data`; nil for the speech server's own
     /// frames. Audio frames are checked without being parsed twice.
     static func turnFrame(_ data: Data) -> TurnFrame? {
-        guard data.range(of: Data("\"conduit.turn".utf8)) != nil,
+        guard data.range(of: Data("\"belay.turn".utf8)) != nil,
               let object = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
               let type = object["type"] as? String,
               let id = object["turn_id"] as? String, !id.isEmpty else { return nil }
         switch type {
-        case "conduit.turn":
+        case "belay.turn":
             return .turn(id: id, text: object["text"] as? String ?? "")
-        case "conduit.turn.cancel":
+        case "belay.turn.cancel":
             return .cancel(id: id)
         default:
             return nil

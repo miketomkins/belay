@@ -4,7 +4,7 @@
 
 **Spec:** `docs/superpowers/specs/2026-09-06-session-identity-design.md`
 
-**Architecture (as delivered):** `ConversationIdentity` (`Conduit/Services/ConversationIdentity.swift`) is the capture/admission model; AppState projects it into the existing reconciliation accepted sets, scroll identity, resume store and composer ownership. No turn-state, viewport-controller, transcript-ordering or catalog rewrite.
+**Architecture (as delivered):** `ConversationIdentity` (`Belay/Services/ConversationIdentity.swift`) is the capture/admission model; AppState projects it into the existing reconciliation accepted sets, scroll identity, resume store and composer ownership. No turn-state, viewport-controller, transcript-ordering or catalog rewrite.
 
 **Constraints:** Preserve unrelated work. ZCode has no `ios_test` tool; the equivalent verified path is a temp git worktree on ios-mac (git bundle for unpushed commits), `xcodegen generate`, `xcodebuild test` with an iPhone 17 Pro destination. Commits stay local until the architecture and regression suite are complete; nothing is merged.
 
@@ -23,7 +23,7 @@
 
 ## Verification results
 
-Recorded at commit time in the PR description; all suites listed above ran green on the Mac worktree (full ConduitTests suite, UI suite, planner validation, script tests). See the PR comment for per-suite counts.
+Recorded at commit time in the PR description; all suites listed above ran green on the Mac worktree (full BelayTests suite, UI suite, planner validation, script tests). See the PR comment for per-suite counts.
 
 ## Remaining limitations
 

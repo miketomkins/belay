@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Make Conduit fall through to its existing WebView authentication flow when Hermes provider discovery returns a redirect, including the Cloudflare Access `302` reported in issue #37.
+**Goal:** Make Belay fall through to its existing WebView authentication flow when Hermes provider discovery returns a redirect, including the Cloudflare Access `302` reported in issue #37.
 
 **Architecture:** Keep `LoginView` unchanged and reuse its existing empty-provider fallback. Add a small injectable `URLSessionConfiguration` seam to `NativeAuthClient` so tests can exercise real response classification with the production redirect delegate, then classify actual HTTP redirect responses (`301`, `302`, `303`, `307`, and `308`) as an empty provider list while retaining errors for other non-2xx responses. No Cloudflare-only mode or Hermes Desktop changes.
 
@@ -21,7 +21,7 @@
 ### Task 1: Add a failing provider-discovery redirect test
 
 **Files:**
-- Create: `ConduitTests/NativeAuthClientTests.swift`
+- Create: `BelayTests/NativeAuthClientTests.swift`
 
 **Interfaces:**
 - Consumes: `NativeAuthClient.authProviders()` and its injectable `URLSessionConfiguration` initializer parameter, which will be added in Task 2.
@@ -31,7 +31,7 @@
 
 Create a `URLProtocol` test double that returns a `302` response with a Cloudflare Access login `Location` header for the `redirect.example` host. Construct `NativeAuthClient` with a test `URLSessionConfiguration` containing that protocol and assert that `try await client.authProviders()` returns `[]`. The test configuration must still use `SecureRedirectDelegate` through the production initializer so the regression covers the actual redirect policy.
 
-The test must include `@testable import Conduit`, use XCTest async assertions, and keep the response body empty because the behavior depends on the HTTP status and redirect location, not JSON parsing.
+The test must include `@testable import Belay`, use XCTest async assertions, and keep the response body empty because the behavior depends on the HTTP status and redirect location, not JSON parsing.
 
 - [ ] **Step 2: Generate the project and run only the new test**
 
@@ -40,10 +40,10 @@ Run:
 ```bash
 xcodegen generate
 xcodebuild test \
-  -project Conduit.xcodeproj \
-  -scheme Conduit \
+  -project Belay.xcodeproj \
+  -scheme Belay \
   -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
-  -only-testing:ConduitTests/NativeAuthClientTests/testProviderDiscoveryRedirectFallsBackToWebView \
+  -only-testing:BelayTests/NativeAuthClientTests/testProviderDiscoveryRedirectFallsBackToWebView \
   CODE_SIGN_IDENTITY='' CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO \
   DEVELOPMENT_TEAM='' PROVISIONING_PROFILE_SPECIFIER=''
 ```
@@ -53,7 +53,7 @@ Expected result before production changes: the test fails because `authProviders
 ### Task 2: Implement the minimal redirect classification
 
 **Files:**
-- Modify: `Conduit/Services/NativeAuthClient.swift:42-66`
+- Modify: `Belay/Services/NativeAuthClient.swift:42-66`
 
 **Interfaces:**
 - Consumes: The failing test's registered protocol and the existing production session construction.
@@ -95,7 +95,7 @@ Run the Task 1 command again. Expected result: `NativeAuthClientTests/testProvid
 ### Task 3: Add preservation and header-coverage tests
 
 **Files:**
-- Modify: `ConduitTests/NativeAuthClientTests.swift`
+- Modify: `BelayTests/NativeAuthClientTests.swift`
 
 **Interfaces:**
 - Consumes: The real `NativeAuthClient.authProviders()` response classification and request construction.
@@ -120,10 +120,10 @@ Run:
 
 ```bash
 xcodebuild test \
-  -project Conduit.xcodeproj \
-  -scheme Conduit \
+  -project Belay.xcodeproj \
+  -scheme Belay \
   -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
-  -only-testing:ConduitTests/NativeAuthClientTests \
+  -only-testing:BelayTests/NativeAuthClientTests \
   CODE_SIGN_IDENTITY='' CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO \
   DEVELOPMENT_TEAM='' PROVISIONING_PROFILE_SPECIFIER=''
 ```
@@ -133,14 +133,14 @@ Expected result: all `NativeAuthClientTests` pass, including redirect fallback, 
 ### Task 4: Run full verification and prepare the PR
 
 **Files:**
-- Verify: `Conduit/Services/NativeAuthClient.swift`
-- Verify: `ConduitTests/NativeAuthClientTests.swift`
+- Verify: `Belay/Services/NativeAuthClient.swift`
+- Verify: `BelayTests/NativeAuthClientTests.swift`
 - Verify: `docs/superpowers/specs/2026-08-11-cloudflare-provider-redirect-design.md`
 - Verify: `docs/superpowers/plans/2026-08-11-cloudflare-provider-redirect.md`
 
 **Interfaces:**
 - Consumes: The completed implementation and regression suite.
-- Produces: A clean, reviewable branch for Conduit issue #37.
+- Produces: A clean, reviewable branch for Belay issue #37.
 
 - [ ] **Step 1: Run the complete repository test command**
 
@@ -161,10 +161,10 @@ Confirm the diff contains only the design/plan records, `NativeAuthClient.swift`
 - [ ] **Step 3: Commit the implementation and tests**
 
 ```bash
-git add Conduit/Services/NativeAuthClient.swift ConduitTests/NativeAuthClientTests.swift
+git add Belay/Services/NativeAuthClient.swift BelayTests/NativeAuthClientTests.swift
 git commit -m "Handle Cloudflare auth redirects during provider discovery"
 ```
 
 - [ ] **Step 4: Push and open a draft PR against `main`**
 
-Push `agent/conduit-issue-37-cloudflare-redirect`, then open a draft PR in `kaishi00/hermes-conduit` with `Fixes #37`. The PR body must explain that redirects now enter the existing WebView path, ordinary errors remain fatal, and Cloudflare-only mode is intentionally excluded.
+Push `agent/belay-issue-37-cloudflare-redirect`, then open a draft PR in `kaishi00/hermes-conduit` with `Fixes #37`. The PR body must explain that redirects now enter the existing WebView path, ordinary errors remain fatal, and Cloudflare-only mode is intentionally excluded.

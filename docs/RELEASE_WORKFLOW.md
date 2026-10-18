@@ -1,6 +1,6 @@
 # iOS Release Workflow
 
-Conduit uses `main` for ongoing development and a short-lived release branch for each TestFlight/App Store candidate. The release branch is the controlled snapshot that gets tested and shipped while unrelated work continues on `main`.
+Belay uses `main` for ongoing development and a short-lived release branch for each TestFlight/App Store candidate. The release branch is the controlled snapshot that gets tested and shipped while unrelated work continues on `main`.
 
 ## Branch and PR model
 
@@ -27,7 +27,7 @@ Update `project.yml` on the release branch:
 - `MARKETING_VERSION` is the App Store version, such as `0.1.3`.
 - `CURRENT_PROJECT_VERSION` is the monotonically increasing build number. Every new TestFlight/App Store upload needs a new build number.
 
-Then regenerate and commit the release metadata. The generated `Conduit.xcodeproj` is not the source of truth; `project.yml` is.
+Then regenerate and commit the release metadata. The generated `Belay.xcodeproj` is not the source of truth; `project.yml` is.
 
 ```bash
 xcodegen generate
@@ -64,7 +64,7 @@ Run it in **release mode** — that is the mode whose coverage a release needs
 certifying a release):
 
 ```bash
-ssh ios-mac 'bash ~/projects/conduit-gate-tooling/scripts/local-ci-gate.sh \
+ssh ios-mac 'bash ~/projects/belay-gate-tooling/scripts/local-ci-gate.sh \
   --mode release --ref <exact-release-head-sha>'
 ```
 

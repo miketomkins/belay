@@ -709,8 +709,8 @@ class RawDisplayParameterTests(unittest.TestCase):
         self.assertEqual(self.literals('homeSection("Profile", tint: .accent) { row }'),
                          [("homeSection", "_", "Profile")])
         self.assertEqual(self.literals(
-            'ConduitSettingsSection(\n    title: "Links",\n    symbol: "link",\n    tint: .accent\n) {}'),
-            [("ConduitSettingsSection", "title", "Links")])
+            'BelaySettingsSection(\n    title: "Links",\n    symbol: "link",\n    tint: .accent\n) {}'),
+            [("BelaySettingsSection", "title", "Links")])
         self.assertEqual(self.literals('self.appendSlashOutput("Too many aliases.", context: context)'),
                          [("appendSlashOutput", "_", "Too many aliases.")])
         self.assertEqual(self.literals('continueButton("Hi \\(name)") { go() }'),
@@ -750,7 +750,7 @@ class RawDisplayParameterTests(unittest.TestCase):
         for source in (
             'SettingsMetricRow(label: AppLocalization.string("Readiness"), value: readiness)',
             'SettingsMetricRow(label: AppLocalization.string("Server"), value: server ?? "—")',
-            'ConduitSettingsSection(title: "Cloudflare Access", symbol: "shield", tint: .accent) {}',
+            'BelaySettingsSection(title: "Cloudflare Access", symbol: "shield", tint: .accent) {}',
             'homeSection("Hermes", tint: .aura) {}',
             'GuardedSourceCard(title: "Mermaid", icon: "function", source: s, guardBytes: MarkdownLargeDocumentPolicy.mermaidGuardBytes)',
             'settingsLink(.profile, icon: "person.crop.circle", title: name, detail: AppLocalization.string("Prefs"), identifier: "settings.profile")',
@@ -834,15 +834,15 @@ class UsageDescriptionTests(unittest.TestCase):
     English whatever the language."""
 
     def test_a_prompt_missing_from_the_catalog_is_reported(self):
-        info = {"NSCameraUsageDescription": "Conduit uses the camera.",
-                "NSMicrophoneUsageDescription": "Conduit uses the microphone.",
-                "CFBundleName": "Conduit"}
+        info = {"NSCameraUsageDescription": "Belay uses the camera.",
+                "NSMicrophoneUsageDescription": "Belay uses the microphone.",
+                "CFBundleName": "Belay"}
         catalog = {"strings": {"NSMicrophoneUsageDescription": {}}}
         self.assertEqual(check_l10n_coverage.usage_description_problems(info, catalog),
                          ["NSCameraUsageDescription"])
 
     def test_covered_prompts_and_other_keys_pass(self):
-        info = {"NSMicrophoneUsageDescription": "Conduit uses the microphone.",
+        info = {"NSMicrophoneUsageDescription": "Belay uses the microphone.",
                 "UIBackgroundModes": ["audio"]}
         catalog = {"strings": {"NSMicrophoneUsageDescription": {}}}
         self.assertEqual(check_l10n_coverage.usage_description_problems(info, catalog), [])
@@ -964,7 +964,7 @@ class LanguagePlanTests(unittest.TestCase):
     def test_one_language_needs_one_spelling_across_catalogs(self):
         catalogs = catalogs_with({"Hello": {"zh-Hans": "你好"}})
         catalogs["InfoPlist.xcstrings"] = {"sourceLanguage": "en", "strings": {
-            "CFBundleName": {"localizations": {"zh_Hans": unit("Conduit")}}}}
+            "CFBundleName": {"localizations": {"zh_Hans": unit("Belay")}}}}
         plan = self.plan(catalogs, [])
         self.assertEqual(plan.shipped, ["zh-Hans"])
         self.assertTrue(any("spelled ['zh-Hans', 'zh_Hans']" in p for p in plan.problems))
@@ -1021,7 +1021,7 @@ class CatalogFileTests(unittest.TestCase):
     def test_draft_languages_are_read_from_info_plist(self):
         import plistlib
         path = self.write("Info.plist", plistlib.dumps(
-            {"ConduitDraftLanguages": ["ja", "pt-BR"]}), mode="wb")
+            {"BelayDraftLanguages": ["ja", "pt-BR"]}), mode="wb")
         self.assertEqual(check_l10n_coverage.read_draft_languages(path), ["ja", "pt-BR"])
 
     def test_a_missing_draft_list_means_no_drafts(self):
@@ -1034,7 +1034,7 @@ class CatalogFileTests(unittest.TestCase):
     def test_a_malformed_draft_list_is_rejected(self):
         import plistlib
         path = self.write("Info.plist", plistlib.dumps(
-            {"ConduitDraftLanguages": "ja"}), mode="wb")
+            {"BelayDraftLanguages": "ja"}), mode="wb")
         with self.assertRaises(ValueError):
             check_l10n_coverage.read_draft_languages(path)
 
@@ -1051,17 +1051,17 @@ class CatalogFileTests(unittest.TestCase):
             "Bye": {"localizations": {"fr": unit("Au revoir")}}}}
         for key in check_l10n_coverage.REGRESSION_KEYS:
             catalog["strings"][key] = {"localizations": {"fr": unit(key)}}
-        self.write("Conduit/Localizable.xcstrings", json.dumps(catalog))
-        self.write("Conduit/Info.plist", plistlib.dumps(
-            {"ConduitDraftLanguages": drafts}), mode="wb")
-        self.write("Conduit/View.swift", 'Text("Hello")\nText("Bye")\n')
+        self.write("Belay/Localizable.xcstrings", json.dumps(catalog))
+        self.write("Belay/Info.plist", plistlib.dumps(
+            {"BelayDraftLanguages": drafts}), mode="wb")
+        self.write("Belay/View.swift", 'Text("Hello")\nText("Bye")\n')
 
     def test_a_corrupt_catalog_fails_the_check_cleanly(self):
         self.write_repo(drafts=[])
-        self.write("Conduit/Localizable.xcstrings", '{"strings": {\n<<<<<<< HEAD\n')
+        self.write("Belay/Localizable.xcstrings", '{"strings": {\n<<<<<<< HEAD\n')
         with self.assertRaises(check_l10n_coverage.CatalogError) as caught:
             check_l10n_coverage.check(self.directory.name)
-        self.assertIn("Conduit/Localizable.xcstrings", str(caught.exception))
+        self.assertIn("Belay/Localizable.xcstrings", str(caught.exception))
 
     def test_a_catalog_of_the_wrong_shape_fails_the_check_cleanly(self):
         for content in ("[]", '{"sourceLanguage": "en"}', '{"strings": []}',
@@ -1073,25 +1073,25 @@ class CatalogFileTests(unittest.TestCase):
                         '{"strings": {"%lld": {"localizations": {"fr": '
                         '{"variations": {"plural": {"other": "x"}}}}}}}'):
             self.write_repo(drafts=[])
-            self.write("Conduit/Localizable.xcstrings", content)
+            self.write("Belay/Localizable.xcstrings", content)
             with self.assertRaises(check_l10n_coverage.CatalogError, msg=content) as caught:
                 check_l10n_coverage.check(self.directory.name)
             self.assertIn("not a String Catalog", str(caught.exception))
 
     def test_an_unreadable_swift_file_fails_the_check_cleanly(self):
         self.write_repo(drafts=[])
-        self.write("Conduit/Broken.swift", b"Text(\"\xff\")\n", mode="wb")
+        self.write("Belay/Broken.swift", b"Text(\"\xff\")\n", mode="wb")
         _checked, _missing, key_problems, _plan = check_l10n_coverage.check(
             self.directory.name)
-        problems = key_problems[os.path.join("Conduit", "Broken.swift")]
+        problems = key_problems[os.path.join("Belay", "Broken.swift")]
         self.assertIn("can't be read as UTF-8", problems[0])
 
     def test_an_unreadable_info_plist_fails_the_check_cleanly(self):
         self.write_repo(drafts=[])
-        self.write("Conduit/Info.plist", "not a plist")
+        self.write("Belay/Info.plist", "not a plist")
         _checked, _missing, key_problems, _plan = check_l10n_coverage.check(
             self.directory.name)
-        self.assertIn("Conduit/Info.plist: ConduitDraftLanguages", key_problems)
+        self.assertIn("Belay/Info.plist: BelayDraftLanguages", key_problems)
 
     def test_a_new_partial_language_fails_until_marked_draft(self):
         self.write_repo(drafts=[])
@@ -1123,7 +1123,7 @@ class CheckIntegrationTests(unittest.TestCase):
         self.assertIn(plan.source, ("en",))
         self.assertTrue(plan.shipped, "the repo ships at least one translation")
         catalog_path = os.path.join(os.path.dirname(SCRIPTS_DIR),
-                                    "Conduit", "Localizable.xcstrings")
+                                    "Belay", "Localizable.xcstrings")
         with open(catalog_path, encoding="utf-8") as handle:
             catalog_keys = set(json.load(handle)["strings"])
         for key in check_l10n_coverage.REGRESSION_KEYS:

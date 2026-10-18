@@ -347,8 +347,8 @@ except Exception:
 }
 
 # Method-precise retry filters from an extraction detail file: one
-# ConduitUITests/Class/testMethod line per non-passing test when the
-# xcresult identifies it, ConduitUITests/Class when only the class is known
+# BelayUITests/Class/testMethod line per non-passing test when the
+# xcresult identifies it, BelayUITests/Class when only the class is known
 # (a class-level line subsumes any method-level lines of the same class).
 # Anything whose FINAL result is not Passed is retried - Failed, but also
 # Crashed/Skipped entries left by an aborted run, so a partial batch can

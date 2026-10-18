@@ -29,14 +29,14 @@ def bundle_node(name, suites):
 
 
 def doc_of(bundles):
-    plan = {"nodeType": "Test Plan", "name": "Conduit", "result": "Passed",
+    plan = {"nodeType": "Test Plan", "name": "Belay", "result": "Passed",
             "children": bundles}
     return {"testNodes": [plan]}
 
 
 def unit_doc(*suites):
-    """Document with one ConduitTests bundle containing the given suites."""
-    return doc_of([bundle_node("ConduitTests", list(suites))])
+    """Document with one BelayTests bundle containing the given suites."""
+    return doc_of([bundle_node("BelayTests", list(suites))])
 
 
 class ExtractFromDocTests(unittest.TestCase):
@@ -51,11 +51,11 @@ class ExtractFromDocTests(unittest.TestCase):
 
     def test_unit_and_ui_bundles_are_separated_by_node_not_name(self):
         doc = doc_of([
-            bundle_node("ConduitTests", [suite_node("AaTests", [case_node("t()", 1.0)])]),
-            bundle_node("ConduitUITests", [suite_node("BbUITests", [case_node("t()", 2.0)])]),
+            bundle_node("BelayTests", [suite_node("AaTests", [case_node("t()", 1.0)])]),
+            bundle_node("BelayUITests", [suite_node("BbUITests", [case_node("t()", 2.0)])]),
         ])
         out = ext.extract_from_doc(doc, "x.xcresult")
-        self.assertEqual(sorted(out["bundles"]), ["ConduitTests", "ConduitUITests"])
+        self.assertEqual(sorted(out["bundles"]), ["BelayTests", "BelayUITests"])
         self.assertEqual(out["classes"], {"AaTests": 1.0, "BbUITests": 2.0})
 
     def test_failures_captured(self):
@@ -127,7 +127,7 @@ class LaneResultTests(unittest.TestCase):
             }), encoding="utf-8")
             out = Path(tmp) / "lane-result.json"
             args = SimpleNamespace(
-                lane="unit-1", kind="unit", target="ConduitTests",
+                lane="unit-1", kind="unit", target="BelayTests",
                 classes="AlphaTests,BetaTests", status="fail",
                 predicted_s=112.0, timeout_s=300, actual_s=98.5,
                 started_at="2026-08-29T00:00:00Z",
@@ -152,7 +152,7 @@ class LaneResultTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             out = Path(tmp) / "lane-result.json"
             args = SimpleNamespace(
-                lane="ui-2", kind="ui", target="ConduitUITests",
+                lane="ui-2", kind="ui", target="BelayUITests",
                 classes="AlphaUITests,BetaUITests", status="pass",
                 predicted_s=120.0, timeout_s=900, actual_s=150.0,
                 started_at="2026-09-08T00:00:00Z",
@@ -179,11 +179,11 @@ class LaneResultTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             out = Path(tmp) / "lane-result.json"
             args = SimpleNamespace(
-                lane="unit", kind="unit", target="ConduitTests",
+                lane="unit", kind="unit", target="BelayTests",
                 classes="AlphaTests", status="pass",
                 predicted_s=10.0, timeout_s=600, actual_s=12.0,
                 started_at="2026-09-24T00:00:00Z",
-                simulator_name="Conduit CI Gate",
+                simulator_name="Belay CI Gate",
                 simulator_udid="6D08B063-B890-4D18-893B-D1E89E119919",
                 attempts_json="", isolation_json="", batches_json="",
                 simulator_reset=False, simulator_erase=False,
@@ -194,7 +194,7 @@ class LaneResultTests(unittest.TestCase):
             self.assertEqual(rc, ext.EXIT_OK)
             doc = json.loads(out.read_text(encoding="utf-8"))
             self.assertEqual(doc["simulator"], {
-                "name": "Conduit CI Gate",
+                "name": "Belay CI Gate",
                 "udid": "6D08B063-B890-4D18-893B-D1E89E119919"})
 
     def test_lane_result_omits_the_device_when_none_was_given(self):
@@ -203,7 +203,7 @@ class LaneResultTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             out = Path(tmp) / "lane-result.json"
             args = SimpleNamespace(
-                lane="unit", kind="unit", target="ConduitTests",
+                lane="unit", kind="unit", target="BelayTests",
                 classes="AlphaTests", status="pass",
                 predicted_s=10.0, timeout_s=600, actual_s=12.0,
                 started_at="2026-09-24T00:00:00Z",
@@ -237,7 +237,7 @@ class LaneResultTests(unittest.TestCase):
                                "seconds": 0.0, "failures": 0}]},
             ]
             args = SimpleNamespace(
-                lane="unit-2", kind="unit", target="ConduitTests",
+                lane="unit-2", kind="unit", target="BelayTests",
                 classes="AlphaTests,BetaTests,GammaTests", status="pass",
                 predicted_s=45.0, timeout_s=1809, actual_s=700.0,
                 started_at="2026-09-16T00:00:00Z",
@@ -261,7 +261,7 @@ class LaneResultTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             out = Path(tmp) / "lane-result.json"
             args = SimpleNamespace(
-                lane="unit-1", kind="unit", target="ConduitTests",
+                lane="unit-1", kind="unit", target="BelayTests",
                 classes="AlphaTests", status="pass",
                 predicted_s=5.0, timeout_s=603, actual_s=4.0,
                 started_at="2026-08-29T00:00:00Z",
@@ -409,7 +409,7 @@ class MergePartsTests(unittest.TestCase):
 
     def _observation(self, classes, bundles=None, cases=1):
         return {"schema_version": 1, "generated_at": "2026-09-08T00:00:00Z",
-                "xcresult": "x.xcresult", "bundles": bundles or ["ConduitUITests"],
+                "xcresult": "x.xcresult", "bundles": bundles or ["BelayUITests"],
                 "classes": classes, "counts": {"classes": len(classes), "cases": cases}}
 
     def test_merge_parts_last_attempt_wins_per_class(self):
@@ -804,7 +804,7 @@ class AggregateTests(unittest.TestCase):
             detail.write_text('{"schema_version": 1, "failures": [], "retried": []}', encoding="utf-8")
             out = Path(tmp) / "lane-result.json"
             args = SimpleNamespace(
-                lane="unit-1", kind="unit", target="ConduitTests",
+                lane="unit-1", kind="unit", target="BelayTests",
                 classes="AlphaTests", status="pass",
                 predicted_s=5.0, timeout_s=300, actual_s=4.0,
                 started_at="2026-08-29T00:00:00Z",

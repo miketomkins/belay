@@ -7,7 +7,7 @@ Audited files (upstream HEAD, shallow clone):
 
 ## 1. Task creation field matrix
 
-| Field | Desktop exposes? | Backend field (`CreateTaskBody`) | Required? | Default / inheritance | Conduit support |
+| Field | Desktop exposes? | Backend field (`CreateTaskBody`) | Required? | Default / inheritance | Belay support |
 |---|---|---|---|---|---|
 | title | yes (Input) | `title: str` | yes | — | exists |
 | body/description | yes (Textarea) | `body: Optional[str]` | no | nil | exists |
@@ -37,12 +37,12 @@ Create submit semantics (desktop `submit()`): `assignee = PARKED ? undefined : (
 - Drawer ⋯ menu: Copy task id · Copy title · Archive · Delete. Card context menu: Open/select/move-to-unlocked/delete.
 - **Reassign**: POST `/tasks/{id}/reassign` `{profile, reclaim_first:true, reason?}` (drawer assignee menu lists roster profiles only). `profile` nil/"" unassigns.
 - **Reclaim**: POST `/tasks/{id}/reclaim` `{reason?}`; 409 unless claimable (running).
-- **Note & requeue** (running): addComment then reclaim — both endpoints Conduit already has.
+- **Note & requeue** (running): addComment then reclaim — both endpoints Belay already has.
 - Diagnostics actions: only `reclaim` (button → reclaim endpoint) and `cli_hint` (copy `payload.command`). Never invent other mutations.
-- Worker log GET `/tasks/{id}/log?tail=<bytes ≤ 2_000_000>` → `{exists,size_bytes,content,truncated}` (Conduit decodes this already).
+- Worker log GET `/tasks/{id}/log?tail=<bytes ≤ 2_000_000>` → `{exists,size_bytes,content,truncated}` (Belay decodes this already).
 - Activity event kinds mapped upstream: `created,status,assigned,commented,claimed,spawned,completed,blocked,unblocked,reclaimed,specified,promoted,scheduled,archived,reprioritized` (+ `edited`); unknown kinds fall back to kind + key=value detail.
 - Runs: outcome/status badge (failed set `crashed|failed|timed_out|gave_up`), profile, duration(ended−started), relative time, error/summary lines.
-- Model options source: desktop uses SDK catalog menu; kanban plugin also serves GET `/model-options` (`{providers:[{slug,label,models[]}]}`) curated so the dropdown can never offer a pair Hermes would reject — Conduit uses this via KanbanService (keeps Kanban networking on DashboardTicketBridge).
+- Model options source: desktop uses SDK catalog menu; kanban plugin also serves GET `/model-options` (`{providers:[{slug,label,models[]}]}`) curated so the dropdown can never offer a pair Hermes would reject — Belay uses this via KanbanService (keeps Kanban networking on DashboardTicketBridge).
 
 ## 3. Deliberate mobile deviations
 1. Composer is a grouped Form (Basics/Assignment/Execution/Dependencies) instead of one flat dialog; selectors push/sheet.

@@ -21,21 +21,21 @@
 ### Task 1: Add the failing orientation contract tests
 
 **Files:**
-- Create: `ConduitTests/InterfaceOrientationTests.swift`
+- Create: `BelayTests/InterfaceOrientationTests.swift`
 
 **Interfaces:**
-- Consumes: the built app bundle identified by `com.milim.relay`.
+- Consumes: the built app bundle identified by `live.tomkins.belay`.
 - Produces: XCTest coverage for the universal and iPad-specific orientation arrays.
 
 - [ ] **Step 1: Write the failing tests**
 
-Create `ConduitTests/InterfaceOrientationTests.swift`:
+Create `BelayTests/InterfaceOrientationTests.swift`:
 
 ```swift
 import XCTest
 
 final class InterfaceOrientationTests: XCTestCase {
-    private let appBundleIdentifier = "com.milim.relay"
+    private let appBundleIdentifier = "live.tomkins.belay"
 
     func testUniversalOrientationsRemainPortraitOnlyForIPhone() throws {
         let info = try XCTUnwrap(Bundle(identifier: appBundleIdentifier)?.infoDictionary)
@@ -78,10 +78,10 @@ for runtime, devices in data["devices"].items():
 sys.exit(1)
 ')
 xcodebuild test \
-  -project Conduit.xcodeproj \
-  -scheme Conduit \
+  -project Belay.xcodeproj \
+  -scheme Belay \
   -destination "platform=iOS Simulator,id=$SIMULATOR" \
-  -only-testing:ConduitTests/InterfaceOrientationTests \
+  -only-testing:BelayTests/InterfaceOrientationTests \
   CODE_SIGN_IDENTITY='' \
   CODE_SIGNING_REQUIRED=NO \
   CODE_SIGNING_ALLOWED=NO \
@@ -96,7 +96,7 @@ iPad-specific plist key does not exist yet.
 ### Task 2: Add the iPad-specific plist declaration
 
 **Files:**
-- Modify: `Conduit/Info.plist` near `UISupportedInterfaceOrientations`
+- Modify: `Belay/Info.plist` near `UISupportedInterfaceOrientations`
 
 **Interfaces:**
 - Consumes: the failing bundle contract from Task 1.
@@ -127,9 +127,9 @@ tests pass with zero failures.
 Run:
 
 ```bash
-plutil -lint Conduit/Info.plist
+plutil -lint Belay/Info.plist
 git diff --check
-git add Conduit/Info.plist ConduitTests/InterfaceOrientationTests.swift
+git add Belay/Info.plist BelayTests/InterfaceOrientationTests.swift
 git commit -m "Add iPad landscape orientation support"
 ```
 
@@ -139,7 +139,7 @@ commit contains only the plist declaration and its regression tests.
 ### Task 3: Verify the complete merged application
 
 **Files:**
-- Verify: generated `Conduit.xcodeproj` and built app `Info.plist`
+- Verify: generated `Belay.xcodeproj` and built app `Info.plist`
 
 **Interfaces:**
 - Consumes: the committed orientation declaration and tests from Task 2.
@@ -164,8 +164,8 @@ for runtime, devices in data["devices"].items():
 sys.exit(1)
 ')
 xcodebuild test \
-  -project Conduit.xcodeproj \
-  -scheme Conduit \
+  -project Belay.xcodeproj \
+  -scheme Belay \
   -destination "platform=iOS Simulator,id=$SIMULATOR" \
   -configuration Debug \
   -derivedDataPath /tmp/hermes-conduit-ipad-tests-derived \
@@ -185,7 +185,7 @@ Run:
 
 ```bash
 plutil -p \
-  /tmp/hermes-conduit-ipad-tests-derived/Build/Products/Debug-iphonesimulator/Conduit.app/Info.plist \
+  /tmp/hermes-conduit-ipad-tests-derived/Build/Products/Debug-iphonesimulator/Belay.app/Info.plist \
   | sed -n '/UISupportedInterfaceOrientations/,+12p'
 ```
 

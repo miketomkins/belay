@@ -1,6 +1,6 @@
 //
 //  WatchCallVoices.swift
-//  Conduit and the Conduit Watch app
+//  Belay and the Belay Watch app
 //
 //  Which of the Watch's voices can start, as the iPhone last found them for
 //  the active dashboard and profile. Calls from Hermes ring the Watch only
@@ -70,7 +70,7 @@ struct WatchPhoneContext: Codable, Equatable {
     /// The iPhone's active dashboard: whose main profile a call names when
     /// its push names no dashboard, as the iPhone does.
     var activeDashboardID: String? = nil
-    /// The accent picked in Settings > Appearance (ConduitAccentChoice raw
+    /// The accent picked in Settings > Appearance (BelayAccentChoice raw
     /// value), which the Watch app draws in. Nil from an older iPhone app.
     var accent: String? = nil
 

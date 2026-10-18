@@ -42,7 +42,7 @@ class CheckCardSchemaTests(unittest.TestCase):
         self.assertEqual(self.run_check(files), 1)
 
     def test_compare_names_the_plugin_file(self):
-        name = os.path.join("Conduit", "Cards", "card-schema.json")
+        name = os.path.join("Belay", "Cards", "card-schema.json")
         self.assertIsNone(check.compare(b"a", b"a", name))
         self.assertIn("cards/card-schema.json", check.compare(b"a", b"b", name))
 

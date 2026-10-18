@@ -16,11 +16,11 @@ class QuietStretchTests(unittest.TestCase):
                          quiet.quiet_stretches(samples))
 
     def test_longest_first_with_the_line_each_followed(self):
-        log = ["Resolve Package Graph", "Computing build graph", "Ld Conduit"]
+        log = ["Resolve Package Graph", "Computing build graph", "Ld Belay"]
         stretches = [(12, 0, 0), (95, 12, 2), (30, 107, 3), (4, 137, 3)]
         self.assertEqual(
-            ["95s from 12s, after: Computing build graph, next: Ld Conduit",
-             "30s from 107s, after: Ld Conduit, next: (end of log)",
+            ["95s from 12s, after: Computing build graph, next: Ld Belay",
+             "30s from 107s, after: Ld Belay, next: (end of log)",
              "12s from 0s, after: (no output yet), next: Resolve Package Graph"],
             quiet.describe(stretches, log))
 

@@ -79,8 +79,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ## Liquid Orb (vendored shader and renderer)
 
-The live call orb ([`Conduit/Views/LiquidOrb/LiquidOrbView.swift`](Conduit/Views/LiquidOrb/LiquidOrbView.swift)
-and [`Conduit/Views/LiquidOrb/LiquidOrb.metal`](Conduit/Views/LiquidOrb/LiquidOrb.metal))
+The live call orb ([`Belay/Views/LiquidOrb/LiquidOrbView.swift`](Belay/Views/LiquidOrb/LiquidOrbView.swift)
+and [`Belay/Views/LiquidOrb/LiquidOrb.metal`](Belay/Views/LiquidOrb/LiquidOrb.metal))
 is vendored from
 [Liquid Orb Editor](https://github.com/lersent001/orb) (commit `8d1736e`),
 copyright (c) 2026 LerSent001, MIT License. The source files retain the

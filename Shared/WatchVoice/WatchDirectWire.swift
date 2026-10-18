@@ -1,6 +1,6 @@
 //
 //  WatchDirectWire.swift
-//  Conduit and the Conduit Watch app
+//  Belay and the Belay Watch app
 //
 //  Between the link's direct-call messages and the Gemini Live code both
 //  devices share (designs/apple-watch-voice-direct.md): the token, the

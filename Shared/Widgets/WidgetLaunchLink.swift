@@ -37,7 +37,7 @@ struct WidgetLaunchLink: Equatable {
 
     init?(url: URL) {
         guard let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
-              components.scheme?.lowercased() == "conduit",
+              components.scheme?.lowercased() == "belay",
               components.host?.lowercased() == "widget",
               components.user == nil, components.password == nil, components.port == nil,
               components.fragment == nil,
@@ -112,7 +112,7 @@ struct WidgetLaunchLink: Equatable {
 
     private static func makeURL(action: WidgetLaunchAction, workspace: WidgetWorkspaceID?, reference: WidgetConversationReference?) -> URL? {
         var components = URLComponents()
-        components.scheme = "conduit"
+        components.scheme = "belay"
         components.host = "widget"
         components.path = "/v1/\(action.rawValue)"
         var items: [URLQueryItem] = []

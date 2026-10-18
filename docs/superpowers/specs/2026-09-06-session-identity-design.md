@@ -1,6 +1,6 @@
 # Session identity and recovery
 
-Investigated against Conduit `2605ee95b907de067e05d0c914a865fab03a05ff` and the reporter's Hermes `9dd6634c5635321cf38840cc30e9b51226689128`. Updated 2026-09-06 to describe the shipped architecture (PR #137 branch `fix/session-identity-134`, commit `532b5b3` and successors).
+Investigated against Belay `2605ee95b907de067e05d0c914a865fab03a05ff` and the reporter's Hermes `9dd6634c5635321cf38840cc30e9b51226689128`. Updated 2026-09-06 to describe the shipped architecture (PR #137 branch `fix/session-identity-134`, commit `532b5b3` and successors).
 
 ## Problem and evidence
 
@@ -10,7 +10,7 @@ Resume also discards `stored_session_id` / `session_key` supplied by Hermes, the
 
 ## Delivered model: `ConversationIdentity`
 
-`Conduit/Services/ConversationIdentity.swift` defines the authoritative identity value with a mandatory semantic separation:
+`Belay/Services/ConversationIdentity.swift` defines the authoritative identity value with a mandatory semantic separation:
 
 - `profile` — the owning workspace profile.
 - `durableSessionID: String?` — the stable UI/persistence identity (a catalog row's stored id, or the id the resume store persisted). Present only when positively established; a runtime-only conversation has none.

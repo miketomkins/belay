@@ -1,6 +1,6 @@
 //
 //  GrokLiveAvailability.swift
-//  Conduit and the Conduit Watch app
+//  Belay and the Belay Watch app
 //
 //  Whether the Hermes host can serve Grok Live, and the seam a Grok Live
 //  session opens its connections through: the phone's dashboard relay

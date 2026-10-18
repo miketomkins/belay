@@ -1,10 +1,10 @@
 //
 //  LocationHostClient.swift
-//  Conduit
+//  Belay
 //
 //  Dashboard requests without the app: the Location Push extension answers
-//  a locate while Conduit isn't running, and a background wake may come
-//  before Conduit has reconnected. Both send with a host pass the app keeps
+//  a locate while Belay isn't running, and a background wake may come
+//  before Belay has reconnected. Both send with a host pass the app keeps
 //  up to date in the App Group Keychain whenever it has a working
 //  connection to the bound dashboard: the dashboard's address and the
 //  headers its own requests carry there (the session cookies, or a native
@@ -100,7 +100,7 @@ enum LocationHostClient {
         // proxy's or portal's page, or nothing) stored nothing: counting it
         // as sent would drop the location.
         guard let object else {
-            throw LocationHostError.http(status: http.statusCode, detail: "The answer wasn't from the Conduit plugin.")
+            throw LocationHostError.http(status: http.statusCode, detail: "The answer wasn't from the Belay plugin.")
         }
         return object
     }

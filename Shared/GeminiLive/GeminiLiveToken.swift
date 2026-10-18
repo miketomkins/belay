@@ -1,6 +1,6 @@
 //
 //  GeminiLiveToken.swift
-//  Conduit and the Conduit Watch app
+//  Belay and the Belay Watch app
 //
 //  Gemini Live's single-use tokens and the host's availability, moved out
 //  of GeminiLiveTokenClient.swift unchanged so the Watch can run

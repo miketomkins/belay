@@ -21,8 +21,8 @@ class WorksheetTests(unittest.TestCase):
         self.addCleanup(shutil.rmtree, self.root, ignore_errors=True)
         self.addCleanup(setattr, l10n, "REPO_ROOT", l10n.REPO_ROOT)
         l10n.REPO_ROOT = self.root
-        os.makedirs(os.path.join(self.root, "Conduit"))
-        self.catalog_path = os.path.join(self.root, "Conduit", "Localizable.xcstrings")
+        os.makedirs(os.path.join(self.root, "Belay"))
+        self.catalog_path = os.path.join(self.root, "Belay", "Localizable.xcstrings")
         self.write({
             "sourceLanguage": "en",
             "version": "1.0",
@@ -59,10 +59,10 @@ class WorksheetTests(unittest.TestCase):
 
     def test_call_sites_report_the_file_line(self):
         os.makedirs(os.path.join(self.root, "Shared"))
-        with open(os.path.join(self.root, "Conduit", "View.swift"), "w", encoding="utf-8") as handle:
+        with open(os.path.join(self.root, "Belay", "View.swift"), "w", encoding="utf-8") as handle:
             handle.write('// one\n// two\nlet a = 1\nText("Hello")\n')
-        sites = l10n.call_sites("Conduit/Localizable.xcstrings")
-        self.assertEqual(sites["Hello"], ["Conduit/View.swift:4"])
+        sites = l10n.call_sites("Belay/Localizable.xcstrings")
+        self.assertEqual(sites["Hello"], ["Belay/View.swift:4"])
 
     def test_export_all_includes_current_translations(self):
         entries = self.entries(l10n.export("ja", include_all=True))
@@ -71,9 +71,9 @@ class WorksheetTests(unittest.TestCase):
 
     def test_import_writes_values_and_plurals_in_language_order(self):
         worksheet = {"language": "fr", "entries": [
-            {"catalog": "Conduit/Localizable.xcstrings", "key": "Hello", "translation": "Bonjour"},
-            {"catalog": "Conduit/Localizable.xcstrings", "key": "Goodbye", "translation": None},
-            {"catalog": "Conduit/Localizable.xcstrings", "key": "%lld files", "translation": {
+            {"catalog": "Belay/Localizable.xcstrings", "key": "Hello", "translation": "Bonjour"},
+            {"catalog": "Belay/Localizable.xcstrings", "key": "Goodbye", "translation": None},
+            {"catalog": "Belay/Localizable.xcstrings", "key": "%lld files", "translation": {
                 "other": "%lld fichiers", "one": "%lld fichier", "many": "%lld de fichiers"}},
         ]}
         path = os.path.join(self.root, "fr.json")
@@ -89,7 +89,7 @@ class WorksheetTests(unittest.TestCase):
 
     def test_import_creates_new_keys_only_when_asked(self):
         worksheet = {"language": "ja", "entries": [
-            {"catalog": "Conduit/Localizable.xcstrings", "key": "New string", "translation": "新しい文字列"}]}
+            {"catalog": "Belay/Localizable.xcstrings", "key": "New string", "translation": "新しい文字列"}]}
         path = os.path.join(self.root, "ja.json")
         with open(path, "w", encoding="utf-8") as handle:
             json.dump(worksheet, handle)
@@ -110,7 +110,7 @@ class WorksheetTests(unittest.TestCase):
         catalog["strings"]["Show %lld of %lld"] = {"localizations": {
             "ja": unit("%2$lld件中%1$lld件"), "de": unit("%lld von %lld 100%ig")}}
         self.write(catalog)
-        l10n.rename("Show %lld of %lld", "Show %lld of %@", "Conduit/Localizable.xcstrings")
+        l10n.rename("Show %lld of %lld", "Show %lld of %@", "Belay/Localizable.xcstrings")
         strings = self.read()["strings"]
         self.assertNotIn("Show %lld of %lld", strings)
         localizations = strings["Show %lld of %@"]["localizations"]
@@ -119,13 +119,13 @@ class WorksheetTests(unittest.TestCase):
 
     def test_rename_refuses_a_different_argument_count(self):
         with self.assertRaises(ValueError):
-            l10n.rename("%lld files", "%lld files in %@", "Conduit/Localizable.xcstrings")
+            l10n.rename("%lld files", "%lld files in %@", "Belay/Localizable.xcstrings")
 
     def test_remove_deletes_keys(self):
-        l10n.remove(["Goodbye"], "Conduit/Localizable.xcstrings")
+        l10n.remove(["Goodbye"], "Belay/Localizable.xcstrings")
         self.assertNotIn("Goodbye", self.read()["strings"])
         with self.assertRaises(KeyError):
-            l10n.remove(["Goodbye"], "Conduit/Localizable.xcstrings")
+            l10n.remove(["Goodbye"], "Belay/Localizable.xcstrings")
 
 
 if __name__ == "__main__":

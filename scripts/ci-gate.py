@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CI Gate: the single stable branch-protection verdict for Hermes Conduit.
+"""CI Gate: the single stable branch-protection verdict for Hermes Belay.
 
 GitHub-hosted CI is the merge gate (docs/CI.md, CI v5). Its jobs must never
 be required individually, so this job aggregates them into one stable status

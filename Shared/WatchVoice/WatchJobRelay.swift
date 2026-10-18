@@ -1,6 +1,6 @@
 //
 //  WatchJobRelay.swift
-//  Conduit and the Conduit Watch app
+//  Belay and the Belay Watch app
 //
 //  A Watch call's Hermes jobs through the push relay, wrist up or down
 //  (designs/apple-watch-voice-direct.md, "Wrist-down jobs through the
@@ -9,7 +9,7 @@
 //  each job as an ordinary Hermes chat. The Watch app itself asks for job
 //  news (finished jobs, approval requests) while jobs run, and answers an
 //  approval with Approve or Deny on its screen, or by voice when the user
-//  turned that on in Conduit.
+//  turned that on in Belay.
 //
 //  What the model hears mirrors the iPhone's tool bridge and job
 //  supervisor for the same outcome, checked by parity tests. Written for
@@ -74,7 +74,7 @@ enum WatchJobAnswer {
     }
 
     /// A grant from a plugin before 0.10 runs jobs but can't change one.
-    static let followUpsNeedNewerPlugin = "the Conduit plugin on the user's Hermes host is too old to change a running job from the Watch; updating it fixes that"
+    static let followUpsNeedNewerPlugin = "the Belay plugin on the user's Hermes host is too old to change a running job from the Watch; updating it fixes that"
 
     static let unknownJob: [String: String] = ["error": "Unknown job_id. Call list_jobs for the jobs' ids."]
 
@@ -264,7 +264,7 @@ enum WatchJobAnswer {
         case "finished":
             let result = item.result?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
             guard !result.isEmpty else {
-                return updatePrompt("\(item.title) has finished. Open it in Conduit on your iPhone to read the result.")
+                return updatePrompt("\(item.title) has finished. Open it in Belay on your iPhone to read the result.")
             }
             return completionPrompt(title: item.title, result: result)
         case "failed":
@@ -281,7 +281,7 @@ enum WatchJobAnswer {
     /// VoiceBackgroundJobSupervisor.failedNotice: Hermes' reason, its first
     /// line kept short, since a provider's raw error can run on.
     static func failedNotice(_ title: String, reason: String) -> String {
-        let notice = "\(title) failed. Open it in Conduit on your iPhone for details."
+        let notice = "\(title) failed. Open it in Belay on your iPhone for details."
         let line = reason.split(whereSeparator: \.isNewline).lazy
             .map { $0.trimmingCharacters(in: .whitespaces) }
             .first { !$0.isEmpty } ?? ""

@@ -35,7 +35,7 @@ class DiscoveryTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             make_repo(root, ["AlphaTests"])
-            (root / "ConduitTests" / "CopyAlphaTests.swift").write_text(
+            (root / "BelayTests" / "CopyAlphaTests.swift").write_text(
                 "final class AlphaTests: XCTestCase {}\n", encoding="utf-8")
             discovery, _plan = plan_from_tree(root)
             self.assertTrue(any("duplicate" in e for e in discovery["errors"]))
@@ -44,17 +44,17 @@ class DiscoveryTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             make_repo(root, [], [], extra_files={
-                "ConduitTests/BrokenTests.swift":
+                "BelayTests/BrokenTests.swift":
                     "final class BrokenTests: SomeService {}\n"})
             discovery, _plan = plan_from_tree(root)
             self.assertTrue(any("malformed" in e for e in discovery["errors"]))
 
     def test_transitive_test_class_is_planned(self):
         content = {
-            "ConduitTests/BaseTests.swift":
+            "BelayTests/BaseTests.swift":
                 "import XCTest\nclass BaseTests: XCTestCase {\n"
                 "    func testBaseBehavior() {}\n}\n",
-            "ConduitTests/SubTests.swift":
+            "BelayTests/SubTests.swift":
                 "final class SubTests: BaseTests {}\n",
         }
         with tempfile.TemporaryDirectory() as tmp:
@@ -64,7 +64,7 @@ class DiscoveryTests(unittest.TestCase):
 
     def test_helper_mock_is_not_planned(self):
         content = {
-            "ConduitTests/Support.swift":
+            "BelayTests/Support.swift":
                 "import XCTest\nclass TestSupportBase: XCTestCase {}\n"
                 "final class MockGateway: TestSupportBase {}\n",
         }
@@ -655,7 +655,7 @@ class UiShardingTests(unittest.TestCase):
             self.assertEqual(len(assigned), len(set(assigned)))
             for lane in plan["ui_lanes"]:
                 self.assertTrue(lane["classes"])
-                self.assertEqual(lane["target"], "ConduitUITests")
+                self.assertEqual(lane["target"], "BelayUITests")
                 # every class carries a planned per-class watchdog
                 timeouts = dict(p.split("=", 1) for p in lane["class_timeouts"].split(","))
                 self.assertEqual(sorted(timeouts), sorted(lane["classes"]))
@@ -778,7 +778,7 @@ class CliTests(unittest.TestCase):
     def test_validate_cli_fails_on_duplicate(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(make_repo(Path(tmp), ["AlphaTests"]))
-            (root / "ConduitTests" / "Again.swift").write_text(
+            (root / "BelayTests" / "Again.swift").write_text(
                 "final class AlphaTests: XCTestCase {}\n", encoding="utf-8")
             proc = subprocess.run(
                 [sys.executable, str(Path(SCRIPTS_DIR) / "plan-tests.py"),
@@ -834,7 +834,7 @@ class XctestrunAuditTests(unittest.TestCase):
         import plistlib
         path = Path(tmp) / "test.xctestrun"
         with open(path, "wb") as fh:
-            plistlib.dump({"ConduitTests": {"TestHostPath": strings[0],
+            plistlib.dump({"BelayTests": {"TestHostPath": strings[0],
                                             "TestBundlePath": strings[1]}}, fh)
         return str(path)
 

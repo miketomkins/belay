@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Conduit LOCAL exhaustive CI gate.
+# Belay LOCAL exhaustive CI gate.
 #
 # This is the authoritative exhaustive test gate for a trusted commit: it is
 # run on our own Mac over SSH (never inside GitHub's runner system), and it
@@ -16,7 +16,7 @@
 #      regression suites, localization coverage), run CONCURRENTLY with
 #      everything below unless --static-serial asks for the old order;
 #   5. build-for-testing ONCE into a gate-specific DerivedData directory;
-#   6-7. the COMPLETE ConduitTests and ConduitUITests suites, as two WORKERS
+#   6-7. the COMPLETE BelayTests and BelayUITests suites, as two WORKERS
 #      on two project-owned devices (--workers 1 serializes them on the unit
 #      device), each with its own bounded recovery round;
 #   8. the explicit repeat policy for timing/performance-sensitive classes:
@@ -81,13 +81,13 @@ Options:
   --fetch                    Fetch --remote before resolving --ref.
   --remote NAME              Remote for --fetch (default: origin).
   --gate-root DIR            Root for runs + worktrees.
-                             Default: <parent of the repository>/conduit-local-gate
+                             Default: <parent of the repository>/belay-local-gate
   --run-dir DIR              This run's artifact directory.
                              Default: <gate-root>/runs/<sha12>-<UTC stamp>
   --worktree-root DIR        Parent directory for the throwaway worktree.
                              Default: <gate-root>/worktrees
   --simulator NAME           Simulator device the gate's unit worker runs on
-                             (default: $GATE_SIMULATOR_NAME or "Conduit CI
+                             (default: $GATE_SIMULATOR_NAME or "Belay CI
                              Gate" - the gate's OWN device, created if it does
                              not exist, which is what makes erasing it safe).
   --second-simulator NAME    Device the UI worker runs on when --workers 2
@@ -168,7 +168,7 @@ GATE_ROOT=""; RUN_DIR=""; WORKTREE_ROOT=""
 # SIMULATOR_NAME is deliberately IGNORED: the hosted workflow exports one, and
 # naming a device the gate is free to erase is exactly what must never happen
 # to a developer's simulator.
-SIMULATOR_NAME="${GATE_SIMULATOR_NAME:-Conduit CI Gate}"
+SIMULATOR_NAME="${GATE_SIMULATOR_NAME:-Belay CI Gate}"
 SIMULATOR_NAME2="${GATE_SIMULATOR_NAME2:-}"
 REPEAT_CLASSES="$DEFAULT_REPEAT_CLASSES"
 REPEAT_ITERATIONS=3
@@ -336,13 +336,13 @@ if [ -z "$REPO_ROOT" ]; then
   exit 2
 fi
 
-# Fail closed on the wrong repository: the gate certifies Conduit commits, so
-# the invoking checkout must BE a Conduit checkout. Without this, running the
+# Fail closed on the wrong repository: the gate certifies Belay commits, so
+# the invoking checkout must BE a Belay checkout. Without this, running the
 # script from some unrelated repository would resolve --ref there and report a
 # meaningless SHA as the tested commit.
-for marker in project.yml ConduitTests ConduitUITests; do
+for marker in project.yml BelayTests BelayUITests; do
   if [ ! -e "$REPO_ROOT/$marker" ]; then
-    echo "local-ci-gate: $REPO_ROOT does not look like the Conduit repository (missing $marker)" >&2
+    echo "local-ci-gate: $REPO_ROOT does not look like the Belay repository (missing $marker)" >&2
     exit 2
   fi
 done
@@ -364,7 +364,7 @@ done
 # Everything the gate writes lives OUTSIDE the repository: the invoking
 # checkout is never the run's workspace and never accumulates gate output.
 if [ -z "$GATE_ROOT" ]; then
-  GATE_ROOT="$(cd "$REPO_ROOT/.." && pwd)/conduit-local-gate"
+  GATE_ROOT="$(cd "$REPO_ROOT/.." && pwd)/belay-local-gate"
 fi
 if [ -z "$WORKTREE_ROOT" ]; then
   WORKTREE_ROOT="$GATE_ROOT/worktrees"
@@ -826,7 +826,7 @@ fi
 GATE_STARTED_AT="$(now_iso)"
 GATE_START_EPOCH=$(date +%s)
 
-echo "== Conduit local gate =="
+echo "== Belay local gate =="
 echo "repo root : $REPO_ROOT"
 echo "tested ref: $REF -> $SHA"
 echo "mode      : $MODE ($([ "$MODE" = release ] && echo 'complete coverage + repeat/stress policy' || echo 'complete coverage, no repeat/stress policy'))"
@@ -899,12 +899,12 @@ if ! ( umask 077 && mkfifo "$HOST_LEASE_FIFO" ); then
 fi
 IOS_CI_HOST_CONTROLLER_PID=$$ \
   "$IOS_CI_HOST_BIN" acquire simulator-test \
-    --project Conduit \
+    --project Belay \
     --repo "$REPO_ROOT" \
     --workflow local-exhaustive-gate \
     --sha "$SHA" \
     --simulator-name "$SIMULATOR_NAME" \
-    --description "Conduit local exhaustive gate" \
+    --description "Belay local exhaustive gate" \
     --fail-if-busy --hold \
     --monitor "$HOST_LEASE_DIR/watch.jsonl" --on-foreign terminate \
     < "$HOST_LEASE_FIFO" > "$HOST_LEASE_JSON" 2> "$HOST_LEASE_DIR/holder.err" &
@@ -1072,7 +1072,7 @@ write_meta() { # $1 = finished_at, $2 = wall_s
   # exist.
   #
   # Those flags travel as an ARRAY, never as a command substitution: a device
-  # name contains spaces ("Conduit CI Gate 2"), and an unquoted substitution
+  # name contains spaces ("Belay CI Gate 2"), and an unquoted substitution
   # would split it into several arguments.
   local -a second_device=()
   if [ "$WORKERS" -eq 2 ]; then
@@ -1455,7 +1455,7 @@ run_lane() { # $1=kind $2=lane $3=target $4=classes $5=predicted $6=timeout
   # SIMULATOR_NAME is passed here (it is deliberately not exported) so the lane can never
   # silently fall back to ci-lib.sh's default device when --simulator differs:
   # the recorded simulator/runtime must describe the device the tests ran on.
-  CONDUIT_PERF_TRACE="${CONDUIT_PERF_TRACE:-1}" \
+  BELAY_PERF_TRACE="${BELAY_PERF_TRACE:-1}" \
     SIMULATOR_NAME="$SIMULATOR_NAME" \
     SIMULATOR_UDID="${SIMULATOR_UDID:-}" \
     bash "$LANE_RUNNER" --kind "$kind" --lane "$lane" --target "$target" \
@@ -1471,9 +1471,9 @@ simulator_prime() { # $1 = label for the log files
   # hangs simctl indefinitely, and this runs before every retry and repeat.
   i=1
   while [ "$i" -le 2 ]; do
-    run_bounded 60 "$RUN_DIR/sim-prime-$label-$i.launch.log" "$RUN_DIR"       xcrun simctl launch "$udid" com.milim.relay || true
+    run_bounded 60 "$RUN_DIR/sim-prime-$label-$i.launch.log" "$RUN_DIR"       xcrun simctl launch "$udid" live.tomkins.belay || true
     sleep $(( 2 * GATE_SLEEP_SCALE ))
-    run_bounded 60 "$RUN_DIR/sim-prime-$label-$i.term.log" "$RUN_DIR"       xcrun simctl terminate "$udid" com.milim.relay || true
+    run_bounded 60 "$RUN_DIR/sim-prime-$label-$i.term.log" "$RUN_DIR"       xcrun simctl terminate "$udid" live.tomkins.belay || true
     sleep $(( 2 * GATE_SLEEP_SCALE ))
     i=$(( i + 1 ))
   done
@@ -1488,7 +1488,7 @@ simulator_prime() { # $1 = label for the log files
 # re-executed, and a lane that then fails still fails. It exists because the
 # gate's runs on main kept losing batches to
 #
-#   Simulator device failed to launch com.milim.relay ...
+#   Simulator device failed to launch live.tomkins.belay ...
 #   Application failed preflight checks ... reason: Busy
 #
 # What the evidence shows (four full runs plus an A/B probe on this machine):
@@ -1521,7 +1521,7 @@ simulator_prep() { # $1 = label
               # CoreSimulatorService hangs simctl indefinitely, and this runs
               # at every lane boundary. ci-lib.sh is already sourced, so
               # bounded_run is available here.
-              udid=$(simulator_udid) && bounded_run 60 xcrun simctl terminate "$udid" com.milim.relay
+              udid=$(simulator_udid) && bounded_run 60 xcrun simctl terminate "$udid" live.tomkins.belay
               sleep $(( 2 * ${GATE_SLEEP_SCALE:-1} ))' _ "$WT" "$SIM_ERASE" ) \
       >"$log" 2>&1 3>&- || status=$?
   local elapsed=$(( $(date +%s) - started ))
@@ -1750,7 +1750,7 @@ else
         if run_lane unit "$GATE_UNIT_LANE" "$GATE_UNIT_TARGET" "$GATE_UNIT_CLASSES" \
             "$GATE_UNIT_PREDICTED" "$GATE_UNIT_TIMEOUT" "$RUN_DIR/lanes/unit" \
             --batches-json "$GATE_UNIT_BATCHES_JSON"; then
-          echo "unit lane: the complete ConduitTests suite ran"
+          echo "unit lane: the complete BelayTests suite ran"
         else
           # The lane stopped at the batch that failed, so the rest of the suite
           # has no result yet. Run the batches it never reached as a
@@ -1910,7 +1910,7 @@ else
         if run_lane ui "$GATE_UI_LANE" "$GATE_UI_TARGET" "$GATE_UI_CLASSES" \
             "$GATE_UI_PREDICTED" "$GATE_UI_TIMEOUT" "$RUN_DIR/lanes/ui" \
             --class-timeouts "$GATE_UI_CLASS_TIMEOUTS"; then
-          echo "ui lane: the complete ConduitUITests suite ran"
+          echo "ui lane: the complete BelayUITests suite ran"
         else
           echo "ui lane: the shard reported failures (classified in the result)"
         fi

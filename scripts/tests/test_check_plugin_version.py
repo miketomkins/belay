@@ -27,7 +27,7 @@ class CheckPluginVersionTests(unittest.TestCase):
         self.assertEqual(self.run_check("0.41.0", "name: conduit_push\nversion: 0.41.0\n"), 0)
 
     def test_a_recommended_version_behind_the_plugin_passes(self):
-        # Conduit offers the plugin's own latest version; this is only the floor.
+        # Belay offers the plugin's own latest version; this is only the floor.
         self.assertEqual(self.run_check("0.29.0", "version: 0.41.0\n"), 0)
 
     def test_recommended_ahead_of_the_plugin_fails(self):

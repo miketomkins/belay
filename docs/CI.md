@@ -52,13 +52,13 @@ What gets compiled (2026-10-15, when builds had grown to 9-17 minutes):
 
 - **The app without its Watch app and extensions.** The smoke job generates
   the project from `project-tests.yml`, an xcodegen overlay of `project.yml`
-  whose only change is that the Conduit target no longer embeds the Apple
+  whose only change is that the Belay target no longer embeds the Apple
   Watch app and the three app extensions. No test runs them, and the Watch app
   is a second platform compiled from scratch. The smoke job builds the full
-  app instead when the PR touches those targets' sources (`ConduitWatch/`,
-  `ConduitWidgets/`, `ConduitNotificationService/`, `ConduitLocationPush/`,
-  `Shared/`, `Conduit/Voice/GPTLive/GPTLiveProtocol.swift` or either project
-  spec). `Conduit/Localizable.xcstrings` is left
+  app instead when the PR touches those targets' sources (`BelayWatch/`,
+  `BelayWidgets/`, `BelayNotificationService/`, `BelayLocationPush/`,
+  `Shared/`, `Belay/Voice/GPTLive/GPTLiveProtocol.swift` or either project
+  spec). `Belay/Localizable.xcstrings` is left
   out on purpose: the app target compiles the same catalog in the slim build,
   and nearly every PR edits it. Every push to `main` builds the full app too,
   as do the nightly timing and UI jobs and TestFlight archives. The plan job
@@ -553,7 +553,7 @@ suites.
 
 
 `scripts/plan-tests.py` discovers XCTestCase classes by scanning
-`ConduitTests/` and `ConduitUITests/` sources:
+`BelayTests/` and `BelayUITests/` sources:
 
 * A class is a **test class** if it directly inherits `XCTestCase` (repo
   convention) or is named `*Tests` and inherits `XCTestCase` transitively.
@@ -563,8 +563,8 @@ suites.
 * Classes that merely resolve to `XCTestCase` without the above (mocks such
   as `MockGateway`, `FakeSocket`) enumerate zero tests and are excluded from
   lanes - the same behavior as the old static shard guard.
-* Target membership comes from the **directory** (`ConduitTests/` vs
-  `ConduitUITests/`), never from the class name.
+* Target membership comes from the **directory** (`BelayTests/` vs
+  `BelayUITests/`), never from the class name.
 * Duplicates, and `*Tests`-named classes that do not resolve to
   `XCTestCase`, are hard errors. A new test class can never silently miss CI.
 
@@ -954,34 +954,34 @@ SSH — never inside GitHub's self-hosted-runner system — and it always tests 
 From any machine with the `ios-mac` SSH alias (see the workspace `AGENTS.md`):
 
 ```
-ssh ios-mac 'bash ~/projects/conduit-gate-tooling/scripts/local-ci-gate.sh --ref <sha-or-ref>'
+ssh ios-mac 'bash ~/projects/belay-gate-tooling/scripts/local-ci-gate.sh --ref <sha-or-ref>'
 ```
 
-`~/projects/conduit-gate-tooling` is a scratch worktree **of the Conduit
+`~/projects/belay-gate-tooling` is a scratch worktree **of the Belay
 repository itself** (created once with `git -C
 ~/projects/hermes-conduit-swiftui worktree add --detach
-~/projects/conduit-gate-tooling origin/main`), not a separate clone: `--ref`
+~/projects/belay-gate-tooling origin/main`), not a separate clone: `--ref`
 is resolved in the shared object store, so the SHA that gets reported is a
-Conduit commit. The script refuses to run at all unless the checkout it is
-invoked from looks like Conduit (`project.yml`, `ConduitTests/`,
-`ConduitUITests/`), so pointing it at an unrelated repository fails fast
+Belay commit. The script refuses to run at all unless the checkout it is
+invoked from looks like Belay (`project.yml`, `BelayTests/`,
+`BelayUITests/`), so pointing it at an unrelated repository fails fast
 instead of certifying a meaningless SHA.
 
 `--ref` accepts any ref or SHA that repository already has; add `--fetch` to
 fetch `origin` first, which makes the whole thing one command:
 
 ```
-ssh ios-mac 'bash ~/projects/conduit-gate-tooling/scripts/local-ci-gate.sh --ref origin/main --fetch'
+ssh ios-mac 'bash ~/projects/belay-gate-tooling/scripts/local-ci-gate.sh --ref origin/main --fetch'
 ```
 
 The two certifications:
 
 ```
 # a trusted PR about to be merged: complete unit + UI coverage, no repeat layer
-ssh ios-mac 'bash ~/projects/conduit-gate-tooling/scripts/local-ci-gate.sh --mode merge --ref <sha>'
+ssh ios-mac 'bash ~/projects/belay-gate-tooling/scripts/local-ci-gate.sh --mode merge --ref <sha>'
 
 # a release head (the DEFAULT mode): that, plus the repeat/stress policy
-ssh ios-mac 'bash ~/projects/conduit-gate-tooling/scripts/local-ci-gate.sh --mode release --ref <sha>'
+ssh ios-mac 'bash ~/projects/belay-gate-tooling/scripts/local-ci-gate.sh --mode release --ref <sha>'
 ```
 
 Both modes need the host's `SIMULATOR_TEST` lease and take the gate's own two
@@ -997,7 +997,7 @@ only when the entire gate passed. Run `--help` for every flag.
 
 ### Host simulator coordination (`ios-ci-host`)
 
-The Mac is a **shared build host** (Conduit, VitalRoute, SeaBag, agent
+The Mac is a **shared build host** (Belay, VitalRoute, SeaBag, agent
 sessions, ordinary development), and two concurrent xcodebuild/Simulator
 chains on one host corrupt each other's state — the launch-wedge class of
 infrastructure failures. The gate therefore holds the host-level
@@ -1037,7 +1037,7 @@ allocation and host-busy evidence. Exact-SHA evidence, gate-result files,
 assertion-vs-infrastructure classification, repeat policy and the release
 verdict remain the gate's own responsibilities.
 
-The device is pinned by name (`--simulator`, default **`Conduit CI Gate`**;
+The device is pinned by name (`--simulator`, default **`Belay CI Gate`**;
 the environment's `SIMULATOR_OS`/`SIMULATOR_ARCH` are honoured by ci-lib.sh as
 usual), and the SAME device is passed explicitly to every phase (the build, the
 lanes and the preparation), so the simulator/runtime recorded in the result is
@@ -1080,10 +1080,10 @@ the same time as each other.
 | devices | resolve/create BOTH project-owned devices (`--simulator`, and `--second-simulator` when `--workers 2`) | Each name must be unambiguous in the inventory (fail closed otherwise); the two must resolve to different UDIDs |
 | build | `ci-build-for-testing.sh` once, into a gate-specific DerivedData | The same build-once contract as hosted CI, without the artifact round trip |
 | static | `plan-tests.py validate`, `python3 -m unittest discover -s scripts/tests`, `check-l10n-coverage.py` — concurrently, in the background | Starts once the build has moved its `ci-lane/build` diagnostics out of the worktree, and finishes underneath the lanes; the run WAITS for it and fails on its verdict, so overlapping changes when the checks run, never whether they count. `--static-serial` restores the old foreground order; `--skip-static` marks the result **partial** |
-| prepare | before each lane: ci-lib.sh's own bounded shutdown/**erase**/boot/wait-for-boot, on that WORKER's device | Environment preparation, never a retry — it re-runs nothing and a lane that fails afterwards still fails. Without it, the host app's install/launch is refused (`Simulator device failed to launch com.milim.relay … Application failed preflight checks … reason: Busy`) and the batch is lost. An early A/B probe on our Mac (one sample per arm) suggested the erase was the part that matters; the controlled A/B of 2026-09-24 (88 invocations across four arms, frozen release products) superseded it: what decides the refusal is the device's state when xcodebuild starts - Shutdown-at-launch (xcodebuild cold-boots the device itself) refused 40% and 70% of launches with and without a preceding erase (8/20, 14/20), while Booted-at-launch was clean either way (0/24, 0/24). The prepare sequence remains a **partial** mitigation: it leaves the device Booted for the next launch, but on a full run the lane runner's own shutdown used to re-arm the cold boot, so the refusal returned a batch or two into a lane. Costs ~40 s per lane. `--no-simulator-erase` keeps the cheaper mode for observing the raw behavior; `--no-simulator-prep` skips preparation entirely. |
+| prepare | before each lane: ci-lib.sh's own bounded shutdown/**erase**/boot/wait-for-boot, on that WORKER's device | Environment preparation, never a retry — it re-runs nothing and a lane that fails afterwards still fails. Without it, the host app's install/launch is refused (`Simulator device failed to launch live.tomkins.belay … Application failed preflight checks … reason: Busy`) and the batch is lost. An early A/B probe on our Mac (one sample per arm) suggested the erase was the part that matters; the controlled A/B of 2026-09-24 (88 invocations across four arms, frozen release products) superseded it: what decides the refusal is the device's state when xcodebuild starts - Shutdown-at-launch (xcodebuild cold-boots the device itself) refused 40% and 70% of launches with and without a preceding erase (8/20, 14/20), while Booted-at-launch was clean either way (0/24, 0/24). The prepare sequence remains a **partial** mitigation: it leaves the device Booted for the next launch, but on a full run the lane runner's own shutdown used to re-arm the cold boot, so the refusal returned a batch or two into a lane. Costs ~40 s per lane. `--no-simulator-erase` keeps the cheaper mode for observing the raw behavior; `--no-simulator-prep` skips preparation entirely. |
 
-| unit worker | the **complete** `ConduitTests` suite, its continuation pass, its bounded recovery round, and (release mode) the whole repeat policy | One exhaustive lane: the planner is forced to `--min-lanes 1 --max-lanes 1` so it still owns the sequential batches and every per-batch watchdog |
-| ui worker | the **complete** `ConduitUITests` suite and its bounded recovery round | One batched invocation over every UI class, with the planner's per-class watchdogs |
+| unit worker | the **complete** `BelayTests` suite, its continuation pass, its bounded recovery round, and (release mode) the whole repeat policy | One exhaustive lane: the planner is forced to `--min-lanes 1 --max-lanes 1` so it still owns the sequential batches and every per-batch watchdog |
+| ui worker | the **complete** `BelayUITests` suite and its bounded recovery round | One batched invocation over every UI class, with the planner's per-class watchdogs |
 | repeats | the repeat policy below (release mode) | Part of the unit worker, so it runs even when the unit or UI lane failed and one red lane cannot hide the rest; skipped when the build failed (no test products), and left failing when the plan could not be produced (there is nothing to project the repeat tasks from) |
 
 ### Workers: two project-owned devices, one host lease
@@ -1213,10 +1213,10 @@ next poll tick.
 
 ### The bounded recovery round (and the wedge it is for)
 
-The gate runs on a dedicated simulator device ("Conduit CI Gate", created on
+The gate runs on a dedicated simulator device ("Belay CI Gate", created on
 demand) precisely so it can erase that device freely: on our Mac the host
 app's install/launch is periodically refused (`Simulator device failed to
-launch com.milim.relay … Application failed preflight checks … reason: Busy`),
+launch live.tomkins.belay … Application failed preflight checks … reason: Busy`),
 and the A/B evidence that diagnosed it points at the device's state when
 xcodebuild starts (see the "prepare" row above: a Booted-at-launch device
 was clean in every arm, while a Shutdown-at-launch cold boot was refused).
@@ -1309,7 +1309,7 @@ vocabulary came up empty.
 * **test-runner failures** — XCTest also files the *run* itself: when the
   Simulator refuses to install or launch the host app, the result bundle
   carries a synthetic entry under the pseudo-class `System Failures`
-  (`Conduit encountered an error`), and the lane runner's status token cannot
+  (`Belay encountered an error`), and the lane runner's status token cannot
   tell it from an assertion. The gate splits those apart using the
   per-invocation extraction parts, so a machine that never started the app is
   reported as infrastructure — never as an assertion failure. This is not
@@ -1393,7 +1393,7 @@ release head. A `merge` run is not partial — its coverage is exactly what
 
 Both artifacts, every phase log, every per-iteration log and the `.xcresult`
 bundles live under the run directory (default
-`<parent of the repo>/conduit-local-gate/runs/<sha12>-<UTC>`), which is
+`<parent of the repo>/belay-local-gate/runs/<sha12>-<UTC>`), which is
 **outside** the repository, so the gate never adds files to a working tree.
 
 What is kept is the lane runner's existing retention policy, not a new one: a

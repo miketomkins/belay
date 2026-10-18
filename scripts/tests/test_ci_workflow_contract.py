@@ -201,7 +201,7 @@ class WorkflowContractTests(unittest.TestCase):
     def test_unit_smoke_step_runs_the_curated_classes_once_without_retry(self):
         unit = _step_text(self._job_text("smoke"), "Run the curated unit smoke classes")
         self.assertIn('UNIT_CLASSES: "${{ needs.plan.outputs.unit-csv }}"', unit)
-        self.assertIn("-only-testing:ConduitTests/", unit)
+        self.assertIn("-only-testing:BelayTests/", unit)
         self.assertEqual(1, unit.count("xcodebuild test-without-building"),
                          "the curated unit classes are ONE invocation")
         for flag in ("-parallel-testing-enabled NO",
@@ -231,19 +231,19 @@ class WorkflowContractTests(unittest.TestCase):
         self.assertNotIn("- target:", overlay)
         plan = self._job_text("plan")
         self.assertIn("fetch-depth: 2", plan)
-        self.assertIn("^(ConduitWatch|ConduitWidgets|ConduitNotificationService"
-                      "|ConduitLocationPush|Shared)/", plan,
+        self.assertIn("^(BelayWatch|BelayWidgets|BelayNotificationService"
+                      "|BelayLocationPush|Shared)/", plan,
                       "a change to any dropped target's folder must build the full app")
         self.assertIn(r"^project(-tests)?\.yml$", plan)
-        self.assertIn(r"^Conduit/Voice/GPTLive/GPTLiveProtocol\.swift$", plan)
+        self.assertIn(r"^Belay/Voice/GPTLive/GPTLiveProtocol\.swift$", plan)
         self.assertIn("HEAD^2", plan, "only a merge-commit checkout may pick the slim build")
         self.assertIn('= "$PR_HEAD" ]', plan, "the merge commit's second parent must be this PR's head")
         self.assertIn("spec=project.yml\n", plan, "the plan job must fail closed to the full app")
         spec = _read(os.path.join(REPO_ROOT, "project.yml"))
         # Every target the overlay drops must still be a dependency in the
         # real spec, or the list above is out of date.
-        for target in ("ConduitWatch", "ConduitNotificationService",
-                       "ConduitWidgets", "ConduitLocationPush"):
+        for target in ("BelayWatch", "BelayNotificationService",
+                       "BelayWidgets", "BelayLocationPush"):
             self.assertIn(f"- target: {target}", spec)
 
     def test_smoke_job_builds_incrementally_and_main_saves_the_full_build(self):
@@ -274,7 +274,7 @@ class WorkflowContractTests(unittest.TestCase):
     def test_ui_smoke_step_runs_the_curated_classes(self):
         ui = _step_text(self._job_text("smoke"), "Run the curated UI smoke suite")
         self.assertIn('UI_CLASSES: "${{ needs.plan.outputs.ui-csv }}"', ui)
-        self.assertIn("-only-testing:ConduitUITests/", ui)
+        self.assertIn("-only-testing:BelayUITests/", ui)
         self.assertNotIn("-test-iterations", ui)
         self.assertNotIn("-retry-tests-on-failure", ui)
         self.assertIn("one targeted retry", ui,
@@ -415,7 +415,7 @@ class NightlyWorkflowTests(unittest.TestCase):
                       "one failing shard must not cancel the other")
         self.assertIn('UNIT_CLASSES: "${{ matrix.classes }}"', unit)
         self.assertIn("UNIT_BATCH_SIZE", unit)
-        self.assertIn("-only-testing:ConduitTests/", unit)
+        self.assertIn("-only-testing:BelayTests/", unit)
         self.assertIn("-test-timeouts-enabled YES", unit,
                       "a hung unit test must be killed, not burn the job ceiling")
         self.assertIn('-destination "$DESTINATION"', unit)
@@ -639,7 +639,7 @@ class SmokeSelectionTests(unittest.TestCase):
 
     def test_a_class_in_the_wrong_target_fails_the_selection(self):
         # Validating against the union of both inventories would let a class
-        # moved between ConduitTests/ and ConduitUITests/ through, and the smoke
+        # moved between BelayTests/ and BelayUITests/ through, and the smoke
         # job would then filter it against the wrong bundle - running zero tests
         # for it while the plan job reported success.
         def mutate(suite):

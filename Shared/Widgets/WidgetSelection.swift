@@ -1,15 +1,15 @@
 import Foundation
 
 enum WidgetTitleCopy: Equatable {
-    case openConduit
-    case openConduitToRefresh
+    case openBelay
+    case openBelayToRefresh
     case resumeChat
     case cached(String)
 
     var sourceValue: String {
         switch self {
-        case .openConduit: "Open Conduit"
-        case .openConduitToRefresh: "Open Conduit to refresh"
+        case .openBelay: "Open Belay"
+        case .openBelayToRefresh: "Open Belay to refresh"
         case .resumeChat: "Resume chat"
         case let .cached(value): value
         }
@@ -52,7 +52,7 @@ enum WidgetSelection {
         if hasInvalidTarget {
             let recoveryWorkspace = selectedID.flatMap { $0.isValid ? $0 : nil }
             return WidgetEntryModel(
-                titleCopy: .openConduitToRefresh,
+                titleCopy: .openBelayToRefresh,
                 dashboardLabel: "",
                 profileLabel: "",
                 resumeLink: scopedRecovery(workspace: recoveryWorkspace),
@@ -63,7 +63,7 @@ enum WidgetSelection {
 
         if hasMismatchedConversationOwner {
             return WidgetEntryModel(
-                titleCopy: .openConduitToRefresh,
+                titleCopy: .openBelayToRefresh,
                 dashboardLabel: selected?.dashboardLabel ?? "",
                 profileLabel: selected?.profileLabel ?? "",
                 resumeLink: scopedRecovery(workspace: selectedID),
@@ -75,13 +75,13 @@ enum WidgetSelection {
         let hasMissingWorkspace = selectedID != nil && selected == nil
         let title: WidgetTitleCopy
         if hasMissingWorkspace || (reference != nil && choice == nil) {
-            title = .openConduitToRefresh
+            title = .openBelayToRefresh
         } else if selectedID == nil || reference == nil {
-            title = .openConduit
+            title = .openBelay
         } else if hideTitle {
             title = .resumeChat
         } else {
-            title = choice.map { .cached($0.title) } ?? .openConduitToRefresh
+            title = choice.map { .cached($0.title) } ?? .openBelayToRefresh
         }
 
         return WidgetEntryModel(

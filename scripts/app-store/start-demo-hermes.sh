@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # Start the App Store demo dashboard on this Mac: a real Hermes Agent (pinned
-# commit) with the Conduit notifier plugin, password sign-in, and the scripted
+# commit) with the Belay notifier plugin, password sign-in, and the scripted
 # model (llm_stub.py) as its provider, then seed the demo chats from
 # demo-script.json through Hermes itself. The dashboard answers at
 # http://$DEMO_HOST:$DEMO_PORT, a *.ts.net name /etc/hosts points at this Mac,
@@ -42,7 +42,7 @@ VIRTUAL_ENV="$DEMO_WORK/venv" uv pip install -q -e "$DEMO_WORK/src"
 HERMES="$DEMO_WORK/venv/bin/hermes"
 PY="$DEMO_WORK/venv/bin/python"
 
-# Conduit never loads the web UI, but the dashboard serves an index page and
+# Belay never loads the web UI, but the dashboard serves an index page and
 # --skip-build would otherwise try npm. A bare page with a <head> is enough.
 mkdir -p "$DEMO_WORK/src/hermes_cli/web_dist"
 printf '<!doctype html><html><head></head><body></body></html>' > "$DEMO_WORK/src/hermes_cli/web_dist/index.html"

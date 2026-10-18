@@ -9,6 +9,6 @@
 include:
   - path: project.yml
 targets:
-  Conduit:
+  Belay:
     dependencies:REPLACE:
       - package: WebRTC

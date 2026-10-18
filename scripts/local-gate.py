@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Local exhaustive gate helpers for Hermes Conduit (see docs/CI.md).
+"""Local exhaustive gate helpers for Hermes Belay (see docs/CI.md).
 
 `scripts/local-ci-gate.sh` owns the orchestration (worktree isolation, build
 once, phase sequencing). This script owns everything that is *data*: it
@@ -57,10 +57,10 @@ RETRY_MODES = ("batch-retry", "class-retry")
 
 # XCTest does NOT only report real test cases. When the test host cannot be
 # installed or launched (a wedged or "Busy" Simulator refusing
-# com.milim.relay, a crashed test runner, a missing binary) the result bundle
+# live.tomkins.belay, a crashed test runner, a missing binary) the result bundle
 # carries a synthetic entry under the pseudo-class "System Failures" -
 # observed in the gate's first real run: class "System Failures", test
-# "Conduit encountered an error", with the launch refusal in the log. Such an
+# "Belay encountered an error", with the launch refusal in the log. Such an
 # entry is NOT a test asserting anything, and counting it as an assertion
 # failure is exactly the mislabeling the gate exists to prevent: it would
 # report "genuine XCTest assertion failures present" for a machine that never
@@ -197,7 +197,7 @@ def cmd_lanes(args) -> int:
     env = {
         "GATE_UNIT_PRESENT": 1,
         "GATE_UNIT_LANE": unit.get("lane") or "unit-1",
-        "GATE_UNIT_TARGET": unit.get("target") or "ConduitTests",
+        "GATE_UNIT_TARGET": unit.get("target") or "BelayTests",
         "GATE_UNIT_CLASSES": _csv(unit_classes),
         "GATE_UNIT_CLASS_COUNT": len(unit_classes),
         "GATE_UNIT_BATCH_COUNT": int(unit.get("batch_count") or len(unit["batches"])),
@@ -209,7 +209,7 @@ def cmd_lanes(args) -> int:
     if ui_classes:
         env.update({
             "GATE_UI_LANE": ui.get("lane") or "ui-1",
-            "GATE_UI_TARGET": ui.get("target") or "ConduitUITests",
+            "GATE_UI_TARGET": ui.get("target") or "BelayUITests",
             "GATE_UI_CLASSES": _csv(ui_classes),
             "GATE_UI_CLASS_COUNT": len(ui_classes),
             "GATE_UI_CLASS_TIMEOUTS": ui.get("class_timeouts") or "",
@@ -296,7 +296,7 @@ def cmd_repeat_spec(args) -> int:
         capped = min(budget, args.timeout_cap) if args.timeout_cap > 0 else budget
         tasks.append({
             "class": name,
-            "target": unit.get("target") or "ConduitTests",
+            "target": unit.get("target") or "BelayTests",
             "predicted_s": found.get("predicted_s") or 0,
             "timeout_s": capped,
             "planner_batch_timeout_s": budget,
@@ -481,7 +481,7 @@ def cmd_recovery_spec(args) -> int:
         capped = min(budget, args.timeout_cap) if args.timeout_cap > 0 else budget
         tasks.append({
             "class": name,
-            "target": lane.get("target") or ("ConduitUITests" if ui else "ConduitTests"),
+            "target": lane.get("target") or ("BelayUITests" if ui else "BelayTests"),
             "predicted_s": (found.get("predicted_s") or 0) if found else 0,
             "timeout_s": capped if capped > 0 else (budget or 600),
         })
@@ -900,7 +900,7 @@ def _read_parts(lane_dir: str):
 # allowed for. It is the simulator refusing to install/launch the host app, as
 # observed on this machine:
 #
-#   Simulator device failed to launch com.milim.relay.
+#   Simulator device failed to launch live.tomkins.belay.
 #   Application failed preflight checks ... reason: Busy
 #
 # Anything else - a crash with no synthetic entry, a watchdog timeout, a build
@@ -2255,7 +2255,7 @@ def cmd_summarize(args) -> int:
 
     result = {
         "schema_version": SCHEMA_VERSION,
-        "gate": "conduit-local-ci-gate",
+        "gate": "belay-local-ci-gate",
         "verdict": verdict,
         # WHICH certification this is. Both modes cover the complete unit and
         # UI suites; they differ only in whether the repeat/stress policy is
@@ -2438,7 +2438,7 @@ def _write_markdown(path: str, result: dict) -> None:
     repeats = result["focused_repeats"]
     infra = result["infrastructure"]
     lines = []
-    lines.append("# Conduit local gate: {0}".format(result["verdict"]))
+    lines.append("# Belay local gate: {0}".format(result["verdict"]))
     lines.append("")
     lines.append("Tested commit: `{0}` (requested `{1}`)".format(
         result["tested_sha"], result["requested_ref"]))
@@ -2480,10 +2480,10 @@ def _write_markdown(path: str, result: dict) -> None:
     lines.append("|---|---|---|---|---|")
     lines.append("| build (once) | {0} | - | - | {1}s |".format(
         result["build"]["status"], result["build"]["duration_s"]))
-    lines.append("| unit (ConduitTests) | {0} | {1} | {2} | {3}s |".format(
+    lines.append("| unit (BelayTests) | {0} | {1} | {2} | {3}s |".format(
         unit.get("status"), unit.get("executions"), unit.get("failures"),
         unit.get("duration_s")))
-    lines.append("| UI (ConduitUITests) | {0} | {1} | {2} | {3}s |".format(
+    lines.append("| UI (BelayUITests) | {0} | {1} | {2} | {3}s |".format(
         ui.get("status"), ui.get("executions"), ui.get("failures"),
         ui.get("duration_s")))
     if repeats.get("enabled"):
@@ -2531,7 +2531,7 @@ def _print_human(result: dict) -> None:
     ui = result["ui"]
     repeats = result["focused_repeats"]
     print("")
-    print("=== Conduit local gate ===")
+    print("=== Belay local gate ===")
     print("tested SHA : {0}  (requested {1})".format(
         result["tested_sha"], result["requested_ref"]))
     print("mode       : {0}{1}".format(

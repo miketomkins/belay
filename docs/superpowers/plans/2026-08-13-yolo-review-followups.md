@@ -20,7 +20,7 @@
 
 ### Task 1: Add the buffered-event regression (RED)
 
-**Files:** `ConduitTests/SessionYoloPersistenceTests.swift`
+**Files:** `BelayTests/SessionYoloPersistenceTests.swift`
 
 Add `testBufferedConflictingSessionInfoPreservesNonYoloRuntimeFields`. Use the existing `SessionYoloResumeGate` and `makeAppState` seams. Return a resume snapshot with `model = "resume-model"`, `provider = "resume-provider"`, `context_percent = 10`, and `yolo = false`. While `openSession` is suspended, buffer a `.sessionInfo` snapshot with `model = "buffered-model"`, `provider = "buffered-provider"`, `context_percent = 42`, `running = true`, and `yolo = true`. After releasing the gate and awaiting `syncSession()`, assert `runtime.yolo == false`, `runtime.model == "buffered-model"`, `runtime.provider == "buffered-provider"`, and `runtime.contextPercent == 42`.
 
@@ -28,15 +28,15 @@ Add `testBufferedConflictingSessionInfoPreservesNonYoloRuntimeFields`. Use the e
 - [ ] **Step 2: Run the focused test and confirm the current whole-event filter fails because `runtime.model` remains `resume-model`.**
 
 ```bash
-xcodebuild test -quiet -project Conduit.xcodeproj -scheme Conduit \
+xcodebuild test -quiet -project Belay.xcodeproj -scheme Belay \
   -destination 'platform=iOS Simulator,id=6930ECCE-D36C-4E11-8AB5-EDEC4DEA8355' \
-  -derivedDataPath /tmp/conduit-yolo-followup-red CODE_SIGNING_ALLOWED=NO \
-  -only-testing:ConduitTests/SessionYoloPersistenceTests/testBufferedConflictingSessionInfoPreservesNonYoloRuntimeFields
+  -derivedDataPath /tmp/belay-yolo-followup-red CODE_SIGNING_ALLOWED=NO \
+  -only-testing:BelayTests/SessionYoloPersistenceTests/testBufferedConflictingSessionInfoPreservesNonYoloRuntimeFields
 ```
 
 ### Task 2: Preserve buffered fields while anchoring YOLO authority (GREEN)
 
-**Files:** `Conduit/Services/AppState.swift`
+**Files:** `Belay/Services/AppState.swift`
 
 1. Extend the private `applyChatResume` overload with optional `reconcileExplicitYolo: Bool?`. Pass the already-computed reconciliation decision from `reconcile`; direct callers retain the existing baseline-derived default.
 2. Extend `applyRuntime` with `authoritativeYolo: Bool? = nil` and use `authoritativeYolo ?? snapshot.yolo` only for the YOLO branch. Leave all other runtime field handling unchanged.
@@ -47,24 +47,24 @@ xcodebuild test -quiet -project Conduit.xcodeproj -scheme Conduit \
 - [ ] **Step 2: Run the new regression plus the existing stale-ordering tests.**
 
 ```bash
-xcodebuild test -quiet -project Conduit.xcodeproj -scheme Conduit \
+xcodebuild test -quiet -project Belay.xcodeproj -scheme Belay \
   -destination 'platform=iOS Simulator,id=6930ECCE-D36C-4E11-8AB5-EDEC4DEA8355' \
-  -derivedDataPath /tmp/conduit-yolo-followup-buffered-green CODE_SIGNING_ALLOWED=NO \
-  -only-testing:ConduitTests/SessionYoloPersistenceTests/testBufferedConflictingSessionInfoPreservesNonYoloRuntimeFields \
-  -only-testing:ConduitTests/SessionYoloPersistenceTests/testBufferedStaleSessionInfoCannotReapplyClearedOverride \
-  -only-testing:ConduitTests/SessionYoloPersistenceTests/testStaleResumeSnapshotCannotClearJustPersistedOverride
+  -derivedDataPath /tmp/belay-yolo-followup-buffered-green CODE_SIGNING_ALLOWED=NO \
+  -only-testing:BelayTests/SessionYoloPersistenceTests/testBufferedConflictingSessionInfoPreservesNonYoloRuntimeFields \
+  -only-testing:BelayTests/SessionYoloPersistenceTests/testBufferedStaleSessionInfoCannotReapplyClearedOverride \
+  -only-testing:BelayTests/SessionYoloPersistenceTests/testStaleResumeSnapshotCannotClearJustPersistedOverride
 ```
 
 - [ ] **Step 3: Commit the buffered replay fix.**
 
 ```bash
-git add Conduit/Services/AppState.swift ConduitTests/SessionYoloPersistenceTests.swift
+git add Belay/Services/AppState.swift BelayTests/SessionYoloPersistenceTests.swift
 git commit -m "fix: preserve buffered session info fields"
 ```
 
 ### Task 3: Add the Model Picker draft regression (RED)
 
-**Files:** `ConduitTests/ModelPickerTests.swift`
+**Files:** `BelayTests/ModelPickerTests.swift`
 
 Add tests for a new pure factory on `ModelPickerYoloDraft`:
 
@@ -84,15 +84,15 @@ func testModelPickerYoloDraftDoesNotReseedAnExistingBaseline() {
 - [ ] **Step 2: Run `ModelPickerTests`; the current source must fail to compile because `seededIfNeeded` is missing.**
 
 ```bash
-xcodebuild test -quiet -project Conduit.xcodeproj -scheme Conduit \
+xcodebuild test -quiet -project Belay.xcodeproj -scheme Belay \
   -destination 'platform=iOS Simulator,id=6930ECCE-D36C-4E11-8AB5-EDEC4DEA8355' \
-  -derivedDataPath /tmp/conduit-yolo-followup-picker-red CODE_SIGNING_ALLOWED=NO \
-  -only-testing:ConduitTests/ModelPickerTests
+  -derivedDataPath /tmp/belay-yolo-followup-picker-red CODE_SIGNING_ALLOWED=NO \
+  -only-testing:BelayTests/ModelPickerTests
 ```
 
 ### Task 4: Guard Model Picker draft initialization (GREEN)
 
-**Files:** `Conduit/Views/ModelPickerView.swift`, `ConduitTests/ModelPickerTests.swift`
+**Files:** `Belay/Views/ModelPickerView.swift`, `BelayTests/ModelPickerTests.swift`
 
 Add:
 
@@ -110,7 +110,7 @@ Replace the unconditional `.onAppear` assignments with an `if let` call to this 
 - [ ] **Step 3: Commit the picker fix.**
 
 ```bash
-git add Conduit/Views/ModelPickerView.swift ConduitTests/ModelPickerTests.swift
+git add Belay/Views/ModelPickerView.swift BelayTests/ModelPickerTests.swift
 git commit -m "fix: preserve Model Picker YOLO drafts"
 ```
 
@@ -121,11 +121,11 @@ git commit -m "fix: preserve Model Picker YOLO drafts"
 - [ ] **Step 1: Run focused coverage for `SessionYoloPersistenceTests` and `ModelPickerTests`.**
 
 ```bash
-xcodebuild test -quiet -project Conduit.xcodeproj -scheme Conduit \
+xcodebuild test -quiet -project Belay.xcodeproj -scheme Belay \
   -destination 'platform=iOS Simulator,id=6930ECCE-D36C-4E11-8AB5-EDEC4DEA8355' \
-  -derivedDataPath /tmp/conduit-yolo-followup-focused CODE_SIGNING_ALLOWED=NO \
-  -only-testing:ConduitTests/SessionYoloPersistenceTests \
-  -only-testing:ConduitTests/ModelPickerTests
+  -derivedDataPath /tmp/belay-yolo-followup-focused CODE_SIGNING_ALLOWED=NO \
+  -only-testing:BelayTests/SessionYoloPersistenceTests \
+  -only-testing:BelayTests/ModelPickerTests
 ```
 
 - [ ] **Step 2: Run the complete XCTest suite and inspect `xcresulttool get test-results summary` for actual passed/failed counts.**

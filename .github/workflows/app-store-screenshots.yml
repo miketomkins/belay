@@ -31,7 +31,7 @@ jobs:
       DEMO_PORT: "9119"
       DEMO_USER: demo
       # Not a secret: the demo dashboard lives only on this runner.
-      DEMO_PASSWORD: conduit-demo-2026
+      DEMO_PASSWORD: belay-demo-2026
       DEMO_WORK: ${{ github.workspace }}/demo-hermes
     steps:
       - uses: actions/checkout@v7
@@ -82,13 +82,13 @@ jobs:
               --cellularMode active --cellularBars 4 --batteryState charged --batteryLevel 100 || true
             slug=$(echo "$name" | tr ' ' '-' | tr -cd 'A-Za-z0-9-')
             set +e
-            TEST_RUNNER_CONDUIT_DEMO_URL="http://$DEMO_HOST:$DEMO_PORT" \
-            TEST_RUNNER_CONDUIT_DEMO_USER="$DEMO_USER" \
-            TEST_RUNNER_CONDUIT_DEMO_PASSWORD="$DEMO_PASSWORD" \
+            TEST_RUNNER_BELAY_DEMO_URL="http://$DEMO_HOST:$DEMO_PORT" \
+            TEST_RUNNER_BELAY_DEMO_USER="$DEMO_USER" \
+            TEST_RUNNER_BELAY_DEMO_PASSWORD="$DEMO_PASSWORD" \
             perl -e 'alarm shift; exec @ARGV' 1500 xcodebuild test \
-              -project Conduit.xcodeproj -scheme Conduit \
+              -project Belay.xcodeproj -scheme Belay \
               -destination "id=$udid" \
-              -only-testing:ConduitScreenshots \
+              -only-testing:BelayScreenshots \
               -resultBundlePath "results/$slug.xcresult" \
               -derivedDataPath dd \
               -enableCodeCoverage NO \
@@ -103,14 +103,14 @@ jobs:
               recorder=$!
               echo "RECORD_START $(python3 -c 'import time; print(time.time())')" > "shots/preview-$slug.marks"
               sleep 2
-              TEST_RUNNER_CONDUIT_DEMO_URL="http://$DEMO_HOST:$DEMO_PORT" \
-              TEST_RUNNER_CONDUIT_DEMO_USER="$DEMO_USER" \
-              TEST_RUNNER_CONDUIT_DEMO_PASSWORD="$DEMO_PASSWORD" \
-              TEST_RUNNER_CONDUIT_RECORD_PREVIEW=1 \
+              TEST_RUNNER_BELAY_DEMO_URL="http://$DEMO_HOST:$DEMO_PORT" \
+              TEST_RUNNER_BELAY_DEMO_USER="$DEMO_USER" \
+              TEST_RUNNER_BELAY_DEMO_PASSWORD="$DEMO_PASSWORD" \
+              TEST_RUNNER_BELAY_RECORD_PREVIEW=1 \
               perl -e 'alarm shift; exec @ARGV' 420 xcodebuild test-without-building \
-                -project Conduit.xcodeproj -scheme Conduit \
+                -project Belay.xcodeproj -scheme Belay \
                 -destination "id=$udid" \
-                -only-testing:ConduitScreenshots/AppStoreScreenshotTests/testRecordPreview \
+                -only-testing:BelayScreenshots/AppStoreScreenshotTests/testRecordPreview \
                 -resultBundlePath "results/$slug-preview.xcresult" \
                 -derivedDataPath dd \
                 > "results-$slug-preview.log" 2>&1
@@ -227,7 +227,7 @@ jobs:
 
   watch:
     # The Watch app needs no dashboard: its screens come from the
-    # -conduitScreenshotCall fixture (ConduitWatch/WatchVoiceCall.swift).
+    # -belayScreenshotCall fixture (BelayWatch/WatchVoiceCall.swift).
     runs-on: macos-26
     timeout-minutes: 45
     env:
@@ -267,14 +267,14 @@ jobs:
           xcrun simctl boot "$udid" || true
           xcrun simctl bootstatus "$udid" -b
           xcodebuild build \
-            -project Conduit.xcodeproj -scheme ConduitWatch \
+            -project Belay.xcodeproj -scheme BelayWatch \
             -destination "id=$udid" -configuration Debug \
             -derivedDataPath watch-dd \
             COMPILER_INDEX_STORE_ENABLE=NO \
             CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO \
             DEVELOPMENT_TEAM="" PROVISIONING_PROFILE_SPECIFIER="" \
             > watch-build.log 2>&1 || { grep -E "error:" watch-build.log | head -20; exit 1; }
-          app=$(find watch-dd/Build/Products -name 'ConduitWatch.app' -path '*watchsimulator*' | head -1)
+          app=$(find watch-dd/Build/Products -name 'BelayWatch.app' -path '*watchsimulator*' | head -1)
           xcrun simctl install "$udid" "$app"
           xcrun simctl status_bar "$udid" override --time 9:41 \
             || xcrun simctl status_bar "$udid" override --time "2026-10-18T09:41:00" \
@@ -282,8 +282,8 @@ jobs:
           mkdir -p shots/watch
           n=1
           for state in home speaking listening; do
-            xcrun simctl terminate "$udid" com.milim.relay.watchkitapp 2>/dev/null || true
-            xcrun simctl launch "$udid" com.milim.relay.watchkitapp -conduitScreenshotCall "$state"
+            xcrun simctl terminate "$udid" live.tomkins.belay.watchkitapp 2>/dev/null || true
+            xcrun simctl launch "$udid" live.tomkins.belay.watchkitapp -belayScreenshotCall "$state"
             sleep 6
             xcrun simctl io "$udid" screenshot "shots/watch/0$n-$state.png"
             n=$((n + 1))

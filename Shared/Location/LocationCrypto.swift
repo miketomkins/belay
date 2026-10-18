@@ -1,6 +1,6 @@
 //
 //  LocationCrypto.swift
-//  Conduit
+//  Belay
 //
 //  End-to-end sealing of location uploads, the health scheme with its own
 //  labels (designs/location-v1-contract.md section 1). The phone and the
@@ -20,16 +20,16 @@ import CryptoKit
 import Foundation
 
 enum LocationCrypto {
-    static let salt = Data("conduit-location-v1".utf8)
-    static let ingestInfo = Data("conduit-location-v1 ingest device-to-host".utf8)
-    static let voiceRequestInfo = Data("conduit-location-v1 voice device-to-host".utf8)
-    static let voiceAnswerInfo = Data("conduit-location-v1 voice host-to-device".utf8)
+    static let salt = Data("belay-location-v1".utf8)
+    static let ingestInfo = Data("belay-location-v1 ingest device-to-host".utf8)
+    static let voiceRequestInfo = Data("belay-location-v1 voice device-to-host".utf8)
+    static let voiceAnswerInfo = Data("belay-location-v1 voice host-to-device".utf8)
     /// Maps requests the host asks this iPhone to answer with MapKit
     /// (designs/maps-v1-contract.md section 2): one key per direction.
-    static let mapsRequestInfo = Data("conduit-location-v1 maps host-to-device".utf8)
-    static let mapsAnswerInfo = Data("conduit-location-v1 maps device-to-host".utf8)
-    static let kidLabel = Data("conduit-location-kid\n".utf8)
-    static let aadTag = "conduit-location/1"
+    static let mapsRequestInfo = Data("belay-location-v1 maps host-to-device".utf8)
+    static let mapsAnswerInfo = Data("belay-location-v1 maps device-to-host".utf8)
+    static let kidLabel = Data("belay-location-kid\n".utf8)
+    static let aadTag = "belay-location/1"
 
     enum Failure: Error, Equatable {
         case malformedHostKey

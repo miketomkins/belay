@@ -2,7 +2,7 @@
 """Seed the demo dashboard's chats through the same gateway RPC the app uses.
 
 Each chat in demo-script.json becomes a session created with session.create
-(source "desktop", like Conduit) and its turns are sent with prompt.submit,
+(source "desktop", like Belay) and its turns are sent with prompt.submit,
 waiting for message.complete before the next one. The scripted model answers.
 Run with the Hermes venv's Python (needs httpx and websockets).
 
@@ -87,7 +87,7 @@ async def seed(script_path, base, user, password):
             meta = {key: bot[key] for key in ("title", "color") if bot.get(key)}
             if meta:
                 await rpc("profiles.configure", {"name": name, "ui_meta": {"hermes-bots": meta}})
-            # The bot's one chat, made the way Conduit makes it.
+            # The bot's one chat, made the way Belay makes it.
             created = await rpc("session.create", {"cols": 96, "source": "desktop", "profile": name,
                                                    "title": "Bot Chat", "hidden": True,
                                                    "follow_profile_config": True})

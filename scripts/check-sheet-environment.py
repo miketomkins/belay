@@ -33,7 +33,7 @@ import os
 import re
 import sys
 
-SOURCE_DIRS = ("Conduit", "ConduitWatch", "ConduitWidgets", "ConduitNotificationService", "Shared")
+SOURCE_DIRS = ("Belay", "BelayWatch", "BelayWidgets", "BelayNotificationService", "Shared")
 PRESENTATIONS = re.compile(r"\.(sheet|fullScreenCover|popover)\s*\(")
 VIEW_DECL = re.compile(r"\bstruct\s+(\w+)\s*(?:<[^>{]*>)?\s*:\s*([^{]*)\{")
 EXTENSION_DECL = re.compile(r"\bextension\s+(\w+)\b[^{]*\{")

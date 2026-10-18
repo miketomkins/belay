@@ -1,6 +1,6 @@
 //
 //  WatchAudioBridgeWire.swift
-//  Conduit and the Conduit Watch app
+//  Belay and the Belay Watch app
 //
 //  A Watch call to GPT-Live through the Hermes host's audio bridge
 //  (designs/apple-watch-gpt-live.md). GPT-Live on a ChatGPT subscription
@@ -39,8 +39,8 @@ enum WatchAudioBridgeWire {
     /// What fits in one sealed message: the type, counter and tag go
     /// around it.
     static let maxPlainBytes = maxMessageBytes - 1 - 8 - 16
-    static let salt = "conduit-watch-audio-v1"
-    static let associatedDataTag = "conduit-watch-audio/1"
+    static let salt = "belay-watch-audio-v1"
+    static let associatedDataTag = "belay-watch-audio/1"
 
     enum Kind: UInt8 {
         case audio = 1
@@ -82,7 +82,7 @@ enum WatchAudioBridgeWire {
                 HKDF<SHA256>.deriveKey(
                     inputKeyMaterial: material,
                     salt: Data(WatchAudioBridgeWire.salt.utf8),
-                    info: Data("conduit-watch-audio-v1 \(direction.rawValue) stream=\(stream)".utf8),
+                    info: Data("belay-watch-audio-v1 \(direction.rawValue) stream=\(stream)".utf8),
                     outputByteCount: 32
                 )
             }
@@ -167,7 +167,7 @@ enum WatchAudioBridgeWire {
 
     // MARK: Control
 
-    /// Starts the engine. `briefing` is Conduit's rules, persona and
+    /// Starts the engine. `briefing` is Belay's rules, persona and
     /// memory (GPT-Live puts it in the instructions); `greeting` asks for
     /// a first line; `callOpening` makes the model open a call Hermes
     /// placed (#544), sent without a greeting (the host lets it win); `history` seeds a rejoined call's conversation.

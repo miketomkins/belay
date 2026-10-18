@@ -15,8 +15,8 @@ set -uo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 source "$SCRIPT_DIR/ci-lib.sh"
 
-PROJECT="Conduit.xcodeproj"
-SCHEME="Conduit"
+PROJECT="Belay.xcodeproj"
+SCHEME="Belay"
 # Workspace-anchored by default: GITHUB_WORKSPACE is byte-identical across
 # GitHub-hosted runners for the same repository, which is what makes the
 # absolute paths inside the .xctestrun portable without rewriting anything.
@@ -58,7 +58,7 @@ destination_s=$(( $(date +%s) - prep_start ))
 # - COMPILER_INDEX_STORE_ENABLE=NO: no IDE index is written alongside every
 #   compile (it was on: `-index-store-path` on each swift-frontend call).
 # - -enableCodeCoverage NO: the scheme gathers coverage, which instruments
-#   every Conduit file (`-profile-generate`); nothing in CI reads coverage.
+#   every Belay file (`-profile-generate`); nothing in CI reads coverage.
 # - ARCHS = the destination's arch (SIMULATOR_ARCH, arm64 by default, as in
 #   build_destination): the embedded Watch app is a dependency on another
 #   platform, so ONLY_ACTIVE_ARCH did not apply and it compiled for x86_64

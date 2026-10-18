@@ -1,6 +1,6 @@
 //
 //  WatchToolRelay.swift
-//  Conduit and the Conduit Watch app
+//  Belay and the Belay Watch app
 //
 //  A Watch call's lookups through the push relay while the iPhone can't
 //  be reached (designs/apple-watch-voice-direct.md, "Wrist-down tools
@@ -67,19 +67,19 @@ enum WatchToolSeal {
         }
     }
 
-    static let salt = "conduit-watch-tools-v1"
+    static let salt = "belay-watch-tools-v1"
     /// The most a sealed call carries: a tool name and a short query.
     static let maxCallBytes = 4 * 1024
 
     static func info(_ direction: Direction) -> String {
         switch direction {
-        case .call: return "conduit-watch-tools-v1 call watch-to-host"
-        case .result: return "conduit-watch-tools-v1 result host-to-watch"
+        case .call: return "belay-watch-tools-v1 call watch-to-host"
+        case .result: return "belay-watch-tools-v1 result host-to-watch"
         }
     }
 
     static func associatedData(_ direction: Direction, grantID: String, rid: String) -> Data {
-        Data(["conduit-watch-tools/1", direction.rawValue, "grant=\(grantID)", "rid=\(rid)"].joined(separator: "\n").utf8)
+        Data(["belay-watch-tools/1", direction.rawValue, "grant=\(grantID)", "rid=\(rid)"].joined(separator: "\n").utf8)
     }
 
     /// A fixed nonce is for test vectors only.
@@ -266,7 +266,7 @@ enum WatchToolAnswer {
     }
 
     /// A Watch call can't open a chat: what an "Open chat:" delegation hears.
-    static let delegatedCantOpen = "[This call can't open a chat on the phone. Tell the user to open it in Conduit on their iPhone, or delegate \"Read chat:\" with its number to talk about it here.]"
+    static let delegatedCantOpen = "[This call can't open a chat on the phone. Tell the user to open it in Belay on their iPhone, or delegate \"Read chat:\" with its number to talk about it here.]"
 
     /// The answer as the iPhone's broker would send it to the Watch.
     static func outgoing(id: String, name: String, result: [String: String]) -> WatchVoiceWire.DirectOutgoing {

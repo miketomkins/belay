@@ -19,7 +19,7 @@ relaunches, but it could disagree with what the server actually enforced:
    flag in an in-memory set (`tools/approval._session_yolo`) and its `config.set`
    handler never persists it. (The CLI *does* persist it, via
    `SessionDB.set_session_yolo` → `model_config.yolo_mode`, and restores it on
-   resume — `cli.py:_restore_session_yolo`. Desktop/Conduit talk to the gateway,
+   resume — `cli.py:_restore_session_yolo`. Desktop/Belay talk to the gateway,
    not the CLI, so they hit the gap.) After a gateway process restart or rebuilt
    agent the flag reverts to the profile default while the indicator keeps the
    user's choice.
@@ -134,15 +134,15 @@ when set to `off`, per-session YOLO toggles have no effect; use `manual` or
 
 ## What is NOT changed
 
-- The Hermes `config.set` / `approvals.mode` protocol is untouched (Conduit
+- The Hermes `config.set` / `approvals.mode` protocol is untouched (Belay
   cannot fix the gateway-side persistence; that lives in `nousresearch/hermes-agent`).
 - `SessionYoloStore` remains a local cache of the explicit per-session choice.
-- The global floor under `off` is a server-imposed limitation; Conduit reflects
+- The global floor under `off` is a server-imposed limitation; Belay reflects
   it honestly rather than masking it.
 
 ## Tests
 
-`ConduitTests/SessionYoloPersistenceTests` was updated: the
+`BelayTests/SessionYoloPersistenceTests` was updated: the
 clear-on-conflict cases were rewritten to assert the override now survives, and
 new tests cover the global floor, the resume re-assertion (fire / skip-when-agree
 / skip-under-off / failure-is-non-fatal). See the file for the full list.

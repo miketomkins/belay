@@ -1,6 +1,6 @@
 //
 //  HermesRing.swift
-//  Conduit and the Conduit Watch app
+//  Belay and the Belay Watch app
 //
 //  A call from Hermes that rings on the iPhone and the Apple Watch alike
 //  (relay 0.10+, designs/hermes-calls-watch.md). iOS doesn't pass a calling
@@ -37,9 +37,9 @@ struct HermesRing: Equatable {
 }
 
 /// Who a call from Hermes says is calling, the only text CallKit shows on
-/// the iPhone and the Watch alike: the calling profile by the name Conduit
+/// the iPhone and the Watch alike: the calling profile by the name Belay
 /// gives it, with the job's title when the call carries one. The main
-/// ("default") profile goes by the name the user gave it in Conduit, never
+/// ("default") profile goes by the name the user gave it in Belay, never
 /// Hermes' own "Default"; "Hermes" when nothing names the caller.
 enum HermesCallerName {
     static let fallback = "Hermes"
@@ -54,7 +54,7 @@ enum HermesCallerName {
             let main = oneLine(mainName)
             return main.isEmpty ? fallback : String(main.prefix(maximumNameCharacters))
         }
-        // As Conduit shows a profile everywhere else (AppState.profileDisplayName),
+        // As Belay shows a profile everywhere else (AppState.profileDisplayName),
         // on one line: CallKit shows a caller name on one.
         let shown = String(id.prefix(1)).uppercased() + String(id.dropFirst())
         return String(shown.prefix(maximumNameCharacters))
@@ -112,18 +112,18 @@ struct HermesRingSettled: Equatable {
 }
 
 enum HermesRingPush {
-    /// The `ring` beside `sent_at`: in `conduit`, or in `body.conduit`.
+    /// The `ring` beside `sent_at`: in `belay`, or in `body.belay`.
     static func ring(in userInfo: [AnyHashable: Any]) -> [String: Any]? {
-        let direct = (userInfo["conduit"] as? [String: Any])?["ring"] as? [String: Any]
-        let nested = ((userInfo["body"] as? [String: Any])?["conduit"] as? [String: Any])?["ring"] as? [String: Any]
+        let direct = (userInfo["belay"] as? [String: Any])?["ring"] as? [String: Any]
+        let nested = ((userInfo["body"] as? [String: Any])?["belay"] as? [String: Any])?["ring"] as? [String: Any]
         return direct ?? nested
     }
 
     /// The relay's `sent_at` (seconds since 1970), outside any sealed
     /// envelope.
     static func sentAt(_ userInfo: [AnyHashable: Any]) -> Date? {
-        let direct = userInfo["conduit"] as? [String: Any]
-        let nested = (userInfo["body"] as? [String: Any])?["conduit"] as? [String: Any]
+        let direct = userInfo["belay"] as? [String: Any]
+        let nested = (userInfo["body"] as? [String: Any])?["belay"] as? [String: Any]
         guard let seconds = (direct?["sent_at"] as? NSNumber) ?? (nested?["sent_at"] as? NSNumber) else { return nil }
         return Date(timeIntervalSince1970: seconds.doubleValue)
     }
@@ -131,7 +131,7 @@ enum HermesRingPush {
     /// The call's title when the push carries it in the clear; nil from a
     /// sealed push, which only the iPhone can open.
     static func title(_ userInfo: [AnyHashable: Any]) -> String? {
-        let call = ((userInfo["body"] as? [String: Any])?["conduit"] as? [String: Any])?["call"] as? [String: Any]
+        let call = ((userInfo["body"] as? [String: Any])?["belay"] as? [String: Any])?["call"] as? [String: Any]
         let words = (call?["title"] as? String)?
             .split(whereSeparator: { $0.isWhitespace || $0.isNewline })
             .joined(separator: " ") ?? ""
@@ -141,9 +141,9 @@ enum HermesRingPush {
     /// The calling Hermes profile and its dashboard, when the push carries
     /// them in the clear; nil from a sealed push.
     static func caller(_ userInfo: [AnyHashable: Any]) -> (profile: String?, dashboardID: UUID?) {
-        let conduit = (userInfo["body"] as? [String: Any])?["conduit"] as? [String: Any]
-        let dashboard = (conduit?["dashboard_id"] as? String).flatMap { UUID(uuidString: $0.trimmingCharacters(in: .whitespacesAndNewlines)) }
-        return (conduit?["profile"] as? String, dashboard)
+        let belay = (userInfo["body"] as? [String: Any])?["belay"] as? [String: Any]
+        let dashboard = (belay?["dashboard_id"] as? String).flatMap { UUID(uuidString: $0.trimmingCharacters(in: .whitespacesAndNewlines)) }
+        return (belay?["profile"] as? String, dashboard)
     }
 
     static func isID(_ value: String) -> Bool { value.count == 22 && value.allSatisfy(isBase64URL) }
@@ -216,7 +216,7 @@ struct HermesRingAnswer: Equatable {
 /// (designs/hermes-calls-watch.md, "Starting an answered call through the
 /// relay"). The Watch app stays in the background under the system call
 /// screen, where its WatchConnectivity link to the iPhone is down, so it
-/// can't ask Conduit there for the call's session. Instead its settle
+/// can't ask Belay there for the call's session. Instead its settle
 /// carries its start message, sealed, which the relay forwards in the
 /// iPhone's stop push; the iPhone answers it as if it had come over the
 /// link and stores the answer at the relay, sealed, for the Watch to fetch
@@ -266,19 +266,19 @@ enum HermesRingHandoff {
     static let maxSessionChars = 96 * 1024
     /// The longest one fetch waits at the relay, in seconds.
     static let fetchWait = 20
-    static let salt = "conduit-ring-handoff-v1"
+    static let salt = "belay-ring-handoff-v1"
 
     static func key(root: Data, _ direction: Direction) -> SymmetricKey {
         HKDF<SHA256>.deriveKey(
             inputKeyMaterial: SymmetricKey(data: root),
             salt: Data(salt.utf8),
-            info: Data("conduit-ring-handoff-v1 \(direction.rawValue)".utf8),
+            info: Data("belay-ring-handoff-v1 \(direction.rawValue)".utf8),
             outputByteCount: 32
         )
     }
 
     static func associatedData(_ direction: Direction, ringID: String) -> Data {
-        Data(["conduit-ring-handoff/1", direction.rawValue, "ring=\(ringID)"].joined(separator: "\n").utf8)
+        Data(["belay-ring-handoff/1", direction.rawValue, "ring=\(ringID)"].joined(separator: "\n").utf8)
     }
 
     /// A fixed nonce is for tests only.
@@ -410,7 +410,7 @@ enum HermesRingHandoff {
 /// The Watch's handoff key, in the Keychain of the device holding it: the
 /// Watch's own, or on the iPhone the one the Watch sent.
 enum HermesRingHandoffKey {
-    private static let service = "com.milim.relay.hermesRingHandoff"
+    private static let service = "live.tomkins.belay.hermesRingHandoff"
     private static let account = "watch"
 
     private static var baseQuery: [String: Any] {

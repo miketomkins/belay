@@ -2,8 +2,8 @@ import ActivityKit
 import Foundation
 
 /// A running Hermes turn on the Lock Screen and in the Dynamic Island
-/// (#605). Conduit starts one when it sends a turn and updates it from the
-/// chat's stream while it runs; once Conduit is in the background the
+/// (#605). Belay starts one when it sends a turn and updates it from the
+/// chat's stream while it runs; once Belay is in the background the
 /// notifier plugin keeps it current through the relay
 /// (hermes-conduit-notifier `live_activity.py`, relay `live-activities.mjs`).
 ///
@@ -40,10 +40,10 @@ struct HermesTurnAttributes: ActivityAttributes {
     /// The chat's title when the turn started.
     var chatTitle: String
     var startedAt: Date
-    /// Conduit's UI language (`AppLanguageStore`), so the activity speaks
+    /// Belay's UI language (`AppLanguageStore`), so the activity speaks
     /// the same language as the app.
     var language: String
-    /// Opens the chat (`conduit://session/<id>?profile=<name>`).
+    /// Opens the chat (`belay://session/<id>?profile=<name>`).
     var link: URL
     /// Every id the chat is known under (runtime, stored, lineage), so the
     /// app can tell which chat's events update it after a relaunch.
@@ -54,7 +54,7 @@ struct HermesTurnAttributes: ActivityAttributes {
     var profileName: String? = nil
     var glowHex: String? = nil
     /// The saved dashboard the turn ran on (`SavedDashboard.id`), so a
-    /// relaunched Conduit settles it only against that dashboard's live
+    /// relaunched Belay settles it only against that dashboard's live
     /// sessions. Optional: activities started by an older build have none.
     var dashboardID: String? = nil
 
@@ -115,7 +115,7 @@ enum HermesToolCategory: String, Codable, CaseIterable {
 }
 
 /// The words the activity shows, in the app's language. Every key here is
-/// in Conduit/Localizable.xcstrings (the widget extension bundles it).
+/// in Belay/Localizable.xcstrings (the widget extension bundles it).
 enum HermesTurnCopy {
     static func status(_ state: HermesTurnAttributes.ContentState, language: String) -> String {
         WidgetLocalization.string(statusKey(state), language: language)

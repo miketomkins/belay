@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
-"""Remove draft localizations from a built Conduit.app.
+"""Remove draft localizations from a built Belay.app.
 
-A draft language (Conduit/Info.plist's ConduitDraftLanguages array) has
+A draft language (Belay/Info.plist's BelayDraftLanguages array) has
 translation work in the String Catalogs but is not complete yet. Xcode
 compiles every catalog language into an lproj, and an lproj in the app is a
 shipped language: the App Store lists it, iOS Settings offers it as
-Conduit's language, and System Default shows it on devices set to it. The
-Conduit target runs this as its last build phase, so a draft never reaches
+Belay's language, and System Default shows it on devices set to it. The
+Belay target runs this as its last build phase, so a draft never reaches
 the app; scripts/check-l10n-coverage.py holds every other language to
 complete coverage.
 
-To preview a draft in the simulator, take it out of ConduitDraftLanguages
+To preview a draft in the simulator, take it out of BelayDraftLanguages
 locally (don't commit that until the checker passes for it).
 
 Usage (Xcode build phase):
@@ -28,7 +28,7 @@ import shutil
 import sys
 import xml.parsers.expat
 
-DRAFT_LANGUAGES_KEY = "ConduitDraftLanguages"
+DRAFT_LANGUAGES_KEY = "BelayDraftLanguages"
 
 
 def normalized_language(identifier: str) -> str:

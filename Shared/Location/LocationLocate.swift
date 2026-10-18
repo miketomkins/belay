@@ -1,12 +1,12 @@
 //
 //  LocationLocate.swift
-//  Conduit
+//  Belay
 //
 //  The agent's on-demand locate (designs/location-v1-contract.md section 5),
 //  as the Location Push extension receives it. The relay sends a `location`
 //  push shaped like a notification: for a pairing with an end-to-end key a
 //  sealed `conduit_e2e` envelope (inner `profile` and `locate.id`) with the
-//  routing stub `conduit {type: "location.requested", e2e: 1, gateway_id,
+//  routing stub `belay {type: "location.requested", e2e: 1, gateway_id,
 //  dashboard_id}`; for a keyless pairing the plain stub with `profile` and
 //  `locate.id`. It's opened with the same keys and trust rules as the
 //  Notification Service Extension, and answered only for the dashboard and

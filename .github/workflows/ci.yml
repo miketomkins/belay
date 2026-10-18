@@ -84,7 +84,7 @@ jobs:
           # The minutes-long bash meta-suites (lane-runner state machine,
           # destination lookup) run in the dedicated self-test job - they must
           # never delay planning or risk this job's timeout.
-          CONDUIT_CI_SKIP_BASH_WRAPPER_TESTS: "1"
+          BELAY_CI_SKIP_BASH_WRAPPER_TESTS: "1"
         run: |
           set -euo pipefail
           # The planner owns inventory discovery, so its own completeness
@@ -96,18 +96,18 @@ jobs:
 
       - name: Localization catalog coverage
         # Cheap Linux guard: every String(localized:) / SwiftUI literal call
-        # site must resolve to a key in Conduit/Localizable.xcstrings, so a
+        # site must resolve to a key in Belay/Localizable.xcstrings, so a
         # translated string can never silently render English again.
         run: python3 scripts/check-l10n-coverage.py --repo-root .
 
       - name: Recommended plugin version matches the plugin
-        # Conduit only offers the plugin update to hosts below
+        # Belay only offers the plugin update to hosts below
         # NotifierPluginStatus.recommendedVersion, so it must follow every
         # plugin release on hermes-conduit-notifier main.
         run: python3 scripts/check-plugin-version.py --repo-root .
 
       - name: Card schema matches the plugin's
-        # Conduit/Cards/card-schema.json and the shared test vectors are
+        # Belay/Cards/card-schema.json and the shared test vectors are
         # copies of hermes-conduit-notifier main's cards/, so the two sides
         # read one definition.
         run: python3 scripts/check-card-schema.py --repo-root .
@@ -161,7 +161,7 @@ jobs:
             && changed=$(git diff --name-only HEAD^1 HEAD) && [ -n "$changed" ]; then
             # grep reads all its input (no -q): stopping at the first match could
             # kill printf with SIGPIPE, which pipefail would read as "no match".
-            if ! printf '%s\n' "$changed" | grep -E '^(ConduitWatch|ConduitWidgets|ConduitNotificationService|ConduitLocationPush|Shared)/|^project(-tests)?\.yml$|^Conduit/Voice/GPTLive/GPTLiveProtocol\.swift$' >/dev/null; then
+            if ! printf '%s\n' "$changed" | grep -E '^(BelayWatch|BelayWidgets|BelayNotificationService|BelayLocationPush|Shared)/|^project(-tests)?\.yml$|^Belay/Voice/GPTLive/GPTLiveProtocol\.swift$' >/dev/null; then
               spec=project-tests.yml
             fi
           fi
@@ -309,7 +309,7 @@ jobs:
           mkdir -p "$(dirname "$UNIT_SMOKE_LOG")"
           args=()
           for cls in "${CLASSES[@]}"; do
-            args+=("-only-testing:ConduitTests/${cls}")
+            args+=("-only-testing:BelayTests/${cls}")
           done
 
           echo "unit smoke: ${#CLASSES[@]} classes in one invocation"
@@ -360,8 +360,8 @@ jobs:
         # again). Keychain items outlive an uninstall on the simulator.
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         run: |
-          # com.milim.relay is project.yml's PRODUCT_BUNDLE_IDENTIFIER for Conduit.
-          if ! xcrun simctl uninstall "${SIMULATOR_UDID:-booted}" com.milim.relay; then
+          # live.tomkins.belay is project.yml's PRODUCT_BUNDLE_IDENTIFIER for Belay.
+          if ! xcrun simctl uninstall "${SIMULATOR_UDID:-booted}" live.tomkins.belay; then
             echo "::warning::could not remove the app before UI smoke; UI smoke runs on the unit classes' app container"
           fi
 
@@ -419,7 +419,7 @@ jobs:
             local args=()
             local cls
             for cls in "$@"; do
-              args+=("-only-testing:ConduitUITests/${cls}")
+              args+=("-only-testing:BelayUITests/${cls}")
             done
             xcodebuild test-without-building \
               -xctestrun "$XCRUN_FILE" \

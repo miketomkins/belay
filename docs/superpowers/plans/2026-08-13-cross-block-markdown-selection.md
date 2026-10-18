@@ -20,26 +20,26 @@
 
 ```bash
 /Users/agrias/bin/bin/xcodegen generate
-xcodebuild test -project Conduit.xcodeproj -scheme Conduit \
+xcodebuild test -project Belay.xcodeproj -scheme Belay \
   -destination 'platform=iOS Simulator,id=6930ECCE-D36C-4E11-8AB5-EDEC4DEA8355' \
-  -only-testing:ConduitTests/MarkdownSelectionCoordinatorTests \
-  -only-testing:ConduitTests/ChatTextSelectionTests \
+  -only-testing:BelayTests/MarkdownSelectionCoordinatorTests \
+  -only-testing:BelayTests/ChatTextSelectionTests \
   CODE_SIGNING_ALLOWED=NO
 ```
 
 ## File Map
 
-- Create: `Conduit/Views/Components/MarkdownSelectionCoordinator.swift` — segment descriptors, source-order planning, range resolution, attributed copy, and registration state.
-- Modify: `Conduit/Views/Components/SelectableTextView.swift` — optional coordinator registration, touch/selection callbacks, coordinated copy, and teardown.
-- Modify: `Conduit/Views/Components/MarkdownText.swift` — stable segment IDs, coordinator lifetime, rich-block registration, and the response-level gesture/highlight modifier.
-- Create: `ConduitTests/MarkdownSelectionCoordinatorTests.swift` — pure segment ordering, range, revision, copy, and geometry tests.
-- Modify: `ConduitTests/ChatTextSelectionTests.swift` — preserve existing fast-path/link tests and add the bridge contract tests that belong to `SelectableTextView`.
+- Create: `Belay/Views/Components/MarkdownSelectionCoordinator.swift` — segment descriptors, source-order planning, range resolution, attributed copy, and registration state.
+- Modify: `Belay/Views/Components/SelectableTextView.swift` — optional coordinator registration, touch/selection callbacks, coordinated copy, and teardown.
+- Modify: `Belay/Views/Components/MarkdownText.swift` — stable segment IDs, coordinator lifetime, rich-block registration, and the response-level gesture/highlight modifier.
+- Create: `BelayTests/MarkdownSelectionCoordinatorTests.swift` — pure segment ordering, range, revision, copy, and geometry tests.
+- Modify: `BelayTests/ChatTextSelectionTests.swift` — preserve existing fast-path/link tests and add the bridge contract tests that belong to `SelectableTextView`.
 
 ### Task 1: Define the ordered segment model and make its range behavior testable
 
 **Files:**
-- Create: `ConduitTests/MarkdownSelectionCoordinatorTests.swift`
-- Create: `Conduit/Views/Components/MarkdownSelectionCoordinator.swift`
+- Create: `BelayTests/MarkdownSelectionCoordinatorTests.swift`
+- Create: `Belay/Views/Components/MarkdownSelectionCoordinator.swift`
 
 **Interfaces:**
 - Produces `MarkdownSelectionSegmentDescriptor`, `MarkdownSelectionEndpoint`, `MarkdownSelectionSpan`, `MarkdownSelectionCoordinator`, and `MarkdownSelectionSegmentPlan` for later tasks.
@@ -126,16 +126,16 @@ Run the focused command. Expected: the new range tests pass and the existing sel
 - [ ] **Step 5: Commit the model as an independently reviewable change**
 
 ```bash
-git add Conduit/Views/Components/MarkdownSelectionCoordinator.swift ConduitTests/MarkdownSelectionCoordinatorTests.swift
+git add Belay/Views/Components/MarkdownSelectionCoordinator.swift BelayTests/MarkdownSelectionCoordinatorTests.swift
 git commit -m "test: define cross-block markdown selection ranges"
 ```
 
 ### Task 2: Add registration and touch hooks without changing standalone selection
 
 **Files:**
-- Modify: `Conduit/Views/Components/SelectableTextView.swift`
-- Modify: `ConduitTests/ChatTextSelectionTests.swift`
-- Modify: `ConduitTests/MarkdownSelectionCoordinatorTests.swift`
+- Modify: `Belay/Views/Components/SelectableTextView.swift`
+- Modify: `BelayTests/ChatTextSelectionTests.swift`
+- Modify: `BelayTests/MarkdownSelectionCoordinatorTests.swift`
 
 **Interfaces:**
 - `SelectableTextView` gains optional `selectionCoordinator: MarkdownSelectionCoordinator?` and `selectionSegment: MarkdownSelectionSegmentDescriptor?` parameters on all initializers, defaulting to `nil`.
@@ -182,17 +182,17 @@ Override `copy(_:)` in the subclass. If the response coordinator has a cross-seg
 Run the focused command. Expected: all current selection/link tests pass, the registration test passes, and standalone tool text remains unaffected.
 
 ```bash
-git add Conduit/Views/Components/SelectableTextView.swift ConduitTests/ChatTextSelectionTests.swift ConduitTests/MarkdownSelectionCoordinatorTests.swift
+git add Belay/Views/Components/SelectableTextView.swift BelayTests/ChatTextSelectionTests.swift BelayTests/MarkdownSelectionCoordinatorTests.swift
 git commit -m "feat: register coordinated markdown text surfaces"
 ```
 
 ### Task 3: Implement the response host gesture, endpoint geometry, and highlights
 
 **Files:**
-- Modify: `Conduit/Views/Components/MarkdownSelectionCoordinator.swift`
-- Modify: `Conduit/Views/Components/SelectableTextView.swift`
-- Modify: `Conduit/Views/Components/MarkdownText.swift`
-- Modify: `ConduitTests/MarkdownSelectionCoordinatorTests.swift`
+- Modify: `Belay/Views/Components/MarkdownSelectionCoordinator.swift`
+- Modify: `Belay/Views/Components/SelectableTextView.swift`
+- Modify: `Belay/Views/Components/MarkdownText.swift`
+- Modify: `BelayTests/MarkdownSelectionCoordinatorTests.swift`
 
 **Interfaces:**
 - `MarkdownSelectionCoordinator` exposes `beginSelection(segmentID:offset:windowPoint:)`, `updateSelection(windowPoint:)`, `updateSelection(segmentID:offset:windowPoint:)`, `endSelection()`, `hasActiveSelection`, `hasCrossSegmentSelection`, `activeSpans`, and `highlightRects(in:)`.
@@ -249,16 +249,16 @@ Add `MarkdownSelectionHost` as a `ViewModifier` around the fallback `VStack`. It
 Run the focused command. Expected: model, bridge, and existing link tests pass.
 
 ```bash
-git add Conduit/Views/Components/MarkdownSelectionCoordinator.swift Conduit/Views/Components/SelectableTextView.swift Conduit/Views/Components/MarkdownText.swift ConduitTests/MarkdownSelectionCoordinatorTests.swift
+git add Belay/Views/Components/MarkdownSelectionCoordinator.swift Belay/Views/Components/SelectableTextView.swift Belay/Views/Components/MarkdownText.swift BelayTests/MarkdownSelectionCoordinatorTests.swift
 git commit -m "feat: coordinate selection across markdown text blocks"
 ```
 
 ### Task 4: Wire stable segment IDs into every rich Markdown text surface
 
 **Files:**
-- Modify: `Conduit/Views/Components/MarkdownText.swift`
-- Modify: `ConduitTests/MarkdownSelectionCoordinatorTests.swift`
-- Modify: `ConduitTests/ChatTextSelectionTests.swift`
+- Modify: `Belay/Views/Components/MarkdownText.swift`
+- Modify: `BelayTests/MarkdownSelectionCoordinatorTests.swift`
+- Modify: `BelayTests/ChatTextSelectionTests.swift`
 
 **Interfaces:**
 - `MarkdownSelectionSegmentPlan.descriptors(for:)` is the single source for rendered order and IDs.
@@ -302,7 +302,7 @@ Register a table-cell attributed string containing a URL and a code string, sele
 Run the focused command. Expected: all selection tests pass, including mixed paragraph/table/code ordering and link preservation.
 
 ```bash
-git add Conduit/Views/Components/MarkdownText.swift ConduitTests/MarkdownSelectionCoordinatorTests.swift ConduitTests/ChatTextSelectionTests.swift
+git add Belay/Views/Components/MarkdownText.swift BelayTests/MarkdownSelectionCoordinatorTests.swift BelayTests/ChatTextSelectionTests.swift
 git commit -m "feat: enable cross-block selection in rich markdown"
 ```
 
@@ -310,14 +310,14 @@ git commit -m "feat: enable cross-block selection in rich markdown"
 
 **Files:**
 - No source changes unless a verification failure identifies a specific regression.
-- Test evidence: `ConduitTests/MarkdownSelectionCoordinatorTests.swift`, `ConduitTests/ChatTextSelectionTests.swift`.
+- Test evidence: `BelayTests/MarkdownSelectionCoordinatorTests.swift`, `BelayTests/ChatTextSelectionTests.swift`.
 
 - [ ] **Step 1: Run the focused and full unit suites**
 
 Run the focused command, then run:
 
 ```bash
-xcodebuild test -project Conduit.xcodeproj -scheme Conduit \
+xcodebuild test -project Belay.xcodeproj -scheme Belay \
   -destination 'platform=iOS Simulator,id=6930ECCE-D36C-4E11-8AB5-EDEC4DEA8355' \
   CODE_SIGNING_ALLOWED=NO
 ```

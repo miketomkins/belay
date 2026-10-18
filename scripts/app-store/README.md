@@ -21,19 +21,19 @@ Results:
 ## How it works
 
 1. `start-demo-hermes.sh` installs Hermes Agent at a pinned commit with the
-   Conduit notifier plugin, turns on password sign-in, and serves the
+   Belay notifier plugin, turns on password sign-in, and serves the
    dashboard at `http://hermes.tail-demo.ts.net:9119` (an `/etc/hosts` name,
    so the app's Tailscale rules allow plain HTTP).
 2. The model is `llm_stub.py`, an OpenAI-compatible server that replays
    `demo-script.json`: each turn's `match` text picks the scripted reasoning,
    tool calls and answer, and chat titles come from the script too.
 3. `seed_demo.py` creates the bots and chats through the gateway's own RPC,
-   the way Conduit does. `seed_board.py` stages the Kanban board, and the
+   the way Belay does. `seed_board.py` stages the Kanban board, and the
    start script adds the scheduled jobs.
-4. `ConduitScreenshots/AppStoreScreenshotTests.swift` signs in, walks the
+4. `BelayScreenshots/AppStoreScreenshotTests.swift` signs in, walks the
    screens and saves each as a named attachment. Live voice screens use the
-   DEBUG-only `-conduitScreenshotCall listening|speaking` fixture
-   (`Conduit/Services/ScreenshotCallFixture.swift`); the Watch job launches the
+   DEBUG-only `-belayScreenshotCall listening|speaking` fixture
+   (`Belay/Services/ScreenshotCallFixture.swift`); the Watch job launches the
    Watch app with the same argument (`home|speaking|listening|ended`).
 5. `testRecordPreview` runs while `simctl io recordVideo` records; its
    `PREVIEW_MARK` lines and the recorder's stop time let `cut-preview.sh` cut

@@ -24,8 +24,8 @@ enum WidgetLocalization {
     static func title(_ copy: WidgetTitleCopy, language: String) -> String {
         switch copy {
         case .cached(let value): value
-        case .openConduit: string("Open Conduit", language: language)
-        case .openConduitToRefresh: string("Open Conduit to refresh", language: language)
+        case .openBelay: string("Open Belay", language: language)
+        case .openBelayToRefresh: string("Open Belay to refresh", language: language)
         case .resumeChat: string("Resume chat", language: language)
         }
     }

@@ -1,9 +1,9 @@
 //
 //  GeminiLiveProtocol.swift
-//  Conduit
+//  Belay
 //
 //  Wire format for the Gemini Live API (v1beta BidiGenerateContent) as used
-//  by Conduit's Gemini Live voice mode. Pure encode/decode: no sockets, no
+//  by Belay's Gemini Live voice mode. Pure encode/decode: no sockets, no
 //  audio, so every message shape is unit-testable.
 //
 

@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
-"""Fail when Conduit's recommended plugin version is ahead of the plugin.
+"""Fail when Belay's recommended plugin version is ahead of the plugin.
 
-Conduit offers the one-tap plugin update whenever the host is below the
+Belay offers the one-tap plugin update whenever the host is below the
 plugin on hermes-conduit-notifier's main branch, which it reads from GitHub
 (NotifierPluginLatestVersion.swift). NotifierPluginStatus.recommendedVersion
 is only the floor a build offers when GitHub can't be reached, so it may lag
 main (the check notes it). Ahead of main fails: an update can't reach the
-version Conduit asks for, so the notice would never go away. Merge the plugin
-first, then raise the constant in Conduit when a build needs it.
+version Belay asks for, so the notice would never go away. Merge the plugin
+first, then raise the constant in Belay when a build needs it.
 
 If GitHub can't be reached the check warns and passes, so an outage doesn't
 block every PR.
@@ -23,7 +23,7 @@ import urllib.request
 
 PLUGIN_YAML_URL = (
     "https://raw.githubusercontent.com/kaishi00/hermes-conduit-notifier/main/plugin.yaml")
-SWIFT_FILE = os.path.join("Conduit", "Services", "NotifierPluginStatus.swift")
+SWIFT_FILE = os.path.join("Belay", "Services", "NotifierPluginStatus.swift")
 # A failed or truncated download, as opposed to a plugin.yaml that says the wrong thing.
 FETCH_ERRORS = (OSError, http.client.HTTPException, UnicodeDecodeError)
 
@@ -116,7 +116,7 @@ def main(argv=None):
     else:
         behind = False
     if problem and behind:
-        # Conduit offers main's version itself; the floor may lag.
+        # Belay offers main's version itself; the floor may lag.
         print(f"::notice file={SWIFT_FILE}::{problem}")
         return 0
     if problem:

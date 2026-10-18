@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Move translations in and out of Conduit's String Catalogs.
+"""Move translations in and out of Belay's String Catalogs.
 
 The catalogs are large JSON files that Xcode also edits, so hand-editing
 them for one language at a time is slow and easy to get wrong. This tool
@@ -44,18 +44,18 @@ REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Every catalog the app and its targets ship, in the order worksheets list
 # them.
 CATALOGS = (
-    "Conduit/Localizable.xcstrings",
-    "Conduit/AppShortcuts.xcstrings",
-    "Conduit/InfoPlist.xcstrings",
-    "ConduitWatch/Localizable.xcstrings",
-    "ConduitWatch/InfoPlist.xcstrings",
+    "Belay/Localizable.xcstrings",
+    "Belay/AppShortcuts.xcstrings",
+    "Belay/InfoPlist.xcstrings",
+    "BelayWatch/Localizable.xcstrings",
+    "BelayWatch/InfoPlist.xcstrings",
 )
 
 # The Swift sources whose call sites each Localizable catalog serves, for
 # the worksheet's "where" hints.
 SITE_ROOTS = {
-    "Conduit/Localizable.xcstrings": ("Conduit", "Shared"),
-    "ConduitWatch/Localizable.xcstrings": ("ConduitWatch", "Shared"),
+    "Belay/Localizable.xcstrings": ("Belay", "Shared"),
+    "BelayWatch/Localizable.xcstrings": ("BelayWatch", "Shared"),
 }
 
 
